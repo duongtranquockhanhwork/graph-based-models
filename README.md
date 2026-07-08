@@ -245,6 +245,42 @@ npm install
 npm run dev
 ```
 
+### Cấu hình đăng nhập Google
+
+Ứng dụng hỗ trợ đăng nhập bằng Google (bên cạnh email/mật khẩu). Để bật tính năng này:
+
+1. Vào [Google Cloud Console](https://console.cloud.google.com/) → tạo project mới (hoặc chọn project có sẵn).
+2. Vào **APIs & Services → Credentials → Create Credentials → OAuth client ID**.
+3. Chọn loại ứng dụng **Web application**.
+4. Ở mục **Authorized JavaScript origins**, thêm:
+   - `http://localhost:3000` (chạy qua Docker/dev)
+5. Sau khi tạo, copy **Client ID** và điền vào `.env` (root) ở cả hai biến:
+   ```
+   GOOGLE_CLIENT_ID=<client-id>.apps.googleusercontent.com
+   VITE_GOOGLE_CLIENT_ID=<client-id>.apps.googleusercontent.com
+   ```
+   (Nếu chạy frontend độc lập bằng `npm run dev`, cũng copy `frontend/.env.example` thành `frontend/.env` và điền `VITE_GOOGLE_CLIENT_ID`.)
+6. Rebuild container frontend để biến môi trường được đóng gói vào bundle (Vite chỉ đọc env lúc build):
+   ```bash
+   docker compose up --build frontend
+   ```
+
+Nếu chưa cấu hình, nút "Đăng nhập với Google" vẫn hiển thị nhưng sẽ báo lỗi khi bấm — đăng ký/đăng nhập bằng email vẫn hoạt động bình thường.
+
+### Cấu hình SMTP (email đặt lại mật khẩu)
+
+Tính năng "Quên mật khẩu" gửi link reset qua email. Nếu chưa cấu hình SMTP, link reset sẽ được ghi ra log của backend (`docker compose logs backend`) thay vì gửi email thật — vẫn dùng được để test.
+
+Để gửi email thật, điền vào `.env` (ví dụ dùng Gmail với [App Password](https://myaccount.google.com/apppasswords)):
+```
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=<app-password-16-ky-tu>
+SMTP_FROM=your-email@gmail.com
+```
+Sau đó khởi động lại backend: `docker compose up --build backend`.
+
 ---
 
 ## API Documentation

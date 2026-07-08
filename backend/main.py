@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.routers import news, graph, prediction, analytics
+from app.core.deps import get_current_user
+from app.models.user import User  # noqa: F401 (registers table with Base metadata)
+from app.routers import auth, news, graph, prediction, analytics
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,10 +21,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(news.router, prefix="/api/news", tags=["news"])
-app.include_router(graph.router, prefix="/api/graph", tags=["graph"])
-app.include_router(prediction.router, prefix="/api/prediction", tags=["prediction"])
-app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(
+    news.router, prefix="/api/news", tags=["news"], dependencies=[Depends(get_current_user)]
+)
+app.include_router(
+    graph.router, prefix="/api/graph", tags=["graph"], dependencies=[Depends(get_current_user)]
+)
+app.include_router(
+    prediction.router,
+    prefix="/api/prediction",
+    tags=["prediction"],
+    dependencies=[Depends(get_current_user)],
+)
+app.include_router(
+    analytics.router,
+    prefix="/api/analytics",
+    tags=["analytics"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @app.get("/")
