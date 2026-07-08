@@ -1,0 +1,127 @@
+{
+  "FPT": {
+    "company": "Công ty Cổ phần FPT",
+    "industry": "Công nghệ",
+    "aliases": ["fpt corporation", "tập đoàn fpt", "công ty fpt", "fpt software", "fpt telecom"]
+  },
+  "VNM": {
+    "company": "Công ty Cổ phần Sữa Việt Nam (Vinamilk)",
+    "industry": "Hàng tiêu dùng",
+    "aliases": ["vinamilk", "sữa việt nam", "sữa vinamilk", "vietnam dairy"]
+  },
+  "HPG": {
+    "company": "Công ty Cổ phần Tập đoàn Hòa Phát",
+    "industry": "Thép",
+    "aliases": ["hòa phát", "hoa phat", "thép hòa phát", "tập đoàn hòa phát", "hoa phat group"]
+  },
+  "VIC": {
+    "company": "Tập đoàn Vingroup",
+    "industry": "Bất động sản",
+    "aliases": ["vingroup", "tập đoàn vingroup", "vin group"]
+  },
+  "BID": {
+    "company": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
+    "industry": "Ngân hàng",
+    "aliases": ["bidv", "ngân hàng bidv", "đầu tư và phát triển việt nam"]
+  },
+  "VCB": {
+    "company": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+    "industry": "Ngân hàng",
+    "aliases": ["vietcombank", "ngoại thương", "ngân hàng vietcombank", "ngân hàng ngoại thương"]
+  },
+  "TCB": {
+    "company": "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)",
+    "industry": "Ngân hàng",
+    "aliases": ["techcombank", "ngân hàng techcombank", "kỹ thương"]
+  },
+  "MBB": {
+    "company": "Ngân hàng TMCP Quân đội (MB Bank)",
+    "industry": "Ngân hàng",
+    "aliases": ["mb bank", "ngân hàng quân đội", "mbbank"]
+  },
+  "CTG": {
+    "company": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
+    "industry": "Ngân hàng",
+    "aliases": ["vietinbank", "công thương", "ngân hàng vietinbank", "ngân hàng công thương"]
+  },
+  "VHM": {
+    "company": "Công ty Cổ phần Vinhomes",
+    "industry": "Bất động sản",
+    "aliases": ["vinhomes", "công ty vinhomes"]
+  },
+  "MSN": {
+    "company": "Công ty Cổ phần Tập đoàn Masan",
+    "industry": "Hàng tiêu dùng",
+    "aliases": ["masan", "tập đoàn masan", "công ty masan", "masan group"]
+  },
+  "GAS": {
+    "company": "Tổng Công ty Khí Việt Nam (PV Gas)",
+    "industry": "Dầu khí",
+    "aliases": ["pv gas", "khí việt nam", "petrovietnam gas", "pvgas"]
+  },
+  "PLX": {
+    "company": "Tập đoàn Xăng dầu Việt Nam (Petrolimex)",
+    "industry": "Dầu khí",
+    "aliases": ["petrolimex", "xăng dầu việt nam", "tập đoàn xăng dầu"]
+  },
+  "SAB": {
+    "company": "Công ty Cổ phần Bia - Rượu - NGK Sài Gòn (Sabeco)",
+    "industry": "Đồ uống",
+    "aliases": ["sabeco", "bia sài gòn", "sài gòn beer", "bia sabeco"]
+  },
+  "VRE": {
+    "company": "Công ty Cổ phần Vincom Retail",
+    "industry": "Bất động sản",
+    "aliases": ["vincom retail", "vincom", "trung tâm thương mại vincom"]
+  },
+  "NVL": {
+    "company": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va (Novaland)",
+    "industry": "Bất động sản",
+    "aliases": ["novaland", "no va", "địa ốc nova", "nova land"]
+  },
+  "MWG": {
+    "company": "Công ty Cổ phần Đầu tư Thế Giới Di Động",
+    "industry": "Bán lẻ",
+    "aliases": ["thế giới di động", "tgdđ", "the gioi di dong", "thegioididong"]
+  },
+  "DXG": {
+    "company": "Công ty Cổ phần Tập đoàn Đất Xanh",
+    "industry": "Bất động sản",
+    "aliases": ["đất xanh", "dat xanh", "tập đoàn đất xanh"]
+  },
+  "SSI": {
+    "company": "Công ty Cổ phần Chứng khoán SSI",
+    "industry": "Chứng khoán",
+    "aliases": ["chứng khoán ssi", "ssi securities", "ssi chứng khoán"]
+  },
+  "HDB": {
+    "company": "Ngân hàng TMCP Phát triển TP. Hồ Chí Minh (HDBank)",
+    "industry": "Ngân hàng",
+    "aliases": ["hdbank", "ngân hàng hdbank", "hd bank"]
+  },
+  "VPB": {
+    "company": "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)",
+    "industry": "Ngân hàng",
+    "aliases": ["vpbank", "việt nam thịnh vượng", "vp bank"]
+  },
+  "CMG": {
+    "company": "Công ty Cổ phần Tập đoàn Công nghệ CMC",
+    "industry": "Công nghệ",
+    "aliases": ["cmc", "công nghệ cmc", "tập đoàn cmc", "cmc technology"]
+  },
+  "REE": {
+    "company": "Công ty Cổ phần Cơ Điện Lạnh (REE)",
+    "industry": "Công nghiệp",
+    "aliases": ["cơ điện lạnh", "ree corporation", "ree corp"]
+  },
+  "DHG": {
+    "company": "Công ty Cổ phần Dược Hậu Giang",
+    "industry": "Dược phẩm",
+    "aliases": ["dược hậu giang", "hau giang pharma", "dhg pharma"]
+  },
+  "PDR": {
+    "company": "Công ty Cổ phần Phát triển Bất động sản Phát Đạt",
+    "industry": "Bất động sản",
+    "aliases": ["phát đạt", "bds phát đạt", "phat dat"]
+  }
+}
