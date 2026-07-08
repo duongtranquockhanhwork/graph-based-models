@@ -111,22 +111,24 @@ body {
 }
 
 /* Input field */
-.field-input {
-  width: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  padding: 10px 16px;
-  color: #e2e8f0;
-  font-size: 14px;
-  transition: border-color 0.2s;
-  outline: none;
+@layer components {
+  .field-input {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #e2e8f0;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  .field-input::placeholder { color: #475569; }
 }
-.field-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-.field-input::placeholder { color: #475569; }
 
 /* Confidence bar */
 .conf-bar {
