@@ -41,27 +41,26 @@ def predict_trend(analysis: Dict, graph_features: Dict) -> Dict:
         trend = "UNCHANGED"
         confidence = 0.50 + (15 - abs(score)) / 100
 
-    reasons = []
-    if sentiment == "Positive":
-        reasons.append("Tin tức có sentiment tích cực")
-    elif sentiment == "Negative":
-        reasons.append("Tin tức có sentiment tiêu cực")
-    for event in events:
-        ev_label = event.replace("_", " ").title()
-        iv = EVENT_IMPACT.get(event, 0)
-        if iv > 0:
-            reasons.append(f"Sự kiện tích cực: {ev_label}")
-        elif iv < 0:
-            reasons.append(f"Sự kiện tiêu cực: {ev_label}")
+    # Bắt đầu từ các lý do cụ thể đã trích dẫn bằng chứng trực tiếp trong bài
+    # báo (từ khóa, sự kiện, ngành nghề) do nlp_service phân tích, sau đó bổ
+    # sung thêm các lý do dựa trên Knowledge Graph nếu có.
+    reasons = list(analysis.get("reasons", []))
+
     if gf.get("mention_frequency", 0) > 3:
-        reasons.append(f"Cổ phiếu được nhắc đến nhiều ({gf['mention_frequency']} lần)")
+        reasons.append(f"Cổ phiếu được nhắc đến nhiều trong dữ liệu ({gf['mention_frequency']} lần)")
     if gf.get("degree_centrality", 0) > 0.3:
-        reasons.append("Cổ phiếu có nhiều kết nối trong Knowledge Graph")
+        reasons.append("Cổ phiếu có nhiều kết nối trong Knowledge Graph, mức lan tỏa ảnh hưởng cao")
     sr = gf.get("sentiment_ratio", 0.5)
     if sr > 0.6:
-        reasons.append("Tỷ lệ tin tích cực cao trong graph")
+        reasons.append(f"Tỷ lệ tin tích cực liên quan đến cổ phiếu này trong graph cao ({round(sr * 100)}%)")
     elif sr < 0.4:
-        reasons.append("Tỷ lệ tin tiêu cực cao trong graph")
+        reasons.append(f"Tỷ lệ tin tiêu cực liên quan đến cổ phiếu này trong graph cao ({round((1 - sr) * 100)}%)")
+
+    trend_label = {"INCREASING": "TĂNG", "DECREASING": "GIẢM", "UNCHANGED": "ỔN ĐỊNH/ĐI NGANG"}
+    reasons.append(
+        f"=> Dự đoán xu hướng cổ phiếu: {trend_label[trend]} "
+        f"(độ tin cậy {round(confidence * 100)}%, điểm tổng hợp {round(score, 2)})"
+    )
 
     return {
         "trend": trend,

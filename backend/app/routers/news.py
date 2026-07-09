@@ -27,11 +27,9 @@ def _run_analysis(news_id: int, db: Session):
     gf = {}
     for stock in result.get("stocks", []):
         gf.update(get_graph_features(stock))
-    pred = (
-        predict_trend(result, gf)
-        if result.get("stocks")
-        else {"trend": "UNCHANGED", "confidence": 0.5, "explanation": {}, "features": {}}
-    )
+    # Luôn chạy predict_trend để mọi bài báo đã phân tích đều có "lý do" cụ
+    # thể, kể cả khi không nhận diện được mã cổ phiếu nào (gf sẽ rỗng).
+    pred = predict_trend(result, gf)
     news.stocks_mentioned = result["stocks"]
     news.companies_mentioned = result["companies"]
     news.industries_mentioned = result["industries"]
