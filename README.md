@@ -224,6 +224,26 @@ Sau khi hệ thống chạy, import file CSV mẫu để test ngay:
 3. Hệ thống sẽ tự động phân tích (khoảng 5-10 giây)
 4. Xem kết quả ở các trang còn lại
 
+### Tài khoản test
+
+Dùng các tài khoản sau để đăng nhập thử hệ thống (email/mật khẩu):
+
+| Email | Mật khẩu | Ghi chú |
+|-------|----------|---------|
+| `test1@finnexus.dev` | `Test@123` | Tài khoản test 1 |
+| `test2@finnexus.dev` | `Test@123` | Tài khoản test 2 |
+| `admin@finnexus.dev` | `Test@123` | Tài khoản test 3 |
+
+Nếu database chưa có các tài khoản này (ví dụ sau khi chạy `docker compose down -v`), tạo lại bằng lệnh:
+
+```bash
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test1@finnexus.dev","password":"Test@123","full_name":"Test User 1"}'
+```
+
+(đổi `email` và `full_name` để tạo thêm các tài khoản còn lại)
+
 ### Dừng hệ thống
 
 ```bash

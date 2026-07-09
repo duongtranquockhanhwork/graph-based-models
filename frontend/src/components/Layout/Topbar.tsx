@@ -36,7 +36,7 @@ export default function Topbar() {
 
   return (
     <header
-      className="flex items-center justify-between px-6 h-[52px] flex-shrink-0"
+      className="relative z-30 flex items-center justify-between px-6 h-[52px] flex-shrink-0"
       style={{
         background: 'rgba(7, 17, 31, 0.95)',
         backdropFilter: 'blur(12px)',

@@ -117,11 +117,15 @@ body {
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
     border-radius: 10px;
-    padding: 10px 16px;
     color: #e2e8f0;
     font-size: 14px;
     transition: border-color 0.2s;
     outline: none;
+  }
+  /* :where() keeps this at zero specificity so padding utility overrides
+     always win, regardless of rule order after minification. */
+  :where(.field-input) {
+    padding: 10px 16px;
   }
   .field-input:focus {
     border-color: #3b82f6;
