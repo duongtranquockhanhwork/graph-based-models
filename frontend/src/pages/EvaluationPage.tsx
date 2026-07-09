@@ -5,11 +5,11 @@ import type { ModelEvaluation } from '../types'
 import { CheckCircle2, Target, Zap, Activity } from 'lucide-react'
 
 const CHART_TOOLTIP_STYLE = {
-  background: '#0d1f35',
-  border: '1px solid #1e3556',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-default)',
   borderRadius: 10,
   fontSize: 12,
-  color: '#e2e8f0',
+  color: 'var(--text-primary)',
 }
 
 function MetricCard({
@@ -45,8 +45,8 @@ function MetricCard({
           {pct}%
         </span>
       </div>
-      <p className="text-white font-semibold text-[14px]">{label}</p>
-      <p className="text-[11px] mt-0.5" style={{ color: '#3d5a7a' }}>{desc}</p>
+      <p className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>{label}</p>
+      <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-faint)' }}>{desc}</p>
       <div className="conf-bar mt-3">
         <div
           className="conf-bar-fill"
@@ -117,8 +117,8 @@ export default function EvaluationPage() {
           className="rounded-2xl p-5 card-glow"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
-          <h3 className="text-white font-semibold text-[14px] mb-1">Baseline vs Graph-enhanced</h3>
-          <p className="text-[11px] mb-4" style={{ color: '#3d5a7a' }}>
+          <h3 className="font-semibold text-[14px] mb-1" style={{ color: 'var(--text-primary)' }}>Baseline vs Graph-enhanced</h3>
+          <p className="text-[11px] mb-4" style={{ color: 'var(--text-faint)' }}>
             Graph-enhanced sử dụng thêm đặc trưng từ Knowledge Graph
           </p>
           <ResponsiveContainer width="100%" height={200}>
@@ -154,7 +154,7 @@ export default function EvaluationPage() {
               <p className="text-green-400 text-[13px] font-semibold">
                 +{improvement}% cải thiện accuracy
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#3d5a7a' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
                 Graph features giúp mô hình hiểu quan hệ giữa các cổ phiếu
               </p>
             </div>
@@ -166,7 +166,7 @@ export default function EvaluationPage() {
           className="rounded-2xl p-5 card-glow"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
-          <h3 className="text-white font-semibold text-[14px] mb-4">Confusion Matrix · Graph-enhanced</h3>
+          <h3 className="font-semibold text-[14px] mb-4" style={{ color: 'var(--text-primary)' }}>Confusion Matrix · Graph-enhanced</h3>
           {data.confusion_matrix && (
             <div className="overflow-x-auto mb-4">
               <table className="w-full text-sm border-collapse">
@@ -174,7 +174,7 @@ export default function EvaluationPage() {
                   <tr>
                     <th
                       className="text-left text-[10px] font-medium pb-2 pr-3"
-                      style={{ color: '#3d5a7a' }}
+                      style={{ color: 'var(--text-faint)' }}
                     >
                       Thực tế ╲ Dự đoán
                     </th>
@@ -205,7 +205,7 @@ export default function EvaluationPage() {
                           style={
                             i === j
                               ? { background: 'rgba(37,99,235,0.2)', color: '#93c5fd' }
-                              : { color: '#334155' }
+                              : { color: 'var(--text-faint)' }
                           }
                         >
                           {cell}
@@ -219,7 +219,7 @@ export default function EvaluationPage() {
           )}
 
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2.5" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-wide mb-2.5" style={{ color: 'var(--text-faint)' }}>
               Precision theo nhãn
             </p>
             <div className="space-y-2.5">
@@ -242,7 +242,7 @@ export default function EvaluationPage() {
                         }}
                       />
                     </div>
-                    <span className="text-[12px] font-semibold w-9 text-right text-white">{pct}%</span>
+                    <span className="text-[12px] font-semibold w-9 text-right" style={{ color: 'var(--text-primary)' }}>{pct}%</span>
                   </div>
                 )
               })}
@@ -256,7 +256,7 @@ export default function EvaluationPage() {
         className="rounded-2xl p-5"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
       >
-        <h3 className="text-white font-semibold text-[14px] mb-4">Graph Features được sử dụng</h3>
+        <h3 className="font-semibold text-[14px] mb-4" style={{ color: 'var(--text-primary)' }}>Graph Features được sử dụng</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
             { name: 'Degree Centrality', desc: 'Số kết nối của cổ phiếu trong graph', color: '#3b82f6' },
@@ -276,10 +276,10 @@ export default function EvaluationPage() {
                 style={{ background: f.color, boxShadow: `0 0 8px ${f.color}50` }}
               />
               <div className="min-w-0">
-                <p className="text-[12px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>
+                <p className="text-[12px] font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>
                   {f.name}
                 </p>
-                <p className="text-[11px] mt-0.5 leading-tight" style={{ color: '#475569' }}>{f.desc}</p>
+                <p className="text-[11px] mt-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>{f.desc}</p>
               </div>
             </div>
           ))}

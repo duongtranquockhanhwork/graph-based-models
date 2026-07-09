@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float, JSON, Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, JSON, Boolean, ForeignKey
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -27,5 +27,12 @@ class NewsArticle(Base):
     prediction_explanation = Column(JSON, default=dict)
 
     is_analyzed = Column(Boolean, default=False)
+
+    needs_manual_label = Column(Boolean, default=False)
+    manual_sentiment = Column(String(20), nullable=True)
+    manual_event_type = Column(String(50), nullable=True)
+    labeled_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    labeled_at = Column(DateTime(timezone=True), nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

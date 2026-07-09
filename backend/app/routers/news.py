@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import pandas as pd
 import io
 
 from app.core.database import get_db
+from app.core.deps import require_admin
+from app.core.settings_store import get_float_setting
 from app.models.news import NewsArticle
+from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
 from app.services.nlp_service import analyze_article
 from app.services.graph_service import add_news_to_graph, get_graph_features
@@ -23,7 +26,7 @@ def _run_analysis(news_id: int, db: Session):
     news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not news:
         return
-    result = analyze_article(news.title, news.content)
+    result = analyze_article(news.title, news.content, db=db)
     gf = {}
     for stock in result.get("stocks", []):
         gf.update(get_graph_features(stock))
@@ -40,6 +43,8 @@ def _run_analysis(news_id: int, db: Session):
     news.prediction_confidence = pred["confidence"]
     news.prediction_explanation = pred["explanation"]
     news.is_analyzed = True
+    review_threshold = get_float_setting(db, "manual_review_confidence_threshold", 0.6)
+    news.needs_manual_label = pred["confidence"] < review_threshold
     add_news_to_graph(news_id, result)
     news.graph_built = True
     db.commit()
@@ -197,8 +202,42 @@ def create_news(news_in: NewsCreate, background_tasks: BackgroundTasks, db: Sess
 
 
 @router.get("/", response_model=List[NewsResponse])
-def list_news(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
-    return db.query(NewsArticle).order_by(NewsArticle.id.desc()).offset(skip).limit(limit).all()
+def list_news(
+    skip: int = 0,
+    limit: int = 50,
+    q: Optional[str] = None,
+    source: Optional[str] = None,
+    sentiment: Optional[str] = None,
+    event_type: Optional[str] = None,
+    stock: Optional[str] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
+    query = db.query(NewsArticle)
+    if q:
+        query = query.filter(NewsArticle.title.ilike(f"%{q}%"))
+    if source:
+        query = query.filter(NewsArticle.source == source)
+    if sentiment:
+        query = query.filter(NewsArticle.sentiment == sentiment)
+    if date_from:
+        query = query.filter(NewsArticle.published_date >= date_from)
+    if date_to:
+        query = query.filter(NewsArticle.published_date <= date_to)
+
+    if event_type or stock:
+        # Generic JSON column has no portable containment operator, so
+        # filter these criteria in Python after the rest are applied.
+        rows = query.order_by(NewsArticle.id.desc()).all()
+        if event_type:
+            rows = [n for n in rows if event_type in (n.events_detected or [])]
+        if stock:
+            stock_upper = stock.upper()
+            rows = [n for n in rows if stock_upper in (n.stocks_mentioned or [])]
+        return rows[skip : skip + limit]
+
+    return query.order_by(NewsArticle.id.desc()).offset(skip).limit(limit).all()
 
 
 @router.get("/{news_id}", response_model=NewsResponse)
@@ -206,6 +245,23 @@ def get_news(news_id: int, db: Session = Depends(get_db)):
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
         raise HTTPException(404, "Not found")
+    return n
+
+
+@router.patch("/{news_id}", response_model=NewsResponse)
+def patch_news(
+    news_id: int,
+    payload: NewsPatch,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
+    if not n:
+        raise HTTPException(404, "Not found")
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(n, field, value)
+    db.commit()
+    db.refresh(n)
     return n
 
 

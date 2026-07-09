@@ -5,6 +5,7 @@ import SpriteText from 'three-spritetext'
 import { graphApi } from '../services/api'
 import type { GraphData } from '../types'
 import { Search, RefreshCw, Info, Box, CircleDot } from 'lucide-react'
+import { useTheme } from '../context/ThemeContext'
 
 const NODE_COLORS: Record<string, string> = {
   news: '#3B82F6',
@@ -38,6 +39,13 @@ interface FGNode {
 export default function GraphPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fgRef = useRef<any>(null)
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const canvasBg = isDark ? '#030712' : '#f1f5f9'
+  const nodeLabelColor = isDark ? 'rgba(226,232,240,0.9)' : 'rgba(15,23,42,0.85)'
+  const linkColor = isDark ? 'rgba(148,163,184,0.35)' : 'rgba(100,116,139,0.35)'
+  const spriteColor = isDark ? '#cbd5e1' : '#1e293b'
+
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d')
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], edges: [], metadata: {} })
   const [loading, setLoading] = useState(true)
@@ -90,14 +98,14 @@ export default function GraphPage() {
   const graphHeight = window.innerHeight - 96
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#030712' }}>
+    <div className="flex flex-col h-full" style={{ background: canvasBg }}>
       {/* Top toolbar */}
       <div
         className="flex flex-wrap items-center gap-3 px-5 py-3 flex-shrink-0"
-        style={{ borderBottom: '1px solid #1a2d4a', background: 'rgba(7,17,31,0.6)' }}
+        style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-card)' }}
       >
         {/* 2D / 3D tabs */}
-        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: '#0a1628', border: '1px solid #1e3556' }}>
+        <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
           <button
             type="button"
             onClick={() => setViewMode('2d')}
@@ -105,7 +113,7 @@ export default function GraphPage() {
             style={
               viewMode === '2d'
                 ? { background: '#2563eb', color: 'white' }
-                : { color: '#64748b' }
+                : { color: 'var(--text-muted)' }
             }
           >
             <CircleDot size={13} /> 2D · Dễ nhìn
@@ -117,7 +125,7 @@ export default function GraphPage() {
             style={
               viewMode === '3d'
                 ? { background: '#2563eb', color: 'white' }
-                : { color: '#64748b' }
+                : { color: 'var(--text-muted)' }
             }
           >
             <Box size={13} /> 3D · Trực quan
@@ -126,21 +134,10 @@ export default function GraphPage() {
 
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#3d5a7a' }} />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
             <input
-              style={{
-                background: 'rgba(7,17,31,0.92)',
-                border: '1px solid #1e3556',
-                borderRadius: 10,
-                paddingLeft: 32,
-                paddingRight: 14,
-                paddingTop: 8,
-                paddingBottom: 8,
-                color: '#e2e8f0',
-                fontSize: 13,
-                outline: 'none',
-                width: 180,
-              }}
+              className="field-input pl-8"
+              style={{ width: 180, height: 36 }}
               placeholder="Lọc mã: FPT, VNM..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -160,7 +157,7 @@ export default function GraphPage() {
               type="button"
               onClick={handleReset}
               style={{
-                background: 'rgba(7,17,31,0.9)', color: '#94a3b8', border: '1px solid #1e3556',
+                background: 'var(--bg-surface)', color: 'var(--text-secondary)', border: '1px solid var(--border-default)',
                 borderRadius: 10, padding: '8px 14px', fontSize: 13, cursor: 'pointer',
               }}
             >
@@ -172,7 +169,7 @@ export default function GraphPage() {
         {/* Gợi ý chọn nhanh mã cổ phiếu phổ biến */}
         {topStocks.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px]" style={{ color: '#3d5a7a' }}>Xem nhanh:</span>
+            <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>Xem nhanh:</span>
             {topStocks.map(symbol => (
               <button
                 key={symbol}
@@ -181,8 +178,8 @@ export default function GraphPage() {
                 className="text-[11px] font-medium px-2.5 py-1 rounded-full transition-colors"
                 style={
                   activeStock === symbol
-                    ? { background: 'rgba(37,99,235,0.25)', color: '#93c5fd', border: '1px solid rgba(37,99,235,0.5)' }
-                    : { background: 'rgba(16,185,129,0.08)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.2)' }
+                    ? { background: 'rgba(37,99,235,0.18)', color: '#2563eb', border: '1px solid rgba(37,99,235,0.4)' }
+                    : { background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.25)' }
                 }
               >
                 {symbol}
@@ -195,12 +192,12 @@ export default function GraphPage() {
       {/* Hướng dẫn đọc đồ thị */}
       <div
         className="flex items-start gap-2 px-5 py-2.5 flex-shrink-0 text-[12px]"
-        style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid #1a2d4a', color: '#93a8c4' }}
+        style={{ background: 'rgba(37,99,235,0.06)', borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
       >
         <Info size={14} className="flex-shrink-0 mt-0.5" style={{ color: '#3b82f6' }} />
         <span>
-          Mỗi <b style={{ color: '#e2e8f0' }}>chấm tròn</b> là một tin tức, cổ phiếu, công ty... (màu sắc = loại, xem chú thích) —
-          <b style={{ color: '#e2e8f0' }}> đường nối</b> thể hiện mối quan hệ giữa chúng. Chấm càng lớn = càng nhiều liên kết.
+          Mỗi <b style={{ color: 'var(--text-primary)' }}>chấm tròn</b> là một tin tức, cổ phiếu, công ty... (màu sắc = loại, xem chú thích) —
+          <b style={{ color: 'var(--text-primary)' }}> đường nối</b> thể hiện mối quan hệ giữa chúng. Chấm càng lớn = càng nhiều liên kết.
           Bấm vào một mã cổ phiếu ở trên để chỉ xem các quan hệ liên quan đến nó, hoặc click vào một chấm để xem chi tiết.
         </span>
       </div>
@@ -208,10 +205,10 @@ export default function GraphPage() {
       <div className="flex-1 relative">
         {/* Loading overlay */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: '#030712' }}>
+          <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: canvasBg }}>
             <div className="text-center">
               <RefreshCw className="animate-spin mx-auto mb-3" size={28} style={{ color: '#3b82f6' }} />
-              <p className="text-[13px]" style={{ color: '#475569' }}>Đang xây dựng Knowledge Graph...</p>
+              <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>Đang xây dựng Knowledge Graph...</p>
             </div>
           </div>
         )}
@@ -220,9 +217,9 @@ export default function GraphPage() {
         {!loading && graphData.nodes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="text-center">
-              <Info size={36} className="mx-auto mb-3" style={{ color: '#1e3556' }} />
-              <p className="text-[15px] font-medium" style={{ color: '#475569' }}>Chưa có dữ liệu graph</p>
-              <p className="text-[13px] mt-1" style={{ color: '#334155' }}>Hãy import và phân tích tin tức trước</p>
+              <Info size={36} className="mx-auto mb-3" style={{ color: 'var(--border-default)' }} />
+              <p className="text-[15px] font-medium" style={{ color: 'var(--text-muted)' }}>Chưa có dữ liệu graph</p>
+              <p className="text-[13px] mt-1" style={{ color: 'var(--text-faint)' }}>Hãy import và phân tích tin tức trước</p>
             </div>
           </div>
         )}
@@ -239,15 +236,15 @@ export default function GraphPage() {
             nodeThreeObject={(n: object) => {
               const node = n as FGNode
               const sprite = new SpriteText(node.label)
-              sprite.color = '#cbd5e1'
+              sprite.color = spriteColor
               sprite.textHeight = 2.6
               sprite.position.set(0, Math.max(node.size || 5, 3) + 2.5, 0)
               return sprite
             }}
             linkLabel="label"
-            linkColor={() => 'rgba(30,53,86,0.6)'}
+            linkColor={() => linkColor}
             linkWidth={0.8}
-            backgroundColor="#030712"
+            backgroundColor={canvasBg}
             onNodeClick={(node: object) => setSelected(node as FGNode)}
             width={graphWidth}
             height={graphHeight}
@@ -273,7 +270,7 @@ export default function GraphPage() {
               ctx.font = `${fontSize}px sans-serif`
               ctx.textAlign = 'center'
               ctx.textBaseline = 'top'
-              ctx.fillStyle = 'rgba(226,232,240,0.9)'
+              ctx.fillStyle = nodeLabelColor
               ctx.fillText(node.label, node.x, node.y + r + 1.5)
             }}
             nodePointerAreaPaint={(n: object, color: string, ctx: CanvasRenderingContext2D) => {
@@ -285,9 +282,9 @@ export default function GraphPage() {
               ctx.fill()
             }}
             linkLabel="label"
-            linkColor={() => 'rgba(30,53,86,0.8)'}
+            linkColor={() => linkColor}
             linkWidth={1}
-            backgroundColor="#030712"
+            backgroundColor={canvasBg}
             onNodeClick={(node: object) => setSelected(node as FGNode)}
             width={graphWidth}
             height={graphHeight}
@@ -298,16 +295,16 @@ export default function GraphPage() {
         {/* Legend */}
         <div
           className="absolute bottom-4 left-4 z-20 rounded-2xl p-3"
-          style={{ background: 'rgba(7,17,31,0.92)', backdropFilter: 'blur(12px)', border: '1px solid #1e3556' }}
+          style={{ background: 'var(--bg-card)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-default)' }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#3d5a7a' }}>
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-faint)' }}>
             Chú thích
           </p>
           <div className="space-y-1.5">
             {Object.entries(NODE_COLORS).map(([type, color]) => (
               <div key={type} className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 5px ${color}60` }} />
-                <span className="text-[11px]" style={{ color: '#64748b' }}>{NODE_TYPE_LABELS[type]}</span>
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>{NODE_TYPE_LABELS[type]}</span>
               </div>
             ))}
           </div>
@@ -316,14 +313,14 @@ export default function GraphPage() {
         {/* Stats */}
         <div
           className="absolute bottom-4 right-4 z-20 rounded-2xl px-4 py-3 text-right"
-          style={{ background: 'rgba(7,17,31,0.92)', backdropFilter: 'blur(12px)', border: '1px solid #1e3556' }}
+          style={{ background: 'var(--bg-card)', backdropFilter: 'blur(12px)', border: '1px solid var(--border-default)' }}
         >
-          <p className="text-[12px] font-medium text-white">
+          <p className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>
             {(graphData.metadata?.total_nodes || 0).toLocaleString()} nodes
-            <span style={{ color: '#1e3556' }}> · </span>
+            <span style={{ color: 'var(--border-default)' }}> · </span>
             {(graphData.metadata?.total_edges || 0).toLocaleString()} edges
           </p>
-          <p className="text-[10px] mt-0.5" style={{ color: '#3d5a7a' }}>
+          <p className="text-[10px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
             {viewMode === '3d' ? 'Kéo để xoay · Scroll để zoom · Click để xem' : 'Kéo để di chuyển · Scroll để zoom · Click để xem'}
           </p>
         </div>
@@ -332,14 +329,14 @@ export default function GraphPage() {
         {selected && (
           <div
             className="absolute right-0 top-0 bottom-0 w-72 p-5 overflow-y-auto z-20"
-            style={{ background: 'rgba(7,17,31,0.96)', backdropFilter: 'blur(16px)', borderLeft: '1px solid #1e3556' }}
+            style={{ background: 'var(--bg-card)', backdropFilter: 'blur(16px)', borderLeft: '1px solid var(--border-default)' }}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-semibold text-[14px]">Chi tiết node</h3>
+              <h3 className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>Chi tiết node</h3>
               <button
                 onClick={() => setSelected(null)}
                 className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
-                style={{ color: '#475569', background: '#1e3556' }}
+                style={{ color: 'var(--text-muted)', background: 'var(--bg-surface)' }}
               >
                 ×
               </button>
@@ -357,11 +354,11 @@ export default function GraphPage() {
 
             <div className="space-y-3">
               <div>
-                <p className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: '#3d5a7a' }}>Nhãn</p>
-                <p className="text-white text-[13px] font-medium">{selected.label}</p>
+                <p className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-faint)' }}>Nhãn</p>
+                <p className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{selected.label}</p>
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: '#3d5a7a' }}>Loại</p>
+                <p className="text-[10px] uppercase tracking-wide mb-1" style={{ color: 'var(--text-faint)' }}>Loại</p>
                 <span
                   className="text-[11px] px-2.5 py-1 rounded-lg text-white font-medium"
                   style={{ background: NODE_COLORS[selected.type] || '#666' }}
@@ -372,8 +369,8 @@ export default function GraphPage() {
               {Object.entries(selected.properties || {}).map(([k, v]) =>
                 v ? (
                   <div key={k}>
-                    <p className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: '#3d5a7a' }}>{k}</p>
-                    <p className="text-[12px]" style={{ color: '#94a3b8' }}>{String(v)}</p>
+                    <p className="text-[10px] uppercase tracking-wide mb-0.5" style={{ color: 'var(--text-faint)' }}>{k}</p>
+                    <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>{String(v)}</p>
                   </div>
                 ) : null
               )}

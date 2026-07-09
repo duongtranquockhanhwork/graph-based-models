@@ -19,6 +19,8 @@ class UserOut(BaseModel):
     email: EmailStr
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
+    role: str = "customer"
+    is_active: bool = True
     created_at: Optional[datetime] = None
 
     class Config:

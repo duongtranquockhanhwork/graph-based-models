@@ -3,6 +3,8 @@ export interface User {
   email: string
   full_name?: string
   avatar_url?: string
+  role: 'customer' | 'admin'
+  is_active?: boolean
   created_at?: string
 }
 
@@ -29,6 +31,10 @@ export interface NewsArticle {
   prediction_confidence?: number
   prediction_explanation?: Record<string, unknown>
   is_analyzed: boolean
+  needs_manual_label?: boolean
+  manual_sentiment?: string
+  manual_event_type?: string
+  labeled_at?: string
   created_at?: string
 }
 
@@ -92,3 +98,87 @@ export interface ModelEvaluation {
   labels: string[]
   class_report?: Record<string, Record<string, number>>
 }
+
+// ---- Admin ----
+
+export interface AdminNewsStats {
+  total_news: number
+  news_symbol_rows: number
+  model_ready_rows: number
+  total_processed: number
+  pass_count: number
+  pass_pct: number
+  review_count: number
+  drop_count: number
+}
+
+export interface DataQuality {
+  missing_values: number
+  duplicates: number
+  return_label_consistency: number
+  split_leakage: number
+  overall_status: 'PASS' | 'FAIL'
+}
+
+export interface ValidationResult {
+  total_labeled: number
+  sentiment_labeled_count: number
+  accuracy_sentiment: number | null
+  event_labeled_count: number
+  accuracy_event: number | null
+}
+
+export interface ActivityLogEntry {
+  id: number
+  actor_name: string
+  action: string
+  detail?: string
+  status: string
+  created_at: string
+}
+
+export interface AdminDashboardStats {
+  stats: AdminNewsStats
+  data_quality: DataQuality
+  trend_distribution: Record<string, number>
+  sentiment_distribution: Record<string, number>
+  activity: ActivityLogEntry[]
+  alerts: string[]
+  validation_results: ValidationResult
+  users_summary: { total: number; admin: number; customer: number }
+}
+
+export interface EventKeyword {
+  id: number
+  event_type: string
+  label_vi: string
+  keyword: string
+  is_active: boolean
+  created_at?: string
+}
+
+export interface SystemSetting {
+  key: string
+  value: string
+  description?: string
+  updated_at?: string
+}
+
+export interface AdminUser {
+  id: number
+  email: string
+  full_name?: string
+  role: 'customer' | 'admin'
+  is_active: boolean
+  created_at?: string
+}
+
+export interface StockAggregation {
+  symbol: string
+  company?: string
+  industry?: string
+  mention_count: number
+  sentiment_distribution: Record<string, number>
+}
+
+export type LabelingQueueItem = NewsArticle

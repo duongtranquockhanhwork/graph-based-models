@@ -19,11 +19,11 @@ const TREND_COLORS: Record<string, string> = {
 }
 
 const CHART_TOOLTIP_STYLE = {
-  background: '#0d1f35',
-  border: '1px solid #1e3556',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-default)',
   borderRadius: 10,
   fontSize: 12,
-  color: '#e2e8f0',
+  color: 'var(--text-primary)',
 }
 
 function StatCard({
@@ -51,11 +51,11 @@ function StatCard({
         <Icon size={20} style={{ color: accent }} />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5" style={{ color: '#475569' }}>
+        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>
           {label}
         </p>
-        <p className="text-2xl font-bold text-white leading-none">{value.toLocaleString()}</p>
-        {sub && <p className="text-[11px] mt-1" style={{ color: '#3d5a7a' }}>{sub}</p>}
+        <p className="text-2xl font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{value.toLocaleString()}</p>
+        {sub && <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>{sub}</p>}
       </div>
     </div>
   )
@@ -67,7 +67,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
       className="rounded-2xl p-5 card-glow"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
-      <h3 className="text-white font-semibold text-[13px] mb-4">{title}</h3>
+      <h3 className="font-semibold text-[13px] mb-4" style={{ color: 'var(--text-primary)' }}>{title}</h3>
       {children}
     </div>
   )
@@ -173,8 +173,8 @@ export default function DashboardPage() {
                   className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ background: SENTIMENT_COLORS[name] || '#666' }}
                 />
-                <span className="text-[11px]" style={{ color: '#94a3b8' }}>
-                  {name}: <span className="text-white font-medium">{value}</span>
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
+                  {name}: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
                 </span>
               </div>
             ))}
@@ -211,9 +211,9 @@ export default function DashboardPage() {
                   className="w-2 h-2 rounded-full"
                   style={{ background: TREND_COLORS[name] || '#666' }}
                 />
-                <span className="text-[11px]" style={{ color: '#94a3b8' }}>
+                <span className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
                   {name === 'INCREASING' ? '↑ Tăng' : name === 'DECREASING' ? '↓ Giảm' : '— Ổn định'}:{' '}
-                  <span className="text-white font-medium">{value}</span>
+                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{value}</span>
                 </span>
               </div>
             ))}
@@ -228,7 +228,7 @@ export default function DashboardPage() {
               return (
                 <div key={item.industry}>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[12px] truncate pr-2" style={{ color: '#94a3b8' }}>
+                    <span className="text-[12px] truncate pr-2" style={{ color: 'var(--text-secondary)' }}>
                       {idx + 1}. {item.industry}
                     </span>
                     <span className="text-[11px] font-semibold flex-shrink-0" style={{ color: '#60a5fa' }}>

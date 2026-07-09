@@ -28,10 +28,23 @@ api.interceptors.response.use(
   }
 )
 
+export interface NewsFilters {
+  skip?: number
+  limit?: number
+  q?: string
+  source?: string
+  sentiment?: string
+  event_type?: string
+  stock?: string
+  date_from?: string
+  date_to?: string
+}
+
 export const newsApi = {
-  list: (skip = 0, limit = 50) => api.get('/news/', { params: { skip, limit } }),
+  list: (filters: NewsFilters = {}) => api.get('/news/', { params: { skip: 0, limit: 50, ...filters } }),
   get: (id: number) => api.get(`/news/${id}`),
   create: (data: object) => api.post('/news/', data),
+  patch: (id: number, data: object) => api.patch(`/news/${id}`, data),
   uploadCsv: (file: File) => {
     const form = new FormData()
     form.append('file', file)
@@ -58,6 +71,7 @@ export const predictionApi = {
 
 export const analyticsApi = {
   dashboard: () => api.get('/analytics/dashboard'),
+  stocks: () => api.get('/analytics/stocks'),
 }
 
 export default api

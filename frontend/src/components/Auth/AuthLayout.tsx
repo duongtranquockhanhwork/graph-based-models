@@ -96,8 +96,8 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
           </div>
 
           <div className="section-card">
-            <h2 className="text-xl font-bold text-white mb-1.5">{title}</h2>
-            <p className="text-[13px] mb-6" style={{ color: '#7d94ad' }}>
+            <h2 className="text-xl font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>{title}</h2>
+            <p className="text-[13px] mb-6" style={{ color: 'var(--text-secondary)' }}>
               {subtitle}
             </p>
             {children}

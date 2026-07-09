@@ -4,8 +4,14 @@ from collections import Counter
 
 from app.core.database import get_db
 from app.models.news import NewsArticle
+from app.services.stock_stats import compute_stock_stats
 
 router = APIRouter()
+
+
+@router.get("/stocks")
+def stocks_stats(db: Session = Depends(get_db)):
+    return compute_stock_stats(db)
 
 
 @router.get("/dashboard")

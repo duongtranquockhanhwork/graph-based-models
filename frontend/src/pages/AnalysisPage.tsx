@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { newsApi } from '../services/api'
 import type { NewsArticle } from '../types'
-import { RefreshCw, Trash2, ChevronDown, ChevronUp, Search, Loader2 } from 'lucide-react'
+import { RefreshCw, Trash2, ChevronDown, ChevronUp, Search, Loader2, Upload } from 'lucide-react'
 
 const SENTIMENT_STYLE: Record<string, { badge: string; dot: string }> = {
   Positive: { badge: 'badge-up', dot: '#10b981' },
@@ -54,9 +55,9 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-white text-[13px] font-medium leading-snug line-clamp-2">{news.title}</p>
+          <p className="text-[13px] font-medium leading-snug line-clamp-2" style={{ color: 'var(--text-primary)' }}>{news.title}</p>
           <div className="flex items-center flex-wrap gap-2 mt-1.5">
-            <span className="text-[11px]" style={{ color: '#3d5a7a' }}>
+            <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
               {news.source || '—'} · {news.published_date || '—'}
             </span>
 
@@ -83,7 +84,7 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
                       </span>
                     ))}
                     {news.stocks_mentioned.length > 3 && (
-                      <span className="text-[10px]" style={{ color: '#3d5a7a' }}>
+                      <span className="text-[10px]" style={{ color: 'var(--text-faint)' }}>
                         +{news.stocks_mentioned.length - 3}
                       </span>
                     )}
@@ -103,13 +104,13 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
               onDelete()
             }}
             className="p-1.5 rounded-lg transition-all"
-            style={{ color: '#3d5a7a' }}
+            style={{ color: 'var(--text-faint)' }}
             onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#3d5a7a'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-faint)'; (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
           >
             <Trash2 size={13} />
           </button>
-          <div style={{ color: '#3d5a7a' }}>
+          <div style={{ color: 'var(--text-faint)' }}>
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </div>
         </div>
@@ -121,7 +122,7 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
           style={{ borderTop: '1px solid var(--border-subtle)' }}
         >
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
               Mã cổ phiếu
             </p>
             <div className="flex flex-wrap gap-1">
@@ -129,11 +130,11 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
                 ? news.stocks_mentioned.map(s => (
                     <span key={s} className="badge-up text-[11px] px-2 py-0.5 rounded font-medium">{s}</span>
                   ))
-                : <span className="text-[11px]" style={{ color: '#334155' }}>Không tìm thấy</span>}
+                : <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>Không tìm thấy</span>}
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
               Ngành nghề
             </p>
             <div className="flex flex-wrap gap-1">
@@ -143,7 +144,7 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
               Sự kiện
             </p>
             <div className="flex flex-wrap gap-1">
@@ -155,22 +156,22 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] font-medium uppercase tracking-wide mb-1" style={{ color: 'var(--text-faint)' }}>
               Impact Score
             </p>
             <div className="flex items-baseline gap-1">
-              <span className="text-white font-bold text-lg">{news.impact_score?.toFixed(0)}</span>
-              <span className="text-[11px]" style={{ color: '#3d5a7a' }}>/100</span>
+              <span className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{news.impact_score?.toFixed(0)}</span>
+              <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>/100</span>
             </div>
           </div>
           {news.prediction_explanation && (news.prediction_explanation as { reasons?: string[] }).reasons && (
             <div className="col-span-2">
-              <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: '#3d5a7a' }}>
+              <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
                 Lý do dự đoán
               </p>
               <ul className="space-y-0.5">
                 {((news.prediction_explanation as { reasons: string[] }).reasons).map((r, i) => (
-                  <li key={i} className="text-[12px]" style={{ color: '#94a3b8' }}>
+                  <li key={i} className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
                     · {r}
                   </li>
                 ))}
@@ -191,7 +192,7 @@ export default function AnalysisPage() {
 
   const load = () => {
     setLoading(true)
-    newsApi.list(0, 100).then(r => setNews(r.data)).finally(() => setLoading(false))
+    newsApi.list({ skip: 0, limit: 100 }).then(r => setNews(r.data)).finally(() => setLoading(false))
   }
 
   useEffect(() => { load() }, [])
@@ -224,7 +225,7 @@ export default function AnalysisPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-xl font-bold text-white">Phân tích tin tức NLP</h2>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Tin tức</h2>
           {!loading && news.length > 0 && (
             <div className="flex items-center gap-3 mt-1.5">
               <span className="badge-blue text-[11px] px-2 py-0.5 rounded-full">{news.length} bài báo</span>
@@ -235,18 +236,28 @@ export default function AnalysisPage() {
             </div>
           )}
         </div>
-        <button
-          onClick={load}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] transition-all"
-          style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border-subtle)',
-            color: '#94a3b8',
-          }}
-        >
-          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-          Làm mới
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/import"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all"
+            style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)', color: 'white' }}
+          >
+            <Upload size={13} />
+            Nhập dữ liệu
+          </Link>
+          <button
+            onClick={load}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] transition-all"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            Làm mới
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -255,7 +266,7 @@ export default function AnalysisPage() {
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
       >
         <div className="relative flex-1">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#3d5a7a' }} />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
           <input
             className="field-input pl-8 h-9 text-[13px]"
             placeholder="Tìm theo tiêu đề, mã cổ phiếu, nguồn..."
@@ -272,7 +283,7 @@ export default function AnalysisPage() {
               style={
                 filter === f
                   ? { background: 'rgba(37,99,235,0.2)', color: '#60a5fa', border: '1px solid rgba(37,99,235,0.3)' }
-                  : { color: '#475569', border: '1px solid transparent' }
+                  : { color: 'var(--text-muted)', border: '1px solid transparent' }
               }
             >
               {f === 'all' ? 'Tất cả' : f === 'analyzed' ? 'Đã phân tích' : 'Chờ xử lý'}
@@ -293,11 +304,11 @@ export default function AnalysisPage() {
           className="flex flex-col items-center justify-center py-20 rounded-2xl"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
-          <Loader2 size={32} style={{ color: '#1e3556' }} className="mb-3" />
-          <p className="text-[14px] font-medium" style={{ color: '#475569' }}>
+          <Loader2 size={32} style={{ color: 'var(--border-default)' }} className="mb-3" />
+          <p className="text-[14px] font-medium" style={{ color: 'var(--text-muted)' }}>
             {news.length === 0 ? 'Chưa có tin tức nào' : 'Không tìm thấy kết quả'}
           </p>
-          <p className="text-[12px] mt-1" style={{ color: '#334155' }}>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-faint)' }}>
             {news.length === 0 ? 'Hãy import dữ liệu trước' : 'Thử tìm kiếm khác'}
           </p>
         </div>

@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout title="Đặt lại mật khẩu" subtitle="Link không hợp lệ">
-        <p className="text-sm" style={{ color: '#94a3b8' }}>
+        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
           Link đặt lại mật khẩu bị thiếu hoặc không hợp lệ. Vui lòng yêu cầu lại từ trang{' '}
           <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300 font-medium">
             Quên mật khẩu
@@ -55,11 +55,11 @@ export default function ResetPasswordPage() {
     <AuthLayout title="Đặt lại mật khẩu" subtitle="Nhập mật khẩu mới cho tài khoản của bạn">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
             Mật khẩu mới
           </label>
           <div className="relative">
-            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type={showPassword ? 'text' : 'password'}
               required
@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3.5 top-1/2 -translate-y-1/2"
-              style={{ color: '#475569' }}
+              style={{ color: 'var(--text-muted)' }}
               tabIndex={-1}
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
@@ -83,11 +83,11 @@ export default function ResetPasswordPage() {
         </div>
 
         <div>
-          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
             Xác nhận mật khẩu
           </label>
           <div className="relative">
-            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type={showPassword ? 'text' : 'password'}
               required
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3.5 top-1/2 -translate-y-1/2"
-              style={{ color: '#475569' }}
+              style={{ color: 'var(--text-muted)' }}
               tabIndex={-1}
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >

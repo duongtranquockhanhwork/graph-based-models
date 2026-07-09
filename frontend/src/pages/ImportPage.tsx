@@ -102,8 +102,8 @@ export default function ImportPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-white">Nhập dữ liệu tin tức</h2>
-          <p className="text-[12px] mt-0.5" style={{ color: '#475569' }}>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Nhập dữ liệu tin tức</h2>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
             Thêm dữ liệu để hệ thống phân tích và xây dựng Knowledge Graph
           </p>
         </div>
@@ -149,16 +149,16 @@ export default function ImportPage() {
           >
             <Icon
               size={15}
-              style={{ color: activeTab === key ? '#60a5fa' : '#3d5a7a', flexShrink: 0 }}
+              style={{ color: activeTab === key ? '#60a5fa' : 'var(--text-faint)', flexShrink: 0 }}
             />
             <div className="min-w-0">
               <p
                 className="text-[13px] font-medium leading-tight"
-                style={{ color: activeTab === key ? '#e2e8f0' : '#475569' }}
+                style={{ color: activeTab === key ? 'var(--text-primary)' : 'var(--text-muted)' }}
               >
                 {label}
               </p>
-              <p className="text-[10px] leading-tight mt-0.5 hidden sm:block" style={{ color: '#2a4a6a' }}>
+              <p className="text-[10px] leading-tight mt-0.5 hidden sm:block" style={{ color: 'var(--text-faint)' }}>
                 {desc}
               </p>
             </div>
@@ -176,7 +176,7 @@ export default function ImportPage() {
             {...getRootProps()}
             className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200"
             style={{
-              borderColor: isDragActive ? '#3b82f6' : '#1e3556',
+              borderColor: isDragActive ? '#3b82f6' : 'var(--border-default)',
               background: isDragActive ? 'rgba(37,99,235,0.06)' : 'transparent',
             }}
           >
@@ -200,8 +200,8 @@ export default function ImportPage() {
                   <Upload size={24} style={{ color: '#3b82f6' }} />
                 </div>
                 <div>
-                  <p className="text-white text-[14px] font-medium">Kéo thả file CSV vào đây</p>
-                  <p className="text-[12px] mt-1" style={{ color: '#475569' }}>
+                  <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>Kéo thả file CSV vào đây</p>
+                  <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
                     hoặc click để chọn file từ máy tính
                   </p>
                 </div>
@@ -254,8 +254,8 @@ export default function ImportPage() {
               <Globe size={18} style={{ color: '#0ea5e9' }} />
             </div>
             <div>
-              <h3 className="text-white font-semibold text-[14px]">Import từ URL tin tức</h3>
-              <p className="text-[12px] mt-0.5" style={{ color: '#475569' }}>
+              <h3 className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>Import từ URL tin tức</h3>
+              <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
                 Nhập link bài báo từ các website chứng khoán VN (cafef.vn, vnexpress.net, vietstock.vn...)
               </p>
             </div>
@@ -263,12 +263,12 @@ export default function ImportPage() {
 
           <form onSubmit={handleUrlImport} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#64748b' }}>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 URL bài báo
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <Link2 size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#3d5a7a' }} />
+                  <Link2 size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
                   <input
                     className="field-input pl-9"
                     placeholder="https://cafef.vn/..."
@@ -303,8 +303,8 @@ export default function ImportPage() {
                 <CheckCircle2 size={16} className="text-green-400 flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <p className="text-green-400 text-[12px] font-medium mb-1">Import thành công!</p>
-                  <p className="text-white text-[13px] font-medium line-clamp-2">{urlPreview.title}</p>
-                  <p className="text-[11px] mt-1" style={{ color: '#3d5a7a' }}>
+                  <p className="text-[13px] font-medium line-clamp-2" style={{ color: 'var(--text-primary)' }}>{urlPreview.title}</p>
+                  <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>
                     Nguồn: {urlPreview.source} · Đang phân tích NLP...
                   </p>
                 </div>
@@ -347,7 +347,7 @@ export default function ImportPage() {
         >
           <form onSubmit={handleManualSubmit} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#64748b' }}>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Tiêu đề bài báo <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -360,7 +360,7 @@ export default function ImportPage() {
             </div>
 
             <div>
-              <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#64748b' }}>
+              <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                 Nội dung
               </label>
               <textarea
@@ -374,7 +374,7 @@ export default function ImportPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#64748b' }}>
+                <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                   Nguồn
                 </label>
                 <input
@@ -385,7 +385,7 @@ export default function ImportPage() {
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-medium mb-1.5" style={{ color: '#64748b' }}>
+                <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
                   Ngày đăng
                 </label>
                 <input

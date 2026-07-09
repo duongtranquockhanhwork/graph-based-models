@@ -120,14 +120,17 @@ def extract_entities(text: str) -> Dict:
     }
 
 
-def extract_events(text: str) -> List[str]:
-    return list(extract_events_detailed(text).keys())
+def extract_events(text: str, event_patterns: Optional[Dict[str, List[str]]] = None) -> List[str]:
+    return list(extract_events_detailed(text, event_patterns).keys())
 
 
-def extract_events_detailed(text: str) -> Dict[str, List[str]]:
+def extract_events_detailed(
+    text: str, event_patterns: Optional[Dict[str, List[str]]] = None
+) -> Dict[str, List[str]]:
+    patterns = event_patterns if event_patterns is not None else EVENT_PATTERNS
     text_lower = text.lower()
     found: Dict[str, List[str]] = {}
-    for event_type, keywords in EVENT_PATTERNS.items():
+    for event_type, keywords in patterns.items():
         hits = [kw for kw in keywords if kw in text_lower]
         if hits:
             found[event_type] = hits
@@ -139,7 +142,9 @@ def analyze_sentiment(text: str) -> Tuple[str, float]:
     return sentiment, score
 
 
-def analyze_sentiment_detailed(text: str) -> Tuple[str, float, List[str], List[str]]:
+def analyze_sentiment_detailed(
+    text: str, pos_threshold: float = 0.6, neg_threshold: float = 0.4
+) -> Tuple[str, float, List[str], List[str]]:
     text_lower = text.lower()
     pos_hits = [kw for kw in POSITIVE_KEYWORDS if kw in text_lower]
     neg_hits = [kw for kw in NEGATIVE_KEYWORDS if kw in text_lower]
@@ -148,9 +153,9 @@ def analyze_sentiment_detailed(text: str) -> Tuple[str, float, List[str], List[s
     if total == 0:
         return "Neutral", 50.0, pos_hits, neg_hits
     ratio = pos / total
-    if ratio >= 0.6:
+    if ratio >= pos_threshold:
         return "Positive", min(50 + (ratio - 0.5) * 100, 95), pos_hits, neg_hits
-    if ratio <= 0.4:
+    if ratio <= neg_threshold:
         return "Negative", min(50 + (0.5 - ratio) * 100, 95), pos_hits, neg_hits
     return "Neutral", 50.0, pos_hits, neg_hits
 
@@ -209,11 +214,24 @@ def build_reasons(
     return reasons
 
 
-def analyze_article(title: str, content: Optional[str] = None) -> Dict:
+def analyze_article(title: str, content: Optional[str] = None, db=None) -> Dict:
     full_text = title + " " + (content or "")
+
+    event_patterns = None
+    pos_threshold, neg_threshold = 0.6, 0.4
+    if db is not None:
+        from app.core.settings_store import get_float_setting
+        from app.services.keyword_service import get_active_event_patterns
+
+        event_patterns = get_active_event_patterns(db)
+        pos_threshold = get_float_setting(db, "sentiment_positive_threshold", 0.6)
+        neg_threshold = get_float_setting(db, "sentiment_negative_threshold", 0.4)
+
     entities = extract_entities(full_text)
-    events_detail = extract_events_detailed(full_text)
-    sentiment, impact_score, pos_hits, neg_hits = analyze_sentiment_detailed(full_text)
+    events_detail = extract_events_detailed(full_text, event_patterns)
+    sentiment, impact_score, pos_hits, neg_hits = analyze_sentiment_detailed(
+        full_text, pos_threshold, neg_threshold
+    )
     reasons = build_reasons(
         sentiment=sentiment,
         pos_hits=pos_hits,

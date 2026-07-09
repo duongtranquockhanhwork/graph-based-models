@@ -108,28 +108,39 @@ Tin tức (CSV/Manual)
 
 ## Chức năng chính
 
-### 1. Dashboard Tổng quan
+Giao diện khách hàng (role `customer`) có 9 mục điều hướng, phản ánh đúng cấu trúc trang trong ảnh thiết kế:
+
+### 1. Tổng quan (`/dashboard`)
 - Thống kê tổng số tin tức, mã cổ phiếu, công ty
 - Biểu đồ phân bố Sentiment (Positive/Negative/Neutral)
 - Top cổ phiếu được nhắc đến nhiều nhất
 - Xu hướng dự đoán thị trường
 - Timeline số lượng tin theo ngày
 
-### 2. Nhập dữ liệu tin tức
-- Upload file CSV (hỗ trợ kéo thả)
-- Nhập thủ công từng bài báo
-- Phân tích tự động sau khi import
-- File CSV mẫu có sẵn (20 bài báo)
+### 2. Tin tức (`/news`)
+- Danh sách tin tức kèm kết quả phân tích NLP (mã cổ phiếu, ngành, sự kiện, sentiment, impact score, lý do dự đoán)
+- Tìm kiếm, lọc theo trạng thái đã/chưa phân tích
+- Nút "Nhập dữ liệu" dẫn tới trang Import (CSV / URL / thủ công), giữ nguyên toàn bộ luồng import cũ
 
-### 3. Phân tích NLP
-- Trích xuất mã cổ phiếu từ tiêu đề và nội dung
-- Mapping tự động: mã → công ty → ngành nghề
-- Nhận diện sự kiện: lợi nhuận tăng, hợp đồng mới, xử phạt, v.v.
-- Phân loại Sentiment với Impact Score
-- Hiển thị lý do dự đoán (Explainable AI)
+### 3. Cổ phiếu (`/stocks`, `/stocks/:symbol`)
+- Danh mục mã cổ phiếu theo dõi kèm số lần nhắc đến và tỷ lệ sentiment thực tế
+- Trang chi tiết từng mã: dự đoán xu hướng + độ tin cậy, đặc trưng Knowledge Graph (degree/betweenness centrality, mention frequency), phân bố sentiment, danh sách tin tức liên quan — dùng dữ liệu thật, không có biểu đồ giá vì hệ thống chưa tích hợp nguồn dữ liệu giá thị trường
 
-### 4. Knowledge Graph 3D (Điểm nổi bật)
-- Đồ thị 3D tương tác: kéo, xoay, zoom
+### 4. Sự kiện tài chính (`/events`)
+- Tổng hợp các sự kiện được NLP nhận diện tự động (lợi nhuận tăng/giảm, chia cổ tức, sáp nhập, ký hợp đồng, xử phạt, thay đổi lãnh đạo, phát hành cổ phiếu, mở rộng đầu tư...)
+- Lọc tin tức theo từng loại sự kiện
+
+### 5. Phân tích cảm xúc (`/sentiment`)
+- Phân bố sentiment tổng thể, theo từng cổ phiếu, và theo thời gian (30 ngày gần nhất)
+
+### 6. Dự đoán xu hướng (`/prediction`)
+- Dự đoán: **INCREASING / DECREASING / UNCHANGED**
+- Tìm kiếm theo mã cổ phiếu cụ thể
+- Hiển thị độ tin cậy (confidence %)
+- Giải thích chi tiết các yếu tố ảnh hưởng
+
+### 7. Knowledge Graph 3D (`/graph`, Điểm nổi bật)
+- Đồ thị 3D/2D tương tác: kéo, xoay, zoom
 - Node phân loại bằng màu sắc:
   - 🔵 Xanh dương: Tin tức (News)
   - 🟢 Xanh lá: Cổ phiếu (Stock)
@@ -141,17 +152,31 @@ Tin tức (CSV/Manual)
 - Lọc theo mã cổ phiếu
 - Click node xem thông tin chi tiết
 
-### 5. Dự đoán xu hướng
-- Dự đoán: **INCREASING / DECREASING / UNCHANGED**
-- Tìm kiếm theo mã cổ phiếu cụ thể
-- Hiển thị độ tin cậy (confidence %)
-- Giải thích chi tiết các yếu tố ảnh hưởng
-
-### 6. Đánh giá mô hình
+### 8. Báo cáo (`/reports`)
 - So sánh Baseline (text only) vs Graph-enhanced
 - Accuracy, Precision, Recall, F1 Score
 - Confusion Matrix trực quan
 - Danh sách 6 graph features được sử dụng
+
+### 9. Cài đặt (`/settings`)
+- Hồ sơ cá nhân (avatar, tên, email, vai trò)
+- **Chuyển đổi giao diện Sáng/Tối** — mặc định Sáng, lựa chọn được lưu lại trên trình duyệt (`localStorage`), áp dụng cho toàn bộ ứng dụng kể cả Admin Console
+- Lối tắt đổi mật khẩu
+
+### 10. Admin Console (`/admin/*`, chỉ tài khoản role `admin`)
+Giao diện quản trị riêng biệt (sidebar accent xanh lá, tách hoàn toàn khỏi giao diện khách hàng), gồm 9 trang, tất cả đều dùng dữ liệu thật từ pipeline NLP/graph/prediction hiện có — không có trang nào dùng dữ liệu giả lập:
+
+| Trang | Chức năng |
+|-------|-----------|
+| Dashboard | Thống kê pipeline (news-symbol rows, model-ready, PASS/REVIEW/DROP), chất lượng dữ liệu, phân bố nhãn/cảm xúc, nhật ký hoạt động, cảnh báo hệ thống |
+| Quản lý tin tức | Bảng tin tức đầy đủ: tìm kiếm/lọc theo nguồn/sentiment/ngày, sửa nhanh, phân tích lại, xoá, thêm tin thủ công, import CSV |
+| Quản lý cổ phiếu | Danh mục 25 mã cổ phiếu (từ `stock_dictionary.json`) kèm số lần được nhắc đến và phân bố sentiment thực tế — chỉ xem, không chỉnh sửa (danh mục được quản lý qua file JSON) |
+| Quản lý từ khoá sự kiện | CRUD từ điển cụm từ nhận diện sự kiện tài chính dùng bởi `nlp_service` — sửa/thêm/xoá có hiệu lực ngay từ lần phân tích tiếp theo, không cần khởi động lại backend |
+| Kiểm định dữ liệu | Missing values, bản ghi trùng lặp, Return-Label Consistency (tính theo chiều hướng sentiment↔xu hướng), trạng thái PASS/FAIL tổng thể |
+| Gán nhãn thủ công | Hàng chờ các tin có độ tin cậy dự đoán thấp (dưới ngưỡng cấu hình), cho phép admin xác nhận sentiment/sự kiện đúng |
+| Kết quả kiểm định | Độ chính xác của NLP tự động so với nhãn đã được admin xác nhận thủ công (Accuracy Sentiment, Accuracy Event) |
+| Quản lý người dùng | Danh sách tài khoản, đổi vai trò customer/admin, khoá/mở tài khoản (không cho tự khoá/hạ quyền admin cuối cùng) |
+| Cấu hình hệ thống | Ngưỡng phân loại sentiment (positive/negative) và ngưỡng đưa bài vào hàng chờ gán nhãn thủ công |
 
 ---
 
@@ -226,23 +251,23 @@ Sau khi hệ thống chạy, import file CSV mẫu để test ngay:
 
 ### Tài khoản test
 
-Dùng các tài khoản sau để đăng nhập thử hệ thống (email/mật khẩu):
+Hệ thống có 2 vai trò: **customer** (nhà đầu tư — dùng Dashboard/Tin tức/Knowledge Graph/Dự đoán) và **admin** (quản trị hệ thống — dùng Admin Console riêng). Các tài khoản mẫu sau được **tự động seed khi backend khởi động** (kể cả trên database đã tồn tại từ trước, không cần `docker compose down -v`):
 
-| Email | Mật khẩu | Ghi chú |
-|-------|----------|---------|
-| `test1@finnexus.dev` | `Test@123` | Tài khoản test 1 |
-| `test2@finnexus.dev` | `Test@123` | Tài khoản test 2 |
-| `admin@finnexus.dev` | `Test@123` | Tài khoản test 3 |
+| Email | Mật khẩu | Vai trò | Ghi chú |
+|-------|----------|---------|---------|
+| `admin@finnexus.dev` | `Test@123` | `admin` | Đăng nhập sẽ vào thẳng `/admin/dashboard` |
+| `test1@finnexus.dev` | `Test@123` | `customer` | Tài khoản khách hàng test 1 |
+| `test2@finnexus.dev` | `Test@123` | `customer` | Tài khoản khách hàng test 2 |
 
-Nếu database chưa có các tài khoản này (ví dụ sau khi chạy `docker compose down -v`), tạo lại bằng lệnh:
+Muốn tạo thêm tài khoản khách hàng, đăng ký qua trang `/register` hoặc:
 
 ```bash
 curl -X POST http://localhost:8000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"test1@finnexus.dev","password":"Test@123","full_name":"Test User 1"}'
+  -d '{"email":"someone@finnexus.dev","password":"Test@123","full_name":"Someone"}'
 ```
 
-(đổi `email` và `full_name` để tạo thêm các tài khoản còn lại)
+Tài khoản đăng ký qua `/register` luôn nhận vai trò `customer`; muốn nâng lên `admin`, dùng trang **Quản lý người dùng** trong Admin Console (cần đã đăng nhập bằng một tài khoản admin khác).
 
 ### Dừng hệ thống
 
@@ -313,14 +338,18 @@ Truy cập Swagger UI tại: http://localhost:8000/docs
 |--------|----------|-------|
 | `POST` | `/api/news/upload-csv` | Upload file CSV |
 | `POST` | `/api/news/` | Tạo bài báo mới |
-| `GET` | `/api/news/` | Danh sách tin tức |
+| `GET` | `/api/news/?stock=FPT&event_type=...&sentiment=...&q=...` | Danh sách tin tức (lọc theo mã cổ phiếu, sự kiện, sentiment, từ khoá, khoảng ngày) |
+| `PATCH` | `/api/news/{id}` | Sửa nhanh tin tức (title/source/sentiment/impact_score) — chỉ admin |
 | `POST` | `/api/news/{id}/analyze` | Phân tích bài báo |
 | `GET` | `/api/graph/` | Lấy dữ liệu graph |
 | `GET` | `/api/graph/stats` | Thống kê graph |
+| `GET` | `/api/graph/stock/{symbol}/features` | Đặc trưng Knowledge Graph của 1 mã cổ phiếu |
 | `GET` | `/api/prediction/` | Danh sách dự đoán |
 | `GET` | `/api/prediction/stock/{symbol}` | Dự đoán theo mã |
-| `GET` | `/api/prediction/evaluate` | Đánh giá mô hình |
-| `GET` | `/api/analytics/dashboard` | Dữ liệu dashboard |
+| `GET` | `/api/prediction/evaluate` | Đánh giá mô hình (baseline vs graph-enhanced, dữ liệu minh hoạ) |
+| `GET` | `/api/analytics/dashboard` | Dữ liệu dashboard tổng quan |
+| `GET` | `/api/analytics/stocks` | Danh mục cổ phiếu kèm số lần nhắc đến & phân bố sentiment (dùng cho trang Cổ phiếu, Sentiment) |
+| `GET` | `/api/admin/*` | Toàn bộ endpoint Admin Console (xem mục Admin Console) — chỉ role `admin` |
 
 ### Ví dụ CSV upload
 
@@ -346,24 +375,43 @@ finnexus-kg/
 ├── backend/                    # FastAPI Python Service
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   ├── main.py                 # Entry point
+│   ├── main.py                 # Entry point — tạo bảng, chạy migration nhẹ, seed dữ liệu mẫu, mount router
 │   ├── app/
 │   │   ├── core/
 │   │   │   ├── config.py       # Cấu hình
-│   │   │   └── database.py     # SQLAlchemy setup
+│   │   │   ├── database.py     # SQLAlchemy setup
+│   │   │   ├── security.py     # Hash mật khẩu, JWT
+│   │   │   ├── deps.py         # get_current_user, require_admin
+│   │   │   ├── migrate.py      # ADD COLUMN IF NOT EXISTS cho DB cũ
+│   │   │   ├── seed.py         # Seed tài khoản mẫu, từ khoá sự kiện, cấu hình mặc định
+│   │   │   ├── settings_store.py # Đọc SystemSetting từ DB
+│   │   │   └── email.py        # Gửi email reset mật khẩu
 │   │   ├── models/
-│   │   │   └── news.py         # Database model
+│   │   │   ├── user.py         # User (có role: customer/admin)
+│   │   │   ├── news.py         # NewsArticle (có needs_manual_label, manual_sentiment...)
+│   │   │   ├── event_keyword.py    # Từ điển từ khoá sự kiện
+│   │   │   ├── system_setting.py   # Cấu hình hệ thống (key/value)
+│   │   │   └── activity_log.py     # Nhật ký hoạt động admin
 │   │   ├── schemas/
-│   │   │   └── schemas.py      # Pydantic schemas
+│   │   │   ├── auth.py         # UserOut (có role), TokenResponse...
+│   │   │   ├── admin.py        # Schemas cho các endpoint /api/admin/*
+│   │   │   └── schemas.py      # NewsCreate/NewsResponse, Graph schemas
 │   │   ├── routers/
-│   │   │   ├── news.py         # /api/news
+│   │   │   ├── auth.py         # /api/auth
+│   │   │   ├── news.py         # /api/news (có filter + PATCH admin-only)
 │   │   │   ├── graph.py        # /api/graph
 │   │   │   ├── prediction.py   # /api/prediction
-│   │   │   └── analytics.py    # /api/analytics
+│   │   │   ├── analytics.py    # /api/analytics
+│   │   │   └── admin/          # /api/admin/* — chỉ role admin
+│   │   │       ├── dashboard.py, users.py, settings.py, keywords.py
+│   │   │       ├── labeling.py, validation.py, stocks.py, activity.py
 │   │   └── services/
-│   │       ├── nlp_service.py       # NLP & Entity extraction
+│   │       ├── nlp_service.py       # NLP & Entity extraction (đọc keyword/threshold từ DB nếu có)
 │   │       ├── graph_service.py     # Knowledge Graph (NetworkX)
-│   │       └── prediction_service.py # Prediction model
+│   │       ├── prediction_service.py # Prediction model
+│   │       ├── keyword_service.py   # Lấy từ khoá sự kiện active từ DB
+│   │       ├── activity_log.py      # Ghi log hoạt động admin
+│   │       └── validation_service.py # Tính data quality / labeling accuracy
 │   └── data/
 │       ├── stock_dictionary.json    # 25 mã cổ phiếu VN
 │       └── sample_news.csv          # 20 bài báo mẫu
@@ -376,21 +424,39 @@ finnexus-kg/
     ├── tailwind.config.js
     ├── index.html
     └── src/
-        ├── App.tsx
+        ├── App.tsx              # Route khách hàng (/*) và admin (/admin/*), tách theo role
         ├── main.tsx
         ├── index.css
-        ├── types/index.ts       # TypeScript types
-        ├── services/api.ts      # Axios API client
+        ├── types/index.ts       # TypeScript types (User có role, các type Admin*)
+        ├── context/
+        │   ├── AuthContext.tsx
+        │   └── ThemeContext.tsx # Giao diện Sáng/Tối, lưu vào localStorage, mặc định Sáng
+        ├── services/
+        │   ├── api.ts           # Axios client, newsApi (có filter theo stock/event/sentiment + patch)
+        │   ├── authApi.ts
+        │   └── adminApi.ts      # Wrapper cho toàn bộ /api/admin/*
         ├── components/
+        │   ├── Auth/            # ProtectedRoute (role-aware), GuestRoute, AuthLayout...
+        │   ├── ThemeToggle.tsx  # Công tắc chuyển giao diện Sáng/Tối, dùng ở trang Cài đặt
+        │   ├── Admin/
+        │   │   └── AdminWidgets.tsx  # StatCard/SectionCard/Badge dùng chung cho trang admin
         │   └── Layout/
-        │       └── Sidebar.tsx
+        │       ├── Sidebar.tsx, Topbar.tsx           # Giao diện khách hàng
+        │       └── AdminSidebar.tsx, AdminTopbar.tsx # Giao diện admin (accent xanh lá)
         └── pages/
-            ├── DashboardPage.tsx    # Tổng quan
-            ├── ImportPage.tsx       # Nhập dữ liệu
-            ├── AnalysisPage.tsx     # Phân tích NLP
-            ├── GraphPage.tsx        # 3D Knowledge Graph
-            ├── PredictionPage.tsx   # Dự đoán xu hướng
-            └── EvaluationPage.tsx   # Đánh giá mô hình
+            ├── auth/                 # Login/Register/ForgotPassword/ResetPassword
+            ├── admin/                # 9 trang Admin Console + AdminProfilePage (xem mục Admin Console ở trên)
+            ├── DashboardPage.tsx     # 1. Tổng quan
+            ├── AnalysisPage.tsx      # 2. Tin tức (danh sách + kết quả NLP)
+            ├── StocksPage.tsx        # 3. Cổ phiếu (danh mục)
+            ├── StockDetailPage.tsx   #    Cổ phiếu (trang chi tiết theo mã)
+            ├── EventsPage.tsx        # 4. Sự kiện tài chính
+            ├── SentimentPage.tsx     # 5. Phân tích cảm xúc
+            ├── PredictionPage.tsx    # 6. Dự đoán xu hướng
+            ├── GraphPage.tsx         # 7. Knowledge Graph 3D/2D
+            ├── EvaluationPage.tsx    # 8. Báo cáo
+            ├── SettingsPage.tsx      # 9. Cài đặt (hồ sơ + giao diện Sáng/Tối)
+            └── ImportPage.tsx        # Nhập dữ liệu (vào từ nút trong trang Tin tức)
 ```
 
 ---

@@ -1,0 +1,250 @@
+import { useEffect, useRef, useState } from 'react'
+import toast from 'react-hot-toast'
+import { Plus, Upload, RefreshCw, Trash2, Pencil, Check, X, Search } from 'lucide-react'
+import { newsApi } from '../../services/api'
+import type { NewsArticle } from '../../types'
+import { SentimentBadge, StatusBadge } from '../../components/Admin/AdminWidgets'
+
+const SENTIMENT_OPTIONS = ['Positive', 'Negative', 'Neutral']
+
+export default function AdminNewsPage() {
+  const [news, setNews] = useState<NewsArticle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [q, setQ] = useState('')
+  const [sentiment, setSentiment] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [page, setPage] = useState(0)
+  const pageSize = 20
+
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [form, setForm] = useState({ title: '', content: '', source: '', published_date: '' })
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editForm, setEditForm] = useState({ title: '', source: '', sentiment: '' })
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const load = () => {
+    setLoading(true)
+    newsApi
+      .list({
+        skip: page * pageSize,
+        limit: pageSize,
+        q: q || undefined,
+        sentiment: sentiment || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+      })
+      .then((r) => setNews(r.data))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(load, [page])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setPage(0)
+    load()
+  }
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.title.trim()) return
+    try {
+      await newsApi.create(form)
+      toast.success('Đã thêm tin tức')
+      setForm({ title: '', content: '', source: '', published_date: '' })
+      setShowAddForm(false)
+      load()
+    } catch {
+      toast.error('Lỗi khi thêm tin tức')
+    }
+  }
+
+  const handleUploadCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const res = await newsApi.uploadCsv(file)
+      toast.success(`Đã import ${res.data.ids.length} bài báo`)
+      load()
+    } catch {
+      toast.error('Lỗi khi upload CSV')
+    } finally {
+      e.target.value = ''
+    }
+  }
+
+  const handleAnalyze = async (id: number) => {
+    await newsApi.analyze(id)
+    toast.success('Đã xếp hàng phân tích lại')
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Xoá tin tức này?')) return
+    await newsApi.delete(id)
+    toast.success('Đã xoá')
+    load()
+  }
+
+  const startEdit = (n: NewsArticle) => {
+    setEditingId(n.id)
+    setEditForm({ title: n.title, source: n.source || '', sentiment: n.sentiment || '' })
+  }
+
+  const saveEdit = async (id: number) => {
+    try {
+      await newsApi.patch(id, editForm)
+      toast.success('Đã cập nhật')
+      setEditingId(null)
+      load()
+    } catch {
+      toast.error('Lỗi khi cập nhật')
+    }
+  }
+
+  return (
+    <div className="p-6 space-y-4 fade-in">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Quản lý tin tức</h2>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{news.length} tin tức trên trang này</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAddForm((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
+            style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+          >
+            <Plus size={14} /> Thêm tin tức
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}
+          >
+            <Upload size={14} /> Import dữ liệu
+          </button>
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleUploadCsv} />
+        </div>
+      </div>
+
+      {showAddForm && (
+        <form onSubmit={handleCreate} className="section-card space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <input className="field-input" placeholder="Tiêu đề *" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
+          <textarea className="field-input resize-none" rows={3} placeholder="Nội dung" value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
+          <div className="grid grid-cols-2 gap-3">
+            <input className="field-input" placeholder="Nguồn" value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
+            <input type="date" className="field-input" value={form.published_date} onChange={(e) => setForm((f) => ({ ...f, published_date: e.target.value }))} />
+          </div>
+          <button type="submit" className="px-5 py-2 rounded-xl text-[13px] font-medium text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>
+            Lưu tin tức
+          </button>
+        </form>
+      )}
+
+      <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
+          <input className="field-input pl-9" placeholder="Tìm theo tiêu đề..." value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <select className="field-input w-auto" value={sentiment} onChange={(e) => setSentiment(e.target.value)}>
+          <option value="">Tất cả sentiment</option>
+          {SENTIMENT_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <input type="date" className="field-input w-auto" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+        <input type="date" className="field-input w-auto" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+        <button type="submit" className="px-4 py-2 rounded-xl text-[13px]" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
+          Lọc
+        </button>
+      </form>
+
+      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px]">
+            <thead>
+              <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
+                {['ID', 'Tiêu đề', 'Nguồn', 'Ngày đăng', 'Mã CP', 'Event', 'Sentiment', 'Impact', 'Trạng thái', 'Hành động'].map((h) => (
+                  <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={10} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Đang tải...</td></tr>
+              ) : news.length === 0 ? (
+                <tr><td colSpan={10} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Không có tin tức nào</td></tr>
+              ) : (
+                news.map((n) => (
+                  <tr key={n.id} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <td className="px-3 py-2.5" style={{ color: 'var(--text-muted)' }}>{n.id}</td>
+                    <td className="px-3 py-2.5 max-w-[280px]">
+                      {editingId === n.id ? (
+                        <input className="field-input" value={editForm.title} onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))} />
+                      ) : (
+                        <span className="line-clamp-2" style={{ color: 'var(--text-primary)' }}>{n.title}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>
+                      {editingId === n.id ? (
+                        <input className="field-input w-28" value={editForm.source} onChange={(e) => setEditForm((f) => ({ ...f, source: e.target.value }))} />
+                      ) : (n.source || '—')}
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>{n.published_date || '—'}</td>
+                    <td className="px-3 py-2.5">{(n.stocks_mentioned || []).join(', ') || '—'}</td>
+                    <td className="px-3 py-2.5">{(n.events_detected || []).slice(0, 2).join(', ') || '—'}</td>
+                    <td className="px-3 py-2.5">
+                      {editingId === n.id ? (
+                        <select className="field-input w-28" value={editForm.sentiment} onChange={(e) => setEditForm((f) => ({ ...f, sentiment: e.target.value }))}>
+                          <option value="">—</option>
+                          {SENTIMENT_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      ) : (
+                        <SentimentBadge sentiment={n.sentiment} />
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>{n.impact_score ?? '—'}</td>
+                    <td className="px-3 py-2.5">
+                      {n.needs_manual_label ? (
+                        <StatusBadge status="REVIEW" />
+                      ) : n.is_analyzed ? (
+                        <StatusBadge status="PASS" />
+                      ) : (
+                        <StatusBadge status="Chờ phân tích" />
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5">
+                        {editingId === n.id ? (
+                          <>
+                            <button onClick={() => saveEdit(n.id)} className="p-1.5 rounded-lg" style={{ color: '#10b981' }} title="Lưu"><Check size={14} /></button>
+                            <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-secondary)' }} title="Huỷ"><X size={14} /></button>
+                          </>
+                        ) : (
+                          <>
+                            <button onClick={() => startEdit(n)} className="p-1.5 rounded-lg" style={{ color: '#2dd4bf' }} title="Sửa"><Pencil size={14} /></button>
+                            <button onClick={() => handleAnalyze(n.id)} className="p-1.5 rounded-lg" style={{ color: '#fbbf24' }} title="Phân tích lại"><RefreshCw size={14} /></button>
+                            <button onClick={() => handleDelete(n.id)} className="p-1.5 rounded-lg" style={{ color: '#f87171' }} title="Xoá"><Trash2 size={14} /></button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))} className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
+          ← Trang trước
+        </button>
+        <span className="text-[12px]" style={{ color: 'var(--text-faint)' }}>Trang {page + 1}</span>
+        <button disabled={news.length < pageSize} onClick={() => setPage((p) => p + 1)} className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
+          Trang sau →
+        </button>
+      </div>
+    </div>
+  )
+}

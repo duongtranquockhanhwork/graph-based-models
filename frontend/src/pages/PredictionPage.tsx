@@ -45,7 +45,7 @@ function PredCard({ pred }: { pred: Prediction }) {
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <span className="text-xl font-bold text-white">{pred.stock_symbol}</span>
+          <span className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{pred.stock_symbol}</span>
           <div
             className={`flex items-center gap-1 ${cfg.badgeClass} text-[11px] px-2 py-0.5 rounded-full font-medium`}
           >
@@ -54,8 +54,8 @@ function PredCard({ pred }: { pred: Prediction }) {
           </div>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-lg font-bold text-white">{confidence}%</div>
-          <div className="text-[10px]" style={{ color: '#3d5a7a' }}>độ tin cậy</div>
+          <div className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{confidence}%</div>
+          <div className="text-[10px]" style={{ color: 'var(--text-faint)' }}>độ tin cậy</div>
         </div>
       </div>
 
@@ -92,21 +92,21 @@ function PredCard({ pred }: { pred: Prediction }) {
           className="mt-3 pt-3 space-y-1.5"
           style={{ borderTop: `1px solid ${cfg.border}` }}
         >
-          <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: '#3d5a7a' }}>
+          <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-faint)' }}>
             Lý do dự đoán
           </p>
           {pred.explanation.reasons?.map((r, i) => (
-            <p key={i} className="text-[12px]" style={{ color: '#94a3b8' }}>
+            <p key={i} className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
               · {r}
             </p>
           ))}
           {pred.explanation.composite_score !== undefined && (
-            <p className="text-[11px] mt-2" style={{ color: '#3d5a7a' }}>
-              Điểm tổng hợp: <span className="text-white font-medium">{pred.explanation.composite_score}</span>
+            <p className="text-[11px] mt-2" style={{ color: 'var(--text-faint)' }}>
+              Điểm tổng hợp: <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{pred.explanation.composite_score}</span>
             </p>
           )}
           {pred.news_title && (
-            <p className="text-[11px] truncate" style={{ color: '#3d5a7a' }}>
+            <p className="text-[11px] truncate" style={{ color: 'var(--text-faint)' }}>
               Nguồn tin: {pred.news_title}
             </p>
           )}
@@ -114,7 +114,7 @@ function PredCard({ pred }: { pred: Prediction }) {
       )}
 
       <div className="flex justify-end mt-2">
-        <span style={{ color: '#3d5a7a' }}>
+        <span style={{ color: 'var(--text-faint)' }}>
           {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
         </span>
       </div>
@@ -181,7 +181,7 @@ export default function PredictionPage() {
                 <Ico size={18} style={{ color }} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white leading-none">{count}</p>
+                <p className="text-2xl font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{count}</p>
                 <p className="text-[11px] mt-0.5" style={{ color }}>Cổ phiếu {label}</p>
               </div>
             </div>
@@ -194,10 +194,10 @@ export default function PredictionPage() {
         className="rounded-2xl p-5 card-glow"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
       >
-        <h3 className="text-white font-semibold text-[14px] mb-3">Tra cứu theo mã cổ phiếu</h3>
+        <h3 className="font-semibold text-[14px] mb-3" style={{ color: 'var(--text-primary)' }}>Tra cứu theo mã cổ phiếu</h3>
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1 max-w-sm">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#3d5a7a' }} />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
             <input
               className="field-input pl-9 uppercase tracking-widest h-10"
               placeholder="FPT · VNM · HPG · VCB..."
@@ -232,9 +232,9 @@ export default function PredictionPage() {
           className="flex flex-col items-center justify-center py-16 rounded-2xl"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
-          <TrendingUp size={36} style={{ color: '#1e3556' }} className="mb-3" />
-          <p className="text-[14px] font-medium" style={{ color: '#475569' }}>Chưa có dự đoán</p>
-          <p className="text-[12px] mt-1" style={{ color: '#334155' }}>Hãy phân tích tin tức trước</p>
+          <TrendingUp size={36} style={{ color: 'var(--border-default)' }} className="mb-3" />
+          <p className="text-[14px] font-medium" style={{ color: 'var(--text-muted)' }}>Chưa có dự đoán</p>
+          <p className="text-[12px] mt-1" style={{ color: 'var(--text-faint)' }}>Hãy phân tích tin tức trước</p>
         </div>
       ) : (
         <div className="space-y-5">

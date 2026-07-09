@@ -34,19 +34,19 @@ export default function ForgotPasswordPage() {
           >
             <MailCheck size={20} className="text-emerald-400" />
           </div>
-          <p className="text-sm" style={{ color: '#94a3b8' }}>
-            Nếu <span className="text-white">{email}</span> tồn tại trong hệ thống, một email hướng
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Nếu <span style={{ color: 'var(--text-primary)' }}>{email}</span> tồn tại trong hệ thống, một email hướng
             dẫn đặt lại mật khẩu đã được gửi đến bạn.
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+            <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
               Email
             </label>
             <div className="relative">
-              <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+              <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
               <input
                 type="email"
                 required
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
         </form>
       )}
 
-      <p className="text-center text-[13px] mt-6" style={{ color: '#7d94ad' }}>
+      <p className="text-center text-[13px] mt-6" style={{ color: 'var(--text-secondary)' }}>
         <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">
           Quay lại đăng nhập
         </Link>

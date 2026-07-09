@@ -7,9 +7,9 @@ interface AuthContextValue {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, fullName?: string) => Promise<void>
-  loginWithGoogle: (idToken: string) => Promise<void>
+  login: (email: string, password: string) => Promise<User>
+  register: (email: string, password: string, fullName?: string) => Promise<User>
+  loginWithGoogle: (idToken: string) => Promise<User>
   logout: () => void
   forgotPassword: (email: string) => Promise<void>
   resetPassword: (token: string, newPassword: string) => Promise<void>
@@ -37,21 +37,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const applyAuth = (accessToken: string, authUser: User) => {
     localStorage.setItem(TOKEN_KEY, accessToken)
     setUser(authUser)
+    return authUser
   }
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await authApi.login(email, password)
-    applyAuth(res.data.access_token, res.data.user)
+    return applyAuth(res.data.access_token, res.data.user)
   }, [])
 
   const register = useCallback(async (email: string, password: string, fullName?: string) => {
     const res = await authApi.register(email, password, fullName)
-    applyAuth(res.data.access_token, res.data.user)
+    return applyAuth(res.data.access_token, res.data.user)
   }, [])
 
   const loginWithGoogle = useCallback(async (idToken: string) => {
     const res = await authApi.googleLogin(idToken)
-    applyAuth(res.data.access_token, res.data.user)
+    return applyAuth(res.data.access_token, res.data.user)
   }, [])
 
   const logout = useCallback(() => {

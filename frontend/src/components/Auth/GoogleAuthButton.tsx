@@ -1,9 +1,10 @@
 import { GoogleLogin } from '@react-oauth/google'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
+import type { User } from '../../types'
 
 interface GoogleAuthButtonProps {
-  onSuccess?: () => void
+  onSuccess?: (user: User) => void
 }
 
 export default function GoogleAuthButton({ onSuccess }: GoogleAuthButtonProps) {
@@ -13,7 +14,7 @@ export default function GoogleAuthButton({ onSuccess }: GoogleAuthButtonProps) {
     <div>
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px" style={{ background: 'var(--border-subtle)' }} />
-        <span className="text-[11px] uppercase tracking-widest" style={{ color: '#3d5a7a' }}>
+        <span className="text-[11px] uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
           hoặc
         </span>
         <div className="flex-1 h-px" style={{ background: 'var(--border-subtle)' }} />
@@ -30,9 +31,9 @@ export default function GoogleAuthButton({ onSuccess }: GoogleAuthButtonProps) {
               return
             }
             try {
-              await loginWithGoogle(credentialResponse.credential)
+              const user = await loginWithGoogle(credentialResponse.credential)
               toast.success('Đăng nhập thành công')
-              onSuccess?.()
+              onSuccess?.(user)
             } catch {
               toast.error('Đăng nhập Google thất bại')
             }

@@ -40,11 +40,11 @@ export default function RegisterPage() {
     <AuthLayout title="Tạo tài khoản" subtitle="Bắt đầu khám phá Knowledge Graph tài chính">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
             Họ và tên
           </label>
           <div className="relative">
-            <UserIcon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+            <UserIcon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               value={fullName}
@@ -56,11 +56,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
             Email
           </label>
           <div className="relative">
-            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+            <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type="email"
               required
@@ -73,11 +73,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: '#94a3b8' }}>
+          <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
             Mật khẩu
           </label>
           <div className="relative">
-            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: '#475569' }} />
+            <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
             <input
               type={showPassword ? 'text' : 'password'}
               required
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute right-3.5 top-1/2 -translate-y-1/2"
-              style={{ color: '#475569' }}
+              style={{ color: 'var(--text-muted)' }}
               tabIndex={-1}
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
@@ -116,7 +116,7 @@ export default function RegisterPage() {
 
       <GoogleAuthButton onSuccess={() => navigate('/dashboard', { replace: true })} />
 
-      <p className="text-center text-[13px] mt-6" style={{ color: '#7d94ad' }}>
+      <p className="text-center text-[13px] mt-6" style={{ color: 'var(--text-secondary)' }}>
         Đã có tài khoản?{' '}
         <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">
           Đăng nhập

@@ -27,6 +27,10 @@ class NewsResponse(BaseModel):
     prediction_confidence: Optional[float]
     prediction_explanation: Optional[Dict[str, Any]]
     is_analyzed: bool
+    needs_manual_label: bool = False
+    manual_sentiment: Optional[str] = None
+    manual_event_type: Optional[str] = None
+    labeled_at: Optional[datetime] = None
     created_at: Optional[datetime]
 
     class Config:

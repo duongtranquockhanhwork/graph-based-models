@@ -1,46 +1,56 @@
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
-  Upload,
-  FileSearch,
-  GitBranch,
+  Newspaper,
   TrendingUp,
-  BarChart3,
+  CalendarClock,
+  Smile,
+  LineChart,
+  GitBranch,
+  FileBarChart,
+  Settings,
 } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
 
 const links = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
-  { to: '/import', icon: Upload, label: 'Nhập dữ liệu' },
-  { to: '/analysis', icon: FileSearch, label: 'Phân tích NLP' },
+  { to: '/news', icon: Newspaper, label: 'Tin tức' },
+  { to: '/stocks', icon: TrendingUp, label: 'Cổ phiếu' },
+  { to: '/events', icon: CalendarClock, label: 'Sự kiện tài chính' },
+  { to: '/sentiment', icon: Smile, label: 'Phân tích cảm xúc' },
+  { to: '/prediction', icon: LineChart, label: 'Dự đoán xu hướng' },
   { to: '/graph', icon: GitBranch, label: 'Knowledge Graph' },
-  { to: '/prediction', icon: TrendingUp, label: 'Dự đoán xu hướng' },
-  { to: '/evaluation', icon: BarChart3, label: 'Đánh giá mô hình' },
+  { to: '/reports', icon: FileBarChart, label: 'Báo cáo' },
+  { to: '/settings', icon: Settings, label: 'Cài đặt' },
 ]
 
 export default function Sidebar() {
+  const { user } = useAuth()
+  const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
+
   return (
     <aside
       className="w-60 flex flex-col flex-shrink-0"
       style={{
-        background: 'linear-gradient(180deg, #07111f 0%, #050c1a 100%)',
-        borderRight: '1px solid #1a2d4a',
+        background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%)',
+        borderRight: '1px solid var(--border-subtle)',
       }}
     >
       {/* Logo */}
-      <div className="px-5 py-5" style={{ borderBottom: '1px solid #1a2d4a' }}>
+      <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-3">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
               background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)',
-              boxShadow: '0 0 20px rgba(37,99,235,0.45), 0 2px 8px rgba(0,0,0,0.4)',
+              boxShadow: '0 0 20px rgba(37,99,235,0.35), 0 2px 8px rgba(0,0,0,0.15)',
             }}
           >
             <GitBranch size={17} className="text-white" />
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-[15px] leading-tight gradient-text">FinNexus KG</h1>
-            <p className="text-[10px] mt-0.5 truncate" style={{ color: '#3d5a7a' }}>
+            <p className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--text-faint)' }}>
               VN Stock Knowledge Graph
             </p>
           </div>
@@ -51,7 +61,7 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
         <p
           className="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: '#2a4a6a' }}
+          style={{ color: 'var(--text-faint)' }}
         >
           Điều hướng
         </p>
@@ -63,12 +73,12 @@ export default function Sidebar() {
             style={({ isActive }) =>
               isActive
                 ? {
-                    background: 'linear-gradient(135deg, rgba(37,99,235,0.22) 0%, rgba(14,165,233,0.1) 100%)',
+                    background: 'linear-gradient(135deg, rgba(37,99,235,0.16) 0%, rgba(14,165,233,0.08) 100%)',
                     borderLeft: '3px solid #3b82f6',
                     paddingLeft: '9px',
-                    color: '#e2e8f0',
+                    color: 'var(--text-primary)',
                   }
-                : { color: '#475569', borderLeft: '3px solid transparent', paddingLeft: '9px' }
+                : { color: 'var(--text-secondary)', borderLeft: '3px solid transparent', paddingLeft: '9px' }
             }
           >
             {({ isActive }) => (
@@ -76,7 +86,7 @@ export default function Sidebar() {
                 <Icon
                   size={15}
                   className="flex-shrink-0 transition-colors"
-                  style={{ color: isActive ? '#60a5fa' : '#475569' }}
+                  style={{ color: isActive ? '#3b82f6' : 'var(--text-muted)' }}
                 />
                 <span className="flex-1 text-[13px]">{label}</span>
                 {isActive && (
@@ -91,17 +101,31 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer status */}
-      <div className="px-4 py-3" style={{ borderTop: '1px solid #1a2d4a' }}>
-        <div className="flex items-center gap-2 mb-1">
-          <div
-            className="w-2 h-2 rounded-full pulse-dot flex-shrink-0"
-            style={{ background: '#10b981', boxShadow: '0 0 6px #10b981' }}
-          />
-          <span className="text-[11px]" style={{ color: '#3d5a7a' }}>Hệ thống hoạt động</span>
+      {/* Profile */}
+      <NavLink
+        to="/settings"
+        className="block px-4 py-3 transition-colors hover:bg-black/5"
+        style={{ borderTop: '1px solid var(--border-subtle)' }}
+      >
+        <div className="flex items-center gap-2.5">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt={user.full_name || user.email} className="w-8 h-8 rounded-full flex-shrink-0" />
+          ) : (
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-white flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)' }}
+            >
+              {initial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>
+              {user?.full_name || user?.email}
+            </p>
+            <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>Nhà đầu tư</p>
+          </div>
         </div>
-        <p className="text-[10px]" style={{ color: '#2a3f58' }}>Graph-based Models · v1.0</p>
-      </div>
+      </NavLink>
     </aside>
   )
 }
