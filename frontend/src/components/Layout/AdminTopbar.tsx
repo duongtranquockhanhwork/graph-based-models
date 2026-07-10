@@ -12,6 +12,7 @@ const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
   '/admin/labeling': { title: 'Gán nhãn thủ công', breadcrumb: 'Hàng chờ xác nhận nhãn' },
   '/admin/validation-results': { title: 'Kết quả kiểm định', breadcrumb: 'Độ chính xác so với nhãn thủ công' },
   '/admin/users': { title: 'Quản lý người dùng', breadcrumb: 'Vai trò & trạng thái tài khoản' },
+  '/admin/live': { title: 'Bảng giá Live', breadcrumb: 'Giá cổ phiếu thời gian thực' },
   '/admin/settings': { title: 'Cấu hình hệ thống', breadcrumb: 'Ngưỡng phân loại & xử lý' },
   '/admin/profile': { title: 'Hồ sơ cá nhân', breadcrumb: 'Thông tin tài khoản & giao diện' },
 }

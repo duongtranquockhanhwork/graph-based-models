@@ -87,6 +87,104 @@ export interface Prediction {
   features?: Record<string, number>
 }
 
+export interface LiveQuote {
+  symbol: string
+  company_name: string | null
+  exchange: string | null
+  price: number
+  reference_price: number
+  ceiling: number
+  floor: number
+  open_price: number
+  avg_price: number
+  highest: number
+  lowest: number
+  volume: number
+  change: number
+  percent_change: number
+  bid_1_price: number
+  bid_1_volume: number
+  bid_2_price: number
+  bid_2_volume: number
+  bid_3_price: number
+  bid_3_volume: number
+  ask_1_price: number
+  ask_1_volume: number
+  ask_2_price: number
+  ask_2_volume: number
+  ask_3_price: number
+  ask_3_volume: number
+  updated_at: string
+}
+
+export interface Candle {
+  time: string
+  open: number
+  high: number
+  low: number
+  close: number
+  volume: number
+}
+
+export interface IntradayTrade {
+  time: string
+  price: number
+  volume: number
+  match_type: 'buy' | 'sell' | string
+  id: string
+}
+
+export interface StockOverview {
+  symbol: string
+  organ_name?: string | null
+  sector?: string | null
+  market_cap?: number | null
+  issue_share?: number | null
+  company_profile?: string | null
+  listing_date?: string | null
+  foreigner_percentage?: number | null
+  maximum_foreign_percentage?: number | null
+  state_percentage?: number | null
+  target_price?: number | null
+  dividend_per_share_tsr?: number | null
+  average_match_value1_month?: number | null
+  average_match_volume1_month?: number | null
+  highest_price1_year?: number | null
+  lowest_price1_year?: number | null
+  [key: string]: unknown
+}
+
+export interface Shareholder {
+  share_holder: string
+  quantity: number
+  share_own_percent: number
+  update_date?: string | null
+}
+
+export interface CompanyEvent {
+  id: string
+  event_title_vi?: string | null
+  event_title_en?: string | null
+  action_type_vi?: string | null
+  public_date?: string | null
+  category?: string | null
+  [key: string]: unknown
+}
+
+export interface FinancialLineItem {
+  item: string
+  item_en?: string
+  item_id?: string
+  [year: string]: string | number | null | undefined
+}
+
+export interface FinancialStatements {
+  income_statement: FinancialLineItem[]
+  balance_sheet: FinancialLineItem[]
+  cash_flow: FinancialLineItem[]
+  available: boolean
+}
+
 export interface ModelEvaluation {
   accuracy: number
   precision: number
@@ -97,6 +195,8 @@ export interface ModelEvaluation {
   graph_enhanced_accuracy: number
   labels: string[]
   class_report?: Record<string, Record<string, number>>
+  sample_size: number
+  insufficient_data: boolean
 }
 
 // ---- Admin ----

@@ -57,9 +57,6 @@ export const newsApi = {
 }
 
 export const graphApi = {
-  get: (params?: { stock?: string; industry?: string; limit?: number }) =>
-    api.get('/graph/', { params }),
-  stats: () => api.get('/graph/stats'),
   stockFeatures: (symbol: string) => api.get(`/graph/stock/${symbol}/features`),
 }
 

@@ -189,13 +189,15 @@ export default function AnalysisPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'analyzed' | 'pending'>('all')
+  const [page, setPage] = useState(0)
+  const pageSize = 50
 
   const load = () => {
     setLoading(true)
-    newsApi.list({ skip: 0, limit: 100 }).then(r => setNews(r.data)).finally(() => setLoading(false))
+    newsApi.list({ skip: page * pageSize, limit: pageSize }).then(r => setNews(r.data)).finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [page])
 
   const handleDelete = async (id: number) => {
     await newsApi.delete(id)
@@ -228,7 +230,7 @@ export default function AnalysisPage() {
           <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Tin tức</h2>
           {!loading && news.length > 0 && (
             <div className="flex items-center gap-3 mt-1.5">
-              <span className="badge-blue text-[11px] px-2 py-0.5 rounded-full">{news.length} bài báo</span>
+              <span className="badge-blue text-[11px] px-2 py-0.5 rounded-full">{news.length} bài báo trên trang này</span>
               <span className="badge-up text-[11px] px-2 py-0.5 rounded-full">{analyzed} đã phân tích</span>
               {pending > 0 && (
                 <span className="badge-amber text-[11px] px-2 py-0.5 rounded-full">{pending} chờ xử lý</span>
@@ -317,6 +319,28 @@ export default function AnalysisPage() {
           {filtered.map(n => (
             <NewsCard key={n.id} news={n} onDelete={() => handleDelete(n.id)} />
           ))}
+        </div>
+      )}
+
+      {!loading && news.length > 0 && (
+        <div className="flex items-center justify-between mt-4">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(p => Math.max(0, p - 1))}
+            className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
+          >
+            ← Trang trước
+          </button>
+          <span className="text-[12px]" style={{ color: 'var(--text-faint)' }}>Trang {page + 1}</span>
+          <button
+            disabled={news.length < pageSize}
+            onClick={() => setPage(p => p + 1)}
+            className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
+          >
+            Trang sau →
+          </button>
         </div>
       )}
     </div>

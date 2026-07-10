@@ -16,7 +16,7 @@ export default function AdminStocksPage() {
       <div>
         <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Quản lý cổ phiếu</h2>
         <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          Danh mục {stocks.length || 25} mã cổ phiếu theo dõi (nguồn: stock_dictionary.json) cùng số lần được nhắc đến trong tin tức thực tế
+          Danh mục {loading ? '…' : stocks.length} mã cổ phiếu theo dõi (nguồn: stock_dictionary.json) cùng số lần được nhắc đến trong tin tức thực tế
         </p>
       </div>
 

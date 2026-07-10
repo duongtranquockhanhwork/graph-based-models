@@ -17,9 +17,9 @@ import StocksPage from './pages/StocksPage'
 import StockDetailPage from './pages/StockDetailPage'
 import EventsPage from './pages/EventsPage'
 import SentimentPage from './pages/SentimentPage'
-import GraphPage from './pages/GraphPage'
 import PredictionPage from './pages/PredictionPage'
 import EvaluationPage from './pages/EvaluationPage'
+import LivePage from './pages/LivePage'
 import SettingsPage from './pages/SettingsPage'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminNewsPage from './pages/admin/AdminNewsPage'
@@ -49,8 +49,8 @@ function AppLayout() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/sentiment" element={<SentimentPage />} />
               <Route path="/prediction" element={<PredictionPage />} />
-              <Route path="/graph" element={<GraphPage />} />
               <Route path="/reports" element={<EvaluationPage />} />
+              <Route path="/live" element={<LivePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/import" element={<ImportPage />} />
             </Routes>
@@ -79,6 +79,7 @@ function AdminLayout() {
               <Route path="/labeling" element={<AdminLabelingPage />} />
               <Route path="/validation-results" element={<AdminValidationResultsPage />} />
               <Route path="/users" element={<AdminUsersPage />} />
+              <Route path="/live" element={<LivePage />} />
               <Route path="/settings" element={<AdminSettingsPage />} />
               <Route path="/profile" element={<AdminProfilePage />} />
             </Routes>

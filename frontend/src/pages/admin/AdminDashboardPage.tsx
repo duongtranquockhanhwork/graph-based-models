@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
         <StatCard icon={Newspaper} label="Tổng số tin" value={stats.total_news} accent="#14b8a6" />
         <StatCard icon={Link2} label="Dòng dữ liệu" value={stats.news_symbol_rows} accent="#84cc16" sub="news-symbol" />
         <StatCard icon={CheckCircle2} label="Dòng model-ready" value={stats.model_ready_rows} accent="#0ea5e9" />
-        <StatCard icon={ShieldCheck} label="Dòng PASS" value={`${stats.pass_count} (${stats.pass_pct}%)`} accent="#10b981" />
+        <StatCard icon={ShieldCheck} label="Dòng PASS" value={stats.pass_count} sub={`${stats.pass_pct}%`} accent="#10b981" />
         <StatCard icon={PenLine} label="Dòng REVIEW" value={stats.review_count} accent="#f59e0b" />
         <StatCard icon={XCircle} label="Dòng DROP" value={stats.drop_count} accent="#ef4444" />
       </div>

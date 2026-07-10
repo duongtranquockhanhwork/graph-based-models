@@ -8,6 +8,7 @@ import {
   LineChart,
   GitBranch,
   FileBarChart,
+  Radio,
   Settings,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -19,7 +20,7 @@ const links = [
   { to: '/events', icon: CalendarClock, label: 'Sự kiện tài chính' },
   { to: '/sentiment', icon: Smile, label: 'Phân tích cảm xúc' },
   { to: '/prediction', icon: LineChart, label: 'Dự đoán xu hướng' },
-  { to: '/graph', icon: GitBranch, label: 'Knowledge Graph' },
+  { to: '/live', icon: Radio, label: 'Bảng giá Live' },
   { to: '/reports', icon: FileBarChart, label: 'Báo cáo' },
   { to: '/settings', icon: Settings, label: 'Cài đặt' },
 ]

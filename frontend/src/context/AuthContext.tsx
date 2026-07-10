@@ -13,6 +13,8 @@ interface AuthContextValue {
   logout: () => void
   forgotPassword: (email: string) => Promise<void>
   resetPassword: (token: string, newPassword: string) => Promise<void>
+  updateProfile: (fullName: string) => Promise<User>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -68,6 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authApi.resetPassword(token, newPassword)
   }, [])
 
+  const updateProfile = useCallback(async (fullName: string) => {
+    const res = await authApi.updateProfile(fullName)
+    setUser(res.data)
+    return res.data
+  }, [])
+
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    await authApi.changePassword(currentPassword, newPassword)
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
@@ -80,6 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         forgotPassword,
         resetPassword,
+        updateProfile,
+        changePassword,
       }}
     >
       {children}

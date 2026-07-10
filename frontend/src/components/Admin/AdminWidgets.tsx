@@ -24,12 +24,12 @@ export function StatCard({
       >
         <Icon size={20} style={{ color: accent }} />
       </div>
-      <div className="min-w-0">
-        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5" style={{ color: 'var(--text-muted)' }}>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
           {label}
         </p>
-        <p className="text-2xl font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{value}</p>
-        {sub && <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>{sub}</p>}
+        <p className="text-2xl font-bold leading-tight break-words" style={{ color: 'var(--text-primary)' }}>{value}</p>
+        {sub && <p className="text-[11px] mt-1 truncate" style={{ color: 'var(--text-faint)' }}>{sub}</p>}
       </div>
     </div>
   )

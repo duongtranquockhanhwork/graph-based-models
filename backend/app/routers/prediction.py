@@ -11,8 +11,8 @@ router = APIRouter()
 
 
 @router.get("/evaluate")
-def get_model_evaluation():
-    return evaluate_model()
+def get_model_evaluation(db: Session = Depends(get_db)):
+    return evaluate_model(db)
 
 
 @router.get("/")

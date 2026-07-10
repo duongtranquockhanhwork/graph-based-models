@@ -10,8 +10,8 @@ const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
   '/events': { title: 'Sự kiện tài chính', breadcrumb: 'Sự kiện được nhận diện từ tin tức' },
   '/sentiment': { title: 'Phân tích cảm xúc', breadcrumb: 'Tổng hợp Sentiment theo thời gian & cổ phiếu' },
   '/prediction': { title: 'Dự đoán xu hướng', breadcrumb: 'Graph-enhanced Machine Learning' },
-  '/graph': { title: 'Knowledge Graph', breadcrumb: 'Mạng lưới tri thức trực quan' },
   '/reports': { title: 'Báo cáo', breadcrumb: 'Đánh giá mô hình · Metrics' },
+  '/live': { title: 'Bảng giá Live', breadcrumb: 'Giá cổ phiếu thời gian thực' },
   '/settings': { title: 'Cài đặt', breadcrumb: 'Hồ sơ cá nhân & giao diện' },
   '/import': { title: 'Nhập dữ liệu tin tức', breadcrumb: 'Import · CSV / URL / Thủ công' },
 }

@@ -3,6 +3,8 @@ from typing import Dict, List, Optional
 import json
 import os
 
+from sqlalchemy.orm import Session
+
 _dict_path = os.path.join(os.path.dirname(__file__), "../../data/stock_dictionary.json")
 with open(_dict_path, "r", encoding="utf-8") as f:
     STOCK_DICT = json.load(f)
@@ -59,6 +61,19 @@ def add_news_to_graph(news_id: int, analysis: Dict) -> None:
             if STOCK_DICT.get(stocks[i], {}).get("industry") == STOCK_DICT.get(stocks[j], {}).get("industry"):
                 if not G.has_edge(stocks[i], stocks[j]):
                     G.add_edge(stocks[i], stocks[j], relation="same_industry")
+
+
+def rebuild_graph_from_db(db: Session) -> None:
+    from app.models.news import NewsArticle
+
+    G.clear()
+    articles = db.query(NewsArticle).filter(NewsArticle.graph_built == True).all()  # noqa: E712
+    for n in articles:
+        add_news_to_graph(n.id, {
+            "stocks": n.stocks_mentioned or [],
+            "events": n.events_detected or [],
+            "sentiment": n.sentiment or "Neutral",
+        })
 
 
 def get_graph_data(stock_filter: Optional[str] = None,

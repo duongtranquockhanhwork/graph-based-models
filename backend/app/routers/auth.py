@@ -16,10 +16,12 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas.auth import (
+    ChangePasswordRequest,
     ForgotPasswordRequest,
     GoogleLoginRequest,
     ResetPasswordRequest,
     TokenResponse,
+    UpdateProfileRequest,
     UserCreate,
     UserLogin,
     UserOut,
@@ -97,6 +99,34 @@ def google_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.patch("/me", response_model=UserOut)
+def update_me(
+    payload: UpdateProfileRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.full_name = payload.full_name
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post("/change-password")
+def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not current_user.hashed_password:
+        raise HTTPException(400, "Tài khoản đăng nhập bằng Google chưa có mật khẩu. Dùng Quên mật khẩu để đặt mật khẩu mới.")
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(400, "Mật khẩu hiện tại không đúng")
+
+    current_user.hashed_password = hash_password(payload.new_password)
+    db.commit()
+    return {"message": "Đổi mật khẩu thành công"}
 
 
 @router.post("/forgot-password")

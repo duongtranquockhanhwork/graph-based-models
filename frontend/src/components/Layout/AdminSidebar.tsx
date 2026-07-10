@@ -10,6 +10,7 @@ import {
   Users,
   Settings,
   ShieldHalf,
+  Radio,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
@@ -22,6 +23,7 @@ const links = [
   { to: '/admin/labeling', icon: PenLine, label: 'Gán nhãn thủ công' },
   { to: '/admin/validation-results', icon: Gauge, label: 'Kết quả kiểm định' },
   { to: '/admin/users', icon: Users, label: 'Quản lý người dùng' },
+  { to: '/admin/live', icon: Radio, label: 'Bảng giá Live' },
   { to: '/admin/settings', icon: Settings, label: 'Cấu hình hệ thống' },
 ]
 

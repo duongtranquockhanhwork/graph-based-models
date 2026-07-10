@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { predictionApi } from '../services/api'
 import type { ModelEvaluation } from '../types'
-import { CheckCircle2, Target, Zap, Activity } from 'lucide-react'
+import { CheckCircle2, Target, Zap, Activity, ClipboardList } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-card)',
@@ -58,6 +60,7 @@ function MetricCard({
 }
 
 export default function EvaluationPage() {
+  const { user } = useAuth()
   const [data, setData] = useState<ModelEvaluation | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -87,6 +90,30 @@ export default function EvaluationPage() {
     )
   }
 
+  if (data.insufficient_data) {
+    return (
+      <div className="p-6 fade-in">
+        <div
+          className="flex flex-col items-center justify-center py-20 rounded-2xl text-center px-6"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+        >
+          <ClipboardList size={32} style={{ color: 'var(--border-default)' }} className="mb-3" />
+          <p className="text-[14px] font-medium" style={{ color: 'var(--text-muted)' }}>
+            Chưa đủ dữ liệu để đánh giá mô hình
+          </p>
+          <p className="text-[12px] mt-1 max-w-md" style={{ color: 'var(--text-faint)' }}>
+            Đánh giá được tính từ các tin đã được gán nhãn cảm xúc thủ công (hiện có {data.sample_size}/{5} tin cần thiết).
+            {user?.role === 'admin' ? (
+              <> Vào <Link to="/admin/labeling" className="underline">Gán nhãn thủ công</Link> để gán thêm nhãn.</>
+            ) : (
+              <> Hãy liên hệ quản trị viên để gán thêm nhãn thủ công cho tin tức.</>
+            )}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   const comparisonData = [
     { name: 'Baseline\n(Text only)', accuracy: +(data.baseline_accuracy * 100).toFixed(1), fill: '#1e3a6e' },
     { name: 'Graph-enhanced\n(Text + KG)', accuracy: +(data.graph_enhanced_accuracy * 100).toFixed(1), fill: '#2563eb' },
@@ -103,6 +130,10 @@ export default function EvaluationPage() {
 
   return (
     <div className="p-6 space-y-5 fade-in">
+      <p className="text-[12px]" style={{ color: 'var(--text-faint)' }}>
+        Đánh giá dựa trên {data.sample_size} tin đã được gán nhãn cảm xúc thủ công
+      </p>
+
       {/* Metric cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {METRICS.map(m => (

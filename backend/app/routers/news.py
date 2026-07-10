@@ -5,14 +5,16 @@ import pandas as pd
 import io
 
 from app.core.database import get_db
-from app.core.deps import require_admin
+from app.core.deps import get_current_user, require_admin
 from app.core.settings_store import get_float_setting
 from app.models.news import NewsArticle
+from app.models.user import User
 from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
 from app.services.nlp_service import analyze_article
 from app.services.graph_service import add_news_to_graph, get_graph_features
 from app.services.prediction_service import predict_trend
+from app.services import watchlist_service
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -22,7 +24,7 @@ class UrlImportRequest(BaseModel):
     url: str
 
 
-def _run_analysis(news_id: int, db: Session):
+def _run_analysis(news_id: int, db: Session, importer_user_id: Optional[int] = None):
     news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not news:
         return
@@ -49,11 +51,16 @@ def _run_analysis(news_id: int, db: Session):
     news.graph_built = True
     db.commit()
 
+    if importer_user_id is not None:
+        for stock in result.get("stocks", []):
+            watchlist_service.add_symbol(db, importer_user_id, stock)
+
 
 @router.post("/upload-csv")
 async def upload_csv(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = BackgroundTasks(),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     raw = await file.read()
@@ -77,7 +84,7 @@ async def upload_csv(
         db.add(n)
         db.commit()
         db.refresh(n)
-        background_tasks.add_task(_run_analysis, n.id, db)
+        background_tasks.add_task(_run_analysis, n.id, db, current_user.id)
         ids.append(n.id)
 
     return {"message": f"Imported {len(ids)} articles", "ids": ids}
@@ -87,6 +94,7 @@ async def upload_csv(
 def import_from_url(
     req: UrlImportRequest,
     background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     try:
@@ -175,7 +183,7 @@ def import_from_url(
         db.add(news_item)
         db.commit()
         db.refresh(news_item)
-        background_tasks.add_task(_run_analysis, news_item.id, db)
+        background_tasks.add_task(_run_analysis, news_item.id, db, current_user.id)
 
         return {
             "id": news_item.id,
@@ -192,12 +200,17 @@ def import_from_url(
 
 
 @router.post("/")
-def create_news(news_in: NewsCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def create_news(
+    news_in: NewsCreate,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     n = NewsArticle(**news_in.model_dump())
     db.add(n)
     db.commit()
     db.refresh(n)
-    background_tasks.add_task(_run_analysis, n.id, db)
+    background_tasks.add_task(_run_analysis, n.id, db, current_user.id)
     return {"id": n.id, "message": "Created and queued for analysis"}
 
 

@@ -1,8 +1,15 @@
 from typing import Dict, List
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sqlalchemy.orm import Session
 
 SENTIMENT_MAP = {"Positive": 1, "Neutral": 0, "Negative": -1}
 TREND_LABELS = ["INCREASING", "DECREASING", "UNCHANGED"]
+
+# Cùng quy ước ánh xạ cảm xúc -> xu hướng đã dùng trong compute_data_quality
+# (validation_service.py) để suy ra ground truth từ nhãn cảm xúc đã gán thủ công.
+SENTIMENT_TO_TREND = {"Positive": "INCREASING", "Negative": "DECREASING", "Neutral": "UNCHANGED"}
+
+MIN_EVALUATION_SAMPLES = 5
 
 EVENT_IMPACT = {
     "profit_growth": 2,
@@ -83,27 +90,49 @@ def predict_trend(analysis: Dict, graph_features: Dict) -> Dict:
     }
 
 
-def evaluate_model() -> Dict:
-    import random
-    random.seed(42)
-    n = 100
-    y_true = random.choices(TREND_LABELS, weights=[0.4, 0.35, 0.25], k=n)
+def evaluate_model(db: Session) -> Dict:
+    from app.models.news import NewsArticle
 
-    def perturb(labels: List[str], accuracy: float) -> List[str]:
-        result = []
-        for lbl in labels:
-            if random.random() < accuracy:
-                result.append(lbl)
-            else:
-                others = [l for l in TREND_LABELS if l != lbl]
-                result.append(random.choice(others))
-        return result
+    labeled = (
+        db.query(NewsArticle)
+        .filter(NewsArticle.is_analyzed == True, NewsArticle.manual_sentiment.isnot(None))  # noqa: E712
+        .all()
+    )
 
-    y_baseline = perturb(y_true, 0.68)
-    y_enhanced = perturb(y_true, 0.74)
+    if len(labeled) < MIN_EVALUATION_SAMPLES:
+        return {
+            "insufficient_data": True,
+            "sample_size": len(labeled),
+            "accuracy": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1_score": 0.0,
+            "confusion_matrix": [],
+            "class_report": {},
+            "baseline_accuracy": 0.0,
+            "graph_enhanced_accuracy": 0.0,
+            "labels": TREND_LABELS,
+        }
+
+    y_true: List[str] = []
+    y_enhanced: List[str] = []
+    y_baseline: List[str] = []
+
+    for n in labeled:
+        y_true.append(SENTIMENT_TO_TREND.get(n.manual_sentiment, "UNCHANGED"))
+        y_enhanced.append(n.predicted_trend or "UNCHANGED")
+
+        baseline_analysis = {
+            "sentiment": n.sentiment or "Neutral",
+            "events": n.events_detected or [],
+            "impact_score": n.impact_score if n.impact_score is not None else 50.0,
+        }
+        y_baseline.append(predict_trend(baseline_analysis, {})["trend"])
 
     from sklearn.metrics import precision_score, recall_score, f1_score
     return {
+        "insufficient_data": False,
+        "sample_size": len(labeled),
         "accuracy": round(accuracy_score(y_true, y_enhanced), 4),
         "precision": round(precision_score(y_true, y_enhanced, average="weighted", zero_division=0), 4),
         "recall": round(recall_score(y_true, y_enhanced, average="weighted", zero_division=0), 4),

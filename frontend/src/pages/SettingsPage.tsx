@@ -3,6 +3,8 @@ import { KeyRound, Mail, Palette, User as UserIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import ThemeToggle from '../components/ThemeToggle'
+import ProfileEditForm from '../components/Settings/ProfileEditForm'
+import ChangePasswordForm from '../components/Settings/ChangePasswordForm'
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -42,6 +44,7 @@ export default function SettingsPage() {
             <span className="inline-block mt-2 badge-blue text-[11px] px-2 py-0.5 rounded-full">
               {user?.role === 'admin' ? 'Quản trị viên' : 'Nhà đầu tư'}
             </span>
+            <ProfileEditForm />
           </div>
         </div>
       </div>
@@ -66,14 +69,15 @@ export default function SettingsPage() {
           <KeyRound size={15} /> Bảo mật
         </h3>
         <p className="text-[12px] mb-3" style={{ color: 'var(--text-muted)' }}>
-          Đặt lại mật khẩu qua email đã đăng ký
+          Đổi mật khẩu tài khoản của bạn
         </p>
+        <ChangePasswordForm />
         <Link
           to="/forgot-password"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+          className="inline-block mt-3 text-[12px] underline"
+          style={{ color: 'var(--text-muted)' }}
         >
-          Đổi mật khẩu
+          Quên mật khẩu hiện tại?
         </Link>
       </div>
     </div>
