@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Plus, Upload, RefreshCw, Trash2, Pencil, Check, X, Search } from 'lucide-react'
+import { Plus, Upload, RefreshCw, Trash2, Pencil, Check, X, Search, Link2, Globe, Loader2 } from 'lucide-react'
 import { newsApi } from '../../services/api'
 import type { NewsArticle } from '../../types'
 import { SentimentBadge, StatusBadge } from '../../components/Admin/AdminWidgets'
 
 const SENTIMENT_OPTIONS = ['Positive', 'Negative', 'Neutral']
+
+type ImportTab = 'manual' | 'csv' | 'url'
+const IMPORT_TABS: { key: ImportTab; icon: React.ElementType; label: string }[] = [
+  { key: 'manual', icon: Plus, label: 'Thủ công' },
+  { key: 'csv', icon: Upload, label: 'Upload CSV' },
+  { key: 'url', icon: Link2, label: 'Từ URL' },
+]
 
 export default function AdminNewsPage() {
   const [news, setNews] = useState<NewsArticle[]>([])
@@ -17,8 +24,11 @@ export default function AdminNewsPage() {
   const [page, setPage] = useState(0)
   const pageSize = 20
 
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
+  const [importTab, setImportTab] = useState<ImportTab>('manual')
   const [form, setForm] = useState({ title: '', content: '', source: '', published_date: '' })
+  const [urlInput, setUrlInput] = useState('')
+  const [urlLoading, setUrlLoading] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editForm, setEditForm] = useState({ title: '', source: '', sentiment: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -53,7 +63,7 @@ export default function AdminNewsPage() {
       await newsApi.create(form)
       toast.success('Đã thêm tin tức')
       setForm({ title: '', content: '', source: '', published_date: '' })
-      setShowAddForm(false)
+      setShowImport(false)
       load()
     } catch {
       toast.error('Lỗi khi thêm tin tức')
@@ -71,6 +81,25 @@ export default function AdminNewsPage() {
       toast.error('Lỗi khi upload CSV')
     } finally {
       e.target.value = ''
+    }
+  }
+
+  const handleUrlImport = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!urlInput.trim()) return
+    setUrlLoading(true)
+    try {
+      await newsApi.importUrl(urlInput.trim())
+      toast.success('Đã import bài báo từ URL')
+      setUrlInput('')
+      load()
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
+        'Không thể import URL này'
+      toast.error(msg)
+    } finally {
+      setUrlLoading(false)
     }
   }
 
@@ -111,35 +140,99 @@ export default function AdminNewsPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowAddForm((v) => !v)}
+            onClick={() => setShowImport((v) => !v)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
             style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
           >
-            <Plus size={14} /> Thêm tin tức
+            <Plus size={14} /> Thêm / Import tin tức
           </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}
-          >
-            <Upload size={14} /> Import dữ liệu
-          </button>
-          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleUploadCsv} />
         </div>
       </div>
 
-      {showAddForm && (
-        <form onSubmit={handleCreate} className="section-card space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <input className="field-input" placeholder="Tiêu đề *" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
-          <textarea className="field-input resize-none" rows={3} placeholder="Nội dung" value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
-          <div className="grid grid-cols-2 gap-3">
-            <input className="field-input" placeholder="Nguồn" value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
-            <input type="date" className="field-input" value={form.published_date} onChange={(e) => setForm((f) => ({ ...f, published_date: e.target.value }))} />
+      {showImport && (
+        <div className="section-card space-y-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+            {IMPORT_TABS.map(({ key, icon: Icon, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setImportTab(key)}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium transition-all"
+                style={
+                  importTab === key
+                    ? { background: 'var(--bg-card)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }
+                    : { border: '1px solid transparent', color: 'var(--text-muted)' }
+                }
+              >
+                <Icon size={13} /> {label}
+              </button>
+            ))}
           </div>
-          <button type="submit" className="px-5 py-2 rounded-xl text-[13px] font-medium text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>
-            Lưu tin tức
-          </button>
-        </form>
+
+          {importTab === 'manual' && (
+            <form onSubmit={handleCreate} className="space-y-3">
+              <input className="field-input" placeholder="Tiêu đề *" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
+              <textarea className="field-input resize-none" rows={3} placeholder="Nội dung" value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
+              <div className="grid grid-cols-2 gap-3">
+                <input className="field-input" placeholder="Nguồn" value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
+                <input type="date" className="field-input" value={form.published_date} onChange={(e) => setForm((f) => ({ ...f, published_date: e.target.value }))} />
+              </div>
+              <button type="submit" className="px-5 py-2 rounded-xl text-[13px] font-medium text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>
+                Lưu tin tức
+              </button>
+            </form>
+          )}
+
+          {importTab === 'csv' && (
+            <div className="space-y-3">
+              <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
+                Chọn file CSV với cột bắt buộc <strong>title</strong> (tuỳ chọn: content, source, published_date, url)
+              </p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium"
+                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}
+              >
+                <Upload size={14} /> Chọn file CSV
+              </button>
+              <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleUploadCsv} />
+            </div>
+          )}
+
+          {importTab === 'url' && (
+            <form onSubmit={handleUrlImport} className="space-y-3">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Link2 size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
+                  <input
+                    className="field-input pl-9"
+                    placeholder="https://cafef.vn/..."
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    type="url"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={urlLoading || !urlInput.trim()}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+                >
+                  {urlLoading ? (
+                    <><Loader2 size={14} className="animate-spin" /> Đang lấy...</>
+                  ) : (
+                    <><Globe size={14} /> Import</>
+                  )}
+                </button>
+              </div>
+              <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
+                Hỗ trợ: cafef.vn, vnexpress.net, vietstock.vn, tinnhanhchungkhoan.vn, ndh.vn, baomoi.com
+              </p>
+            </form>
+          )}
+        </div>
       )}
 
       <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
