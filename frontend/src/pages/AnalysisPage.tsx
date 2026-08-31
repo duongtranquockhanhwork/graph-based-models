@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { newsApi } from '../services/api'
 import type { NewsArticle } from '../types'
-import { RefreshCw, Trash2, ChevronDown, ChevronUp, Search, Loader2, Upload } from 'lucide-react'
+import { RefreshCw, Trash2, ChevronDown, ChevronUp, Search, Loader2, Upload, AlertTriangle } from 'lucide-react'
 
 const SENTIMENT_STYLE: Record<string, { badge: string; dot: string }> = {
   Positive: { badge: 'badge-up', dot: '#10b981' },
@@ -90,6 +90,16 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
                     )}
                   </div>
                 )}
+                {!news.content && (
+                  <span
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}
+                    title="Không lấy được nội dung bài (chỉ có tiêu đề) — sentiment/sự kiện/impact score dựa trên tín hiệu rất mỏng, độ tin cậy thấp hơn nhiều so với bài có đầy đủ nội dung"
+                  >
+                    <AlertTriangle size={10} />
+                    Chỉ có tiêu đề
+                  </span>
+                )}
               </>
             ) : (
               <span className="badge-amber text-[10px] px-2 py-0.5 rounded-full">Chờ phân tích</span>
@@ -117,10 +127,20 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
       </div>
 
       {expanded && news.is_analyzed && (
-        <div
-          className="px-4 pb-4 pt-3 grid grid-cols-2 md:grid-cols-3 gap-4"
-          style={{ borderTop: '1px solid var(--border-subtle)' }}
-        >
+        <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          {!news.content && (
+            <div
+              className="mx-4 mt-3 flex items-start gap-2 p-2.5 rounded-xl text-[11px]"
+              style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)', color: '#f87171' }}
+            >
+              <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" />
+              <span>
+                Không lấy được nội dung bài báo (link chết, trang không phải bài viết, hoặc bị chặn scrape) — phân tích
+                bên dưới chỉ dựa trên tiêu đề, tín hiệu rất mỏng nên impact score và lý do dự đoán kém tin cậy hơn nhiều.
+              </span>
+            </div>
+          )}
+          <div className="px-4 pb-4 pt-3 grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
               Mã cổ phiếu
@@ -178,6 +198,7 @@ function NewsCard({ news, onDelete }: { news: NewsArticle; onDelete: () => void 
               </ul>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>

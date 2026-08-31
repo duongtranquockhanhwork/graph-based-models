@@ -28,6 +28,12 @@ class NewsArticle(Base):
 
     is_analyzed = Column(Boolean, default=False)
 
+    # Ground truth xu hướng lấy từ biến động giá thật (xem
+    # core/prediction/price_labels.py), không phải suy ra từ sentiment.
+    # None khi chưa có đủ dữ liệu giá quanh published_date.
+    actual_trend = Column(String(20), nullable=True)
+    actual_trend_pct_change = Column(Float, nullable=True)
+
     needs_manual_label = Column(Boolean, default=False)
     manual_sentiment = Column(String(20), nullable=True)
     manual_event_type = Column(String(50), nullable=True)

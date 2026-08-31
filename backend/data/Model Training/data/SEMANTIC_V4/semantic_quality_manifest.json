@@ -1,0 +1,58 @@
+{
+  "release_version": "FINNEXUS_SEMANTIC_QUALITY_V4_0",
+  "source_graph_version": "FINNEXUS_TEMPORAL_KG_V1_0",
+  "dataset_version": "FINNEXUS_RESEARCH_DATASET_V17_1",
+  "status": "BUILT_NOT_GOLD",
+  "input_hashes": {
+    "config": "2b1c413db078735e7069066d373eae39bdabf5bf8486dabc530154679c275bcf",
+    "dataset": "19436083b05e42b09c72274c1a57458be79f1109c215fa2e42119ba42c9fc713",
+    "nodes": "d6618bb30383004aaf4750b9d5032f637df4e5becf63c4657f46f8267271896e",
+    "edges": "b4345d9a047c7fdb019a57d5dab99c2c18319d5ae38409096582bfa2ca9629ff",
+    "entity_evaluation": "2a34cacb8f3315ee2d4ccac30d496b1002f3eba5d0ded90913aad1bd8cf082f0"
+  },
+  "entity_validation_basis": {
+    "high_precision_tier_precision": 0.918918918918919,
+    "wilson_95": [
+      0.8705442076999235,
+      0.950250129349242
+    ],
+    "scope": "PIPELINE_LEVEL_ENTITY_LINK_PRECISION_ONLY"
+  },
+  "counts": {
+    "events_total": 1198,
+    "informative_events": 535,
+    "fallback_events": 663,
+    "informative_edges": 1605,
+    "fallback_edges": 1989,
+    "review_sample_rows": 139
+  },
+  "policy": {
+    "default_semantic_query_group": "INFORMATIVE_CANDIDATE",
+    "fallback_default_enabled": false,
+    "semantic_gold_claim_allowed": false,
+    "predictive_superiority_claim_allowed": false,
+    "outcomes_included": false
+  },
+  "outputs": {
+    "semantic_nodes": {
+      "path": "data\\knowledge_graph\\semantic_quality_v4\\semantic_nodes_v4.csv",
+      "sha256": "ce3b2bc02bf47b08de57162ac25e65950d1981ff38fbedfdc66a93a255f769ce"
+    },
+    "informative_edges": {
+      "path": "data\\knowledge_graph\\semantic_quality_v4\\semantic_informative_edges.csv",
+      "sha256": "0c16c13e4a5facd74b343469aec356ec19f853abdb5fedc03a71f2a9baecd82e"
+    },
+    "fallback_edges": {
+      "path": "data\\knowledge_graph\\semantic_quality_v4\\semantic_fallback_edges.csv",
+      "sha256": "47dbfb1afdbf36368947094652e53b1e87bab87afbdd6eeba3fdcb2a38a834ed"
+    },
+    "event_quality": {
+      "path": "data\\knowledge_graph\\semantic_quality_v4\\semantic_event_quality.csv",
+      "sha256": "9949b9d74bda4888409c23332a11c746c7b0f6c945cb64b3a77819eb30772f2b"
+    },
+    "review_sample": {
+      "path": "data\\knowledge_graph\\semantic_quality_v4\\semantic_review_sample.csv",
+      "sha256": "587f6f5345bde3f3674ed1fe79b317d9115a1a2e74b625b7bf89ce30c4120da6"
+    }
+  }
+}

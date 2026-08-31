@@ -1,0 +1,79 @@
+{
+  "release_version": "FINNEXUS_LAYERED_KG_V3_0",
+  "dataset_version": "FINNEXUS_RESEARCH_DATASET_V17_1",
+  "source_graph_version": "FINNEXUS_TEMPORAL_KG_V1_0",
+  "input_hashes": {
+    "nodes": "d6618bb30383004aaf4750b9d5032f637df4e5becf63c4657f46f8267271896e",
+    "edges": "b4345d9a047c7fdb019a57d5dab99c2c18319d5ae38409096582bfa2ca9629ff",
+    "dataset": "19436083b05e42b09c72274c1a57458be79f1109c215fa2e42119ba42c9fc713",
+    "semantic_evaluation_summary": "2a34cacb8f3315ee2d4ccac30d496b1002f3eba5d0ded90913aad1bd8cf082f0"
+  },
+  "layer_policy": {
+    "core": [
+      "BELONGS_TO",
+      "BENCHMARKED_BY",
+      "LISTED_ON",
+      "MENTIONS",
+      "PUBLISHED_AT",
+      "PUBLISHED_BY",
+      "REPRESENTS"
+    ],
+    "derived": [
+      "RELATED_TO"
+    ],
+    "semantic_experimental": [
+      "AFFECTS",
+      "CONTAINS_EVENT",
+      "HAS_SENTIMENT"
+    ],
+    "future_outcome_layer": "Retained separately at data/knowledge_graph/outcome_*.csv"
+  },
+  "counts": {
+    "core_nodes": 1599,
+    "core_edges": 3344,
+    "derived_edges": 91,
+    "semantic_experimental_nodes": 1201,
+    "semantic_experimental_edges": 3594
+  },
+  "entity_validation_basis": {
+    "precision": 0.918918918918919,
+    "wilson_95": [
+      0.8705442076999235,
+      0.950250129349242
+    ],
+    "scope": "PIPELINE_LEVEL_NOT_ROW_LEVEL_GOLD"
+  },
+  "scientific_limits": [
+    "Core MENTIONS edges inherit pipeline-level precision, not manual validation of every edge.",
+    "Static stock reference relations lack historical effective dates.",
+    "Derived RELATED_TO edges are exploratory and excluded from core.",
+    "Event and sentiment edges remain experimental and are excluded from core.",
+    "Market outcomes are observational and remain physically separate."
+  ],
+  "outputs": {
+    "core_nodes": {
+      "path": "data\\knowledge_graph\\layered\\core_nodes.csv",
+      "sha256": "ecfabc7b4f5fadba42720e770bc76534ecd8183206b4e1f6d0bb90607c57cf48"
+    },
+    "core_edges": {
+      "path": "data\\knowledge_graph\\layered\\core_edges.csv",
+      "sha256": "6dedf2d6a6139bab585973225cf5450ae9fd1b4d2670151d972184237ddb2afb"
+    },
+    "derived_edges": {
+      "path": "data\\knowledge_graph\\layered\\derived_edges.csv",
+      "sha256": "5dd42c040b51af3ab49b2c9c54e5279d9bb4231e005ca3b9734dcbc68eca4655"
+    },
+    "semantic_nodes": {
+      "path": "data\\knowledge_graph\\layered\\semantic_experimental_nodes.csv",
+      "sha256": "77b60a8ab76807902da931a7b54983671d942ae81f518ba7a8c99a16fc861d3a"
+    },
+    "semantic_edges": {
+      "path": "data\\knowledge_graph\\layered\\semantic_experimental_edges.csv",
+      "sha256": "7cab38655498f869394498cb047dfeb805d20913eb77a85fce05d02b1951b6f8"
+    },
+    "core_graphml": {
+      "path": "data\\knowledge_graph\\layered\\finnexus_core_graph.graphml",
+      "sha256": "a26215417ca62feac915f418ee3655eeb70f65b69cb8a9cc421068574cf3e7d6"
+    }
+  }
+}

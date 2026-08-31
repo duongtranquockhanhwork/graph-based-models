@@ -193,10 +193,31 @@ export interface ModelEvaluation {
   confusion_matrix: number[][]
   baseline_accuracy: number
   graph_enhanced_accuracy: number
+  ecbm_accuracy?: number | null
+  ecbm_confusion_matrix?: number[][] | null
+  ecbm_class_report?: Record<string, Record<string, number>> | null
   labels: string[]
   class_report?: Record<string, Record<string, number>>
   sample_size: number
   insufficient_data: boolean
+}
+
+export interface ModelInfo {
+  active_model: 'ecbm' | 'heuristic_baseline'
+  last_training_metrics: {
+    trained: boolean
+    sample_size?: number
+    real_price_labels?: number
+    sentiment_proxy_labels?: number
+    train_size?: number
+    val_size?: number
+    val_accuracy?: number
+    val_f1_weighted?: number
+    val_f1_macro?: number
+    epochs_run?: number
+    labels?: string[]
+    reason?: string
+  } | null
 }
 
 // ---- Admin ----

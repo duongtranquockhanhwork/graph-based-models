@@ -27,3 +27,6 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Regenerable cache (see backend/core/prediction/price_labels.py)
+backend/data/price_history_cache.csv

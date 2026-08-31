@@ -1,0 +1,134 @@
+ontology_version: FINNEXUS_KG_ONTOLOGY_V1_0
+graph_version: FINNEXUS_TEMPORAL_KG_V1_0
+description: >-
+  Ontology for a leakage-safe Vietnamese financial-news knowledge graph.
+  Prediction-time knowledge and future market outcomes are exported separately.
+
+temporal_policy:
+  publication_time_resolution: DATE_ONLY
+  prediction_history_rule: STRICTLY_BEFORE_PUBLICATION_DATE
+  same_day_history_allowed: false
+  static_reference_assumption: >-
+    Company, industry, exchange and index mappings are treated as valid for
+    2019-2022 because historical effective dates are not available locally.
+  outcome_policy: >-
+    MarketReaction nodes and outcome relations are never prediction-time
+    features for the event that produced them.
+
+node_types:
+  News:
+    description: Public financial-news article.
+  Stock:
+    description: Listed Vietnamese stock ticker.
+  Company:
+    description: Listed company represented by a stock.
+  Industry:
+    description: Industry classification from the local stock reference.
+  Event:
+    description: News-stock event instance; one per sample_id.
+  Sentiment:
+    description: Weak semantic effect label for an event.
+  Time:
+    description: Calendar publication date.
+  Source:
+    description: Public news publisher.
+  Exchange:
+    description: HOSE, HNX or UPCOM.
+  MarketIndex:
+    description: Market benchmark associated with the stock.
+  MarketReaction:
+    description: Price-derived outcome observed after an event.
+
+relation_types:
+  PUBLISHED_BY:
+    source: News
+    target: Source
+    prediction_time_safe: true
+  PUBLISHED_AT:
+    source: News
+    target: Time
+    prediction_time_safe: true
+  MENTIONS:
+    source: News
+    target: Stock
+    prediction_time_safe: true
+  REPRESENTS:
+    source: Stock
+    target: Company
+    prediction_time_safe: true
+  BELONGS_TO:
+    source: Stock
+    target: Industry
+    prediction_time_safe: true
+  LISTED_ON:
+    source: Stock
+    target: Exchange
+    prediction_time_safe: true
+  CONTAINS_EVENT:
+    source: News
+    target: Event
+    prediction_time_safe: true
+  AFFECTS:
+    source: Event
+    target: Stock
+    prediction_time_safe: true
+  HAS_SENTIMENT:
+    source: Event
+    target: Sentiment
+    prediction_time_safe: true
+  BENCHMARKED_BY:
+    source: Stock
+    target: MarketIndex
+    prediction_time_safe: true
+  RELATED_TO:
+    source: Stock
+    target: Stock
+    prediction_time_safe: true
+    symmetric: true
+  HAS_REACTION:
+    source: Event
+    target: MarketReaction
+    prediction_time_safe: false
+  OBSERVED_FOR:
+    source: MarketReaction
+    target: Stock
+    prediction_time_safe: false
+  BENCHMARKED_AGAINST:
+    source: MarketReaction
+    target: MarketIndex
+    prediction_time_safe: false
+
+event_types:
+  - MARKET_TRADING
+  - MACRO_POLICY
+  - BUSINESS_RESULT
+  - CORPORATE_ACTION
+  - LEGAL_REGULATORY
+  - M_AND_A
+  - SECTOR_NEWS
+  - OTHER
+
+sentiment_labels:
+  - POSITIVE
+  - NEGATIVE
+  - NEUTRAL
+
+impact_levels:
+  - HIGH
+  - MODERATE
+  - LOW
+
+affected_scopes:
+  - MARKET
+  - SECTOR
+  - STOCK_SPECIFIC
+
+export_contract:
+  prediction_nodes: data/knowledge_graph/nodes.csv
+  prediction_edges: data/knowledge_graph/edges.csv
+  outcome_nodes: data/knowledge_graph/outcome_nodes.csv
+  outcome_edges: data/knowledge_graph/outcome_edges.csv
+  temporal_graph_features: data/knowledge_graph/temporal_graph_features.csv
+  graphml: data/knowledge_graph/finnexus_prediction_graph.graphml
+  summary: data/knowledge_graph/kg_summary.json
+  validation_report: data/quality/knowledge_graph/kg_validation_report.json
