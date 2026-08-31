@@ -13,12 +13,19 @@ for _symbol, _info in STOCK_DICT.items():
         COMPANY_TO_STOCK[_alias.lower()] = _symbol
 
 POSITIVE_KEYWORDS = [
-    "tăng", "tăng trưởng", "lãi", "lợi nhuận tăng", "doanh thu tăng",
+    # NOTE: bare "lãi"/"lợi nhuận" are deliberately NOT here - they mean
+    # "profit" with no direction, so counting them as positive false-triggers
+    # on "lãi giảm"/"lợi nhuận giảm" (a real miss found against a genuine VN
+    # profit-decline headline). Direction always comes from a tăng/giảm/cao
+    # phrase pair below.
+    "tăng", "tăng trưởng", "lợi nhuận tăng", "doanh thu tăng",
     "tích cực", "phục hồi", "hợp đồng mới", "ký kết", "mở rộng",
     "thành công", "vượt kế hoạch", "khởi sắc", "đột phá", "tăng mạnh",
     "tăng vọt", "tăng cao", "tăng kỷ lục", "lợi nhuận cao", "dẫn đầu",
     "đầu tư mới", "ra mắt", "hợp tác", "liên doanh", "xuất khẩu tăng",
     "thị phần tăng", "cổ tức", "chia cổ tức", "trúng thầu", "thắng thầu",
+    "khả quan", "vượt dự báo", "vượt kỳ vọng", "lãi tăng", "lãi ròng tăng",
+    "lợi nhuận ròng tăng", "lãi kỷ lục", "kết quả kinh doanh khả quan",
 ]
 
 NEGATIVE_KEYWORDS = [
@@ -27,11 +34,20 @@ NEGATIVE_KEYWORDS = [
     "giảm sâu", "sụt", "yếu", "đình chỉ", "thu hồi", "phạt",
     "thanh tra", "điều tra", "cảnh báo", "mất thị phần",
     "hủy hợp đồng", "thu hẹp", "sa thải", "cắt giảm",
+    "lãi giảm", "lợi nhuận giảm", "hạ dự báo", "hạ dự báo lợi nhuận",
+    "giảm dự báo", "cắt giảm dự báo", "kém khả quan", "dưới kỳ vọng",
+    "thấp hơn kỳ vọng",
 ]
 
 EVENT_PATTERNS = {
-    "profit_growth": ["lợi nhuận tăng", "lãi tăng", "doanh thu tăng", "lợi nhuận cao", "lãi kỷ lục"],
-    "profit_decline": ["lợi nhuận giảm", "lãi giảm", "doanh thu giảm", "thua lỗ", "lỗ"],
+    "profit_growth": [
+        "lợi nhuận tăng", "lãi tăng", "doanh thu tăng", "lợi nhuận cao", "lãi kỷ lục",
+        "lãi ròng tăng", "lợi nhuận ròng tăng", "vượt kế hoạch lợi nhuận", "lãi vượt",
+    ],
+    "profit_decline": [
+        "lợi nhuận giảm", "lãi giảm", "doanh thu giảm", "thua lỗ", "lỗ",
+        "hạ dự báo lợi nhuận", "hạ dự báo", "giảm dự báo lợi nhuận", "cắt giảm dự báo",
+    ],
     "dividend": ["cổ tức", "chia cổ tức", "trả cổ tức"],
     "merger": ["sáp nhập", "mua lại", "thâu tóm", "liên doanh", "hợp nhất"],
     "new_contract": ["hợp đồng mới", "ký kết hợp đồng", "trúng thầu", "thắng thầu", "ký hợp đồng"],
@@ -137,27 +153,73 @@ def extract_events_detailed(
     return found
 
 
+# Matches an explicit reported swing like "tăng 33%" / "giảm mạnh 15,5%" -
+# a quoted percentage is much stronger evidence of impact than the bare
+# keyword, and VN financial headlines report one constantly ("lãi tăng 21%").
+_MAGNITUDE_PATTERN = re.compile(r"(tăng|giảm)[^%\n]{0,20}?(\d{1,3}(?:[.,]\d+)?)\s*%")
+
+# How many keyword hits count as "strong" evidence before the score is
+# allowed to approach the 5/95 extremes. A single keyword match (e.g. one
+# stray "yếu" in an otherwise neutral title) used to be enough to hit 95 -
+# EVIDENCE_CAP makes the score climb gradually with corroborating evidence
+# instead of saturating on the first hit.
+_EVIDENCE_CAP = 5
+
+
+def _extract_magnitude_hits(text_lower: str) -> List[Tuple[str, float]]:
+    hits = []
+    for m in _MAGNITUDE_PATTERN.finditer(text_lower):
+        direction, raw_pct = m.group(1), m.group(2).replace(",", ".")
+        try:
+            hits.append((direction, float(raw_pct)))
+        except ValueError:
+            continue
+    return hits
+
+
 def analyze_sentiment(text: str) -> Tuple[str, float]:
-    sentiment, score, _pos, _neg = analyze_sentiment_detailed(text)
+    sentiment, score, _pos, _neg, _mag = analyze_sentiment_detailed(text)
     return sentiment, score
 
 
 def analyze_sentiment_detailed(
     text: str, pos_threshold: float = 0.6, neg_threshold: float = 0.4
-) -> Tuple[str, float, List[str], List[str]]:
+) -> Tuple[str, float, List[str], List[str], List[Tuple[str, float]]]:
     text_lower = text.lower()
     pos_hits = [kw for kw in POSITIVE_KEYWORDS if kw in text_lower]
     neg_hits = [kw for kw in NEGATIVE_KEYWORDS if kw in text_lower]
+    magnitude_hits = _extract_magnitude_hits(text_lower)
     pos, neg = len(pos_hits), len(neg_hits)
     total = pos + neg
     if total == 0:
-        return "Neutral", 50.0, pos_hits, neg_hits
+        return "Neutral", 50.0, pos_hits, neg_hits, magnitude_hits
+
     ratio = pos / total
+    evidence_strength = min(total, _EVIDENCE_CAP) / _EVIDENCE_CAP
+
     if ratio >= pos_threshold:
-        return "Positive", min(50 + (ratio - 0.5) * 100, 95), pos_hits, neg_hits
-    if ratio <= neg_threshold:
-        return "Negative", min(50 + (0.5 - ratio) * 100, 95), pos_hits, neg_hits
-    return "Neutral", 50.0, pos_hits, neg_hits
+        sentiment = "Positive"
+        swing = (ratio - 0.5) * 100 * evidence_strength
+    elif ratio <= neg_threshold:
+        sentiment = "Negative"
+        swing = -(0.5 - ratio) * 100 * evidence_strength
+    else:
+        return "Neutral", 50.0, pos_hits, neg_hits, magnitude_hits
+
+    # An explicit reported percentage swing in the direction that matches the
+    # keyword sentiment is direct quantified evidence, not just word choice -
+    # it moves the score further than keyword count alone would.
+    same_direction_magnitudes = [
+        pct for direction, pct in magnitude_hits
+        if (direction == "tăng") == (sentiment == "Positive")
+    ]
+    if same_direction_magnitudes:
+        avg_magnitude = sum(same_direction_magnitudes) / len(same_direction_magnitudes)
+        magnitude_boost = min(avg_magnitude, 40.0) / 40.0 * 20  # up to +-20
+        swing += magnitude_boost if sentiment == "Positive" else -magnitude_boost
+
+    score = max(5.0, min(50 + swing, 95.0))
+    return sentiment, round(score, 2), pos_hits, neg_hits, magnitude_hits
 
 
 def build_reasons(
@@ -168,11 +230,16 @@ def build_reasons(
     industries: List[str],
     industry_evidence: Dict[str, List[str]],
     companies: List[str],
+    magnitude_hits: Optional[List[Tuple[str, float]]] = None,
 ) -> List[str]:
     """Sinh ra danh sách lý do cụ thể, trích dẫn bằng chứng lấy trực tiếp từ
     nội dung bài báo, để người dùng biết AI kết luận dựa trên đâu chứ không
     phải suy đoán chung chung."""
     reasons: List[str] = []
+
+    if magnitude_hits:
+        quotes = ", ".join(f"{d} {p:g}%" for d, p in magnitude_hits[:5])
+        reasons.append(f"Phát hiện số liệu định lượng trong bài (bằng chứng mạnh hơn từ khóa đơn thuần): {quotes}")
 
     if pos_hits:
         reasons.append(
@@ -229,7 +296,7 @@ def analyze_article(title: str, content: Optional[str] = None, db=None) -> Dict:
 
     entities = extract_entities(full_text)
     events_detail = extract_events_detailed(full_text, event_patterns)
-    sentiment, impact_score, pos_hits, neg_hits = analyze_sentiment_detailed(
+    sentiment, impact_score, pos_hits, neg_hits, magnitude_hits = analyze_sentiment_detailed(
         full_text, pos_threshold, neg_threshold
     )
     reasons = build_reasons(
@@ -240,6 +307,7 @@ def analyze_article(title: str, content: Optional[str] = None, db=None) -> Dict:
         industries=entities["industries"],
         industry_evidence=entities["industry_evidence"],
         companies=entities["companies"],
+        magnitude_hits=magnitude_hits,
     )
     return {
         "stocks": entities["stocks"],

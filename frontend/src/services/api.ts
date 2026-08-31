@@ -64,6 +64,7 @@ export const predictionApi = {
   list: () => api.get('/prediction/'),
   forStock: (symbol: string) => api.get(`/prediction/stock/${symbol}`),
   evaluate: () => api.get('/prediction/evaluate'),
+  modelInfo: () => api.get('/prediction/model-info'),
 }
 
 export const analyticsApi = {

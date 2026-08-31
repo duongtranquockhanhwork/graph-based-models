@@ -1,0 +1,104 @@
+protocol_version: FINNEXUS_ENTITY_KG_EVALUATION_PROTOCOL_V2_0
+locked_date: "2026-07-31"
+random_seed: 20260731
+
+scope:
+  dataset: data/dataset/finnexus_news_stock_2019_2022.csv
+  dataset_version: FINNEXUS_RESEARCH_DATASET_V17_1
+  graph_features: data/knowledge_graph/entity_temporal_features_v2.csv
+  graph_version: FINNEXUS_ENTITY_TEMPORAL_GRAPH_FEATURES_V2_0
+
+scientific_status:
+  experiment_design: EXPLORATORY_DEVELOPMENT_AFTER_V1
+  reason: >
+    Entity-only V2 was designed after inspecting the V1 evaluation. Model
+    selection is therefore based on validation only. Test results are retained
+    as descriptive exploratory evidence and are not confirmatory.
+  causal_claim_allowed: false
+  interpretation: >
+    Graph features encode historical entity/source/industry relations. Market
+    targets remain observational associations, not causal news effects.
+
+predictive_ablation:
+  target: primary_reaction_direction_3d
+  populations:
+    - baseline
+    - strict
+  chronological_flow:
+    validation: train_to_validation
+    test: train_plus_validation_to_test
+  feature_sets:
+    - majority
+    - text
+    - market
+    - graph
+    - text_market
+    - text_graph
+    - text_market_graph
+  graph_feature_columns:
+    - entity_stock_degree_centrality
+    - entity_stock_betweenness_centrality
+    - entity_stock_closeness_centrality
+    - entity_projection_nodes
+    - entity_projection_edges
+    - static_industry_peer_count
+    - historical_stock_news_count
+    - historical_stock_unique_source_count
+    - historical_stock_comention_peer_count
+    - historical_stock_comention_weight_sum
+    - recent_30d_stock_news_count
+    - recent_90d_stock_news_count
+    - recent_30d_stock_unique_source_count
+    - recent_90d_stock_unique_source_count
+    - recent_30d_industry_news_count
+    - recent_90d_industry_news_count
+    - recent_30d_industry_active_stock_count
+    - recent_90d_industry_active_stock_count
+    - recent_30d_stock_comention_peer_count
+    - recent_90d_stock_comention_peer_count
+    - recent_30d_stock_comention_weight_sum
+    - recent_90d_stock_comention_weight_sum
+    - recent_30d_same_source_stock_news_count
+    - days_since_previous_stock_news
+  text:
+    analyzer: char_wb
+    ngram_range: [3, 5]
+    min_df: 2
+    max_features: 50000
+    sublinear_tf: true
+  classifier:
+    algorithm: LogisticRegression
+    class_weight: balanced
+    C: 1.0
+    max_iter: 2000
+  primary_comparison:
+    stage: validation
+    augmented: text_market_graph
+    reference: text_market
+    metric: macro_f1
+    minimum_delta: 0.02
+    bootstrap_iterations: 1000
+    bootstrap_group: news_id
+    confidence_level: 0.95
+    require_ci_lower_above_zero: true
+  robustness:
+    strict_population_minimum_delta: 0.0
+
+leakage_controls:
+  require_unique_sample_id: true
+  require_news_disjoint_across_splits: true
+  require_graph_feature_cutoff_before_publication_date: true
+  allow_same_day_graph_history: false
+  allowed_market_features: PRE_EVENT_ONLY
+  semantic_labels_allowed_in_entity_profile: false
+  outcomes_in_prediction_graph: false
+
+decision_rules:
+  retain_entity_v2_for_future_confirmatory_test:
+    - no_leakage_violation
+    - validation_primary_gate_pass
+    - validation_strict_robustness_gate_pass
+  ready_for_confirmatory_claim:
+    - retain_entity_v2_for_future_confirmatory_test
+    - fresh_never_observed_temporal_test_period
+    - confirmatory_protocol_registered_before_targets_are_opened

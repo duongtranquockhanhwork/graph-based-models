@@ -1,0 +1,72 @@
+protocol_version: FINNEXUS_KG_COMPETENCY_PROTOCOL_V1_0
+locked_date: "2026-07-31"
+layered_release: FINNEXUS_LAYERED_KG_V3_0
+default_layer: CORE
+
+questions:
+  - id: CQ01
+    question: Bài báo nào đề cập đến một mã cổ phiếu?
+    required_relations: [MENTIONS]
+    metric: canonical_relation_pair_recall
+    threshold: 1.0
+  - id: CQ02
+    question: Mỗi bài báo được xuất bản bởi nguồn nào và vào ngày nào?
+    required_relations: [PUBLISHED_BY, PUBLISHED_AT]
+    metric: news_with_exact_source_and_date
+    threshold: 1.0
+  - id: CQ03
+    question: Một mã đại diện công ty nào, thuộc ngành/sàn/benchmark nào?
+    required_relations: [REPRESENTS, BELONGS_TO, LISTED_ON, BENCHMARKED_BY]
+    metric: stock_reference_completeness
+    threshold: 1.0
+  - id: CQ04
+    question: Provenance nguồn của bài báo có khớp dataset canonical không?
+    required_relations: [PUBLISHED_BY]
+    metric: source_metadata_accuracy
+    threshold: 1.0
+  - id: CQ05
+    question: Ngày xuất bản trong graph có khớp dataset canonical không?
+    required_relations: [PUBLISHED_AT]
+    metric: publication_date_accuracy
+    threshold: 1.0
+  - id: CQ06
+    question: Hai mã RELATED_TO có thực sự cùng industry reference không?
+    required_relations: [RELATED_TO]
+    metric: derived_same_industry_consistency
+    threshold: 1.0
+  - id: CQ07
+    question: Core có tách khỏi event/sentiment yếu không?
+    required_relations: []
+    metric: core_semantic_isolation
+    threshold: 1.0
+  - id: CQ08
+    question: Semantic experimental có luôn mang cảnh báo không phải Gold không?
+    required_relations: [CONTAINS_EVENT, AFFECTS, HAS_SENTIMENT]
+    metric: experimental_quality_label_completeness
+    threshold: 1.0
+  - id: CQ09
+    question: Outcome tương lai có bị lẫn vào prediction-time core không?
+    required_relations: []
+    metric: outcome_physical_separation
+    threshold: 1.0
+  - id: CQ10
+    question: Bao nhiêu mã trong dataset có thể truy vấn được ít nhất một bài?
+    required_relations: [MENTIONS]
+    metric: stock_query_coverage
+    threshold: 1.0
+  - id: CQ11
+    question: Graph có bao phủ đúng khoảng thời gian của dataset không?
+    required_relations: [PUBLISHED_AT]
+    metric: temporal_range_match
+    threshold: 1.0
+  - id: CQ12
+    question: GraphML có tái hiện đúng số node và edge của core CSV không?
+    required_relations: []
+    metric: graphml_roundtrip_integrity
+    threshold: 1.0
+
+decision:
+  functional_ready:
+    minimum_pass_rate: 1.0
+    zero_failed_critical_questions: true
+  critical_questions: [CQ01, CQ02, CQ03, CQ07, CQ09, CQ12]

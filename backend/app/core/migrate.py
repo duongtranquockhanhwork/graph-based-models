@@ -16,6 +16,8 @@ _STATEMENTS = [
     "ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS manual_event_type VARCHAR(50)",
     "ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS labeled_by_id INTEGER REFERENCES users(id)",
     "ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS labeled_at TIMESTAMPTZ",
+    "ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS actual_trend VARCHAR(20)",
+    "ALTER TABLE news_articles ADD COLUMN IF NOT EXISTS actual_trend_pct_change FLOAT",
 ]
 
 

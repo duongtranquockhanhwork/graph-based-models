@@ -1,0 +1,60 @@
+release_version: FINNEXUS_SEMANTIC_QUALITY_V4_0
+source_graph_version: FINNEXUS_TEMPORAL_KG_V1_0
+dataset_version: FINNEXUS_RESEARCH_DATASET_V17_1
+created_for: >-
+  Separate informative weak semantic candidates from fallback OTHER labels,
+  retain provenance, and prepare a reproducible human-validation sample.
+
+input:
+  dataset: data/dataset/finnexus_news_stock_2019_2022.csv
+  nodes: data/knowledge_graph/nodes.csv
+  edges: data/knowledge_graph/edges.csv
+  entity_evaluation: outputs/kg_evaluation_v1/semantic_evaluation_summary.json
+
+semantic_relations:
+  - CONTAINS_EVENT
+  - AFFECTS
+  - HAS_SENTIMENT
+
+informative_candidate_rule:
+  excluded_event_types: [OTHER]
+  required_label_confidence: HIGH
+  required_entity_tier: HIGH_PRECISION
+  require_source_url: true
+  require_evidence_text: true
+  scientific_status: EXPERIMENTAL_NOT_GOLD
+
+fallback_rule:
+  event_types: [OTHER]
+  purpose: >-
+    Preserve full lineage without exposing fallback no-event labels to semantic
+    querying or graph-model features by default.
+
+review_sampling:
+  random_seed: 20260813
+  informative_per_event_type: 20
+  fallback_rows: 30
+  content_preview_characters: 700
+  rare_event_types:
+    - M_AND_A
+    - MARKET_TRADING
+    - LEGAL_REGULATORY
+    - SECTOR_NEWS
+    - MACRO_POLICY
+
+review_quality_gates:
+  event_type_macro_f1_min: 0.70
+  sentiment_macro_f1_min: 0.70
+  affected_scope_macro_f1_min: 0.70
+  impact_level_quadratic_kappa_min: 0.60
+  require_all_sample_rows_completed: true
+
+output:
+  release_dir: data/knowledge_graph/semantic_quality_v4
+  quality_dir: data/quality/knowledge_graph/semantic_quality_v4
+
+interpretation:
+  - Evidence completeness scores are not probabilities of semantic correctness.
+  - Informative candidates remain unvalidated until independent review is complete.
+  - Fallback edges are excluded from default semantic query/model profiles.
+  - Outcome relations remain physically separate and are never included here.

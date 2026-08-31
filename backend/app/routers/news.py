@@ -13,7 +13,7 @@ from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
 from app.services.nlp_service import analyze_article
 from app.services.graph_service import add_news_to_graph, get_graph_features
-from app.services.prediction_service import predict_trend
+from app.services.prediction_service import predict_trend_active
 from app.services import watchlist_service
 from pydantic import BaseModel
 
@@ -24,6 +24,40 @@ class UrlImportRequest(BaseModel):
     url: str
 
 
+_KNOWN_ARTICLE_BODY_SELECTORS = [
+    "article.fck_detail", ".fck_detail", "article",
+    ".article-content", ".article-body", ".detail-content", ".content-detail",
+    ".post-content", ".entry-content", "main",
+]
+
+
+def _extract_by_known_selectors(soup) -> Optional[str]:
+    for sel in _KNOWN_ARTICLE_BODY_SELECTORS:
+        elem = soup.select_one(sel)
+        if elem:
+            text = elem.get_text(separator="\n", strip=True)
+            if len(text) > 100:
+                return text[:5000]
+    return None
+
+
+def _extract_by_paragraph_density(soup) -> Optional[str]:
+    """Site-agnostic fallback for when none of the known selectors match
+    (a new site, or a known one that redesigned again): the article body is,
+    on essentially every news site, whichever container holds the most text
+    packed into direct-child <p> tags - nav/sidebar/ad blocks don't cluster
+    paragraphs that way. Cheap density heuristic, no per-site maintenance."""
+    best_elem, best_len = None, 0
+    for candidate in soup.find_all(["div", "article", "section"]):
+        paragraphs = candidate.find_all("p", recursive=False)
+        total = sum(len(p.get_text(strip=True)) for p in paragraphs)
+        if total > best_len:
+            best_len, best_elem = total, candidate
+    if best_elem and best_len > 150:
+        return best_elem.get_text(separator="\n", strip=True)[:5000]
+    return None
+
+
 def _run_analysis(news_id: int, db: Session, importer_user_id: Optional[int] = None):
     news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not news:
@@ -32,9 +66,9 @@ def _run_analysis(news_id: int, db: Session, importer_user_id: Optional[int] = N
     gf = {}
     for stock in result.get("stocks", []):
         gf.update(get_graph_features(stock))
-    # Luôn chạy predict_trend để mọi bài báo đã phân tích đều có "lý do" cụ
-    # thể, kể cả khi không nhận diện được mã cổ phiếu nào (gf sẽ rỗng).
-    pred = predict_trend(result, gf)
+    # Luôn chạy predict_trend_active để mọi bài báo đã phân tích đều có "lý do"
+    # cụ thể, kể cả khi không nhận diện được mã cổ phiếu nào (gf sẽ rỗng).
+    pred = predict_trend_active(result, gf)
     news.stocks_mentioned = result["stocks"]
     news.companies_mentioned = result["companies"]
     news.industries_mentioned = result["industries"]
@@ -145,19 +179,15 @@ def import_from_url(
         if not title or len(title) < 5:
             raise HTTPException(400, "Không thể trích xuất tiêu đề từ URL này")
 
-        # Extract content
-        content = None
-        for sel in [
-            "article.fck_detail", ".fck_detail", "article",
-            ".article-body", ".detail-content", ".content-detail",
-            ".post-content", ".entry-content", "main",
-        ]:
-            elem = soup.select_one(sel)
-            if elem:
-                text = elem.get_text(separator="\n", strip=True)
-                if len(text) > 100:
-                    content = text[:5000]
-                    break
+        # Extract content. Known selectors are a fast path for sites we've
+        # already checked; they inevitably go stale as sites redesign
+        # (vietstock.vn moved its article body to .article-content at some
+        # point, silently making every import from it return empty content -
+        # the exact "crawler breaks when site structure changes" risk the
+        # project proposal itself calls out). The density fallback below
+        # covers any site not in the list, and any site whose markup changes
+        # again later, without needing a new selector added every time.
+        content = _extract_by_known_selectors(soup) or _extract_by_paragraph_density(soup)
 
         # Extract published date from meta
         published_date = None
