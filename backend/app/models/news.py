@@ -25,11 +25,15 @@ class NewsArticle(Base):
     predicted_trend = Column(String(20), nullable=True)
     prediction_confidence = Column(Float, nullable=True)
     prediction_explanation = Column(JSON, default=dict)
+    # SCORED | REFUSED | UNAVAILABLE | ABSTAIN | RULE_BASED — trạng thái mà
+    # bộ dự đoán trả về. "Từ chối trả lời" là một kết quả, không phải lỗi,
+    # nên nó được lưu chứ không bị nuốt.
+    prediction_decision = Column(String(30), nullable=True)
 
     is_analyzed = Column(Boolean, default=False)
 
     # Ground truth xu hướng lấy từ biến động giá thật (xem
-    # core/prediction/price_labels.py), không phải suy ra từ sentiment.
+    # ground_truth/price_labels.py), không phải suy ra từ sentiment.
     # None khi chưa có đủ dữ liệu giá quanh published_date.
     actual_trend = Column(String(20), nullable=True)
     actual_trend_pct_change = Column(Float, nullable=True)

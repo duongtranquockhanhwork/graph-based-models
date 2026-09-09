@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from app.models.news import NewsArticle
 
 RETURN_LABEL_CONSISTENCY_PASS_THRESHOLD = 80.0
+# Dưới mức này nghĩa là phần lớn bài báo không dùng được cho mô hình, và bảng
+# kiểm định không được phép báo ĐẠT.
+USABLE_ROW_PASS_THRESHOLD = 50.0
 
 
 def get_news_symbol_stats(db: Session) -> Dict:
@@ -59,25 +62,35 @@ def compute_data_quality(db: Session) -> Dict:
         else 100.0
     )
 
-    # No persisted train/test split exists anywhere in this codebase (the
-    # customer-facing evaluate_model() is fully synthetic), so there is no
-    # real split to leak between — this is intentionally not computed.
-    split_leakage = 0
+    # Tỉ lệ bản ghi thực sự dùng được cho mô hình. Đây là điều kiện bị BỎ SÓT
+    # trong bản trước: overall_status chỉ xét missing/duplicate/consistency,
+    # nên bảng báo "PASS" trong khi pass_pct = 0.0 — không một bản ghi nào đạt.
+    stats = get_news_symbol_stats(db)
+    pass_pct = stats["pass_pct"]
 
-    overall_status = (
-        "PASS"
-        if missing_values == 0
-        and duplicates == 0
-        and return_label_consistency >= RETURN_LABEL_CONSISTENCY_PASS_THRESHOLD
-        else "FAIL"
-    )
+    checks = {
+        "no_missing_values": missing_values == 0,
+        "no_duplicates": duplicates == 0,
+        "label_consistency_ok": return_label_consistency >= RETURN_LABEL_CONSISTENCY_PASS_THRESHOLD,
+        "enough_usable_rows": pass_pct >= USABLE_ROW_PASS_THRESHOLD,
+    }
+    failed = [name for name, ok in checks.items() if not ok]
 
     return {
         "missing_values": missing_values,
         "duplicates": duplicates,
         "return_label_consistency": return_label_consistency,
-        "split_leakage": split_leakage,
-        "overall_status": overall_status,
+        "pass_pct": pass_pct,
+        "checks": checks,
+        "failed_checks": failed,
+        "overall_status": "PASS" if not failed else "FAIL",
+        # `split_leakage` đã được gỡ khỏi kết quả. Nó luôn trả về hằng số 0 và
+        # được hiển thị như một phép kiểm tra thật, tạo cảm giác an toàn giả.
+        # Khi hệ thống có train/test split lưu trong CSDL, hãy tính nó thật
+        # (giao giữa các split_id) rồi mới đưa lại vào đây.
+        "split_leakage_note": (
+            "Mức chính xác của phần dự đoán giá được đo riêng, xem trang Độ chính xác."
+        ),
     }
 
 
@@ -104,4 +117,11 @@ def compute_labeling_accuracy(db: Session) -> Dict:
         "accuracy_sentiment": accuracy_sentiment,
         "event_labeled_count": len(event_labeled),
         "accuracy_event": accuracy_event,
+        # Đây KHÔNG phải độ chính xác của hệ thống trên dữ liệu chung.
+        # Hàng chờ gán nhãn chỉ nhận những bài mô hình không chắc chắn, nên
+        # tập được gán nhãn lệch hẳn về phía khó. Con số này chỉ dùng để theo
+        # dõi chất lượng bộ trích xuất NLP trên đúng nhóm ca khó đó.
+        "selection_bias_note": (
+            "Chỉ đo trên nhóm bài hệ thống thấy khó nhất, nên không đại diện cho toàn bộ dữ liệu."
+        ),
     }

@@ -1,0 +1,92 @@
+name: CI
+
+# Kiểm định hệ thống phát hiện: mô hình dự đoán từng tụt xuống mức đoán ngẫu
+# nhiên và được triển khai mà không ai biết, vì không có một test nào. Pipeline
+# này tồn tại để điều đó không lặp lại.
+#
+# Test backend chạy với FINNEXUS_ROOT rỗng: CI kiểm tra tầng web (phân quyền,
+# chặn SSRF, vòng đời phiên, hợp đồng API), không kiểm tra lại mô hình — repo
+# nghiên cứu có bộ kiểm định riêng cho nó, và không nên tải 51 MB tài sản mô
+# hình trong mỗi lần chạy CI.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend · pytest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Cài đặt phụ thuộc
+        run: pip install -r requirements.txt
+
+      - name: Chạy test
+        env:
+          DATABASE_URL: sqlite:///./ci.db
+          JWT_SECRET_KEY: ci-secret-not-used-anywhere-real
+          ENVIRONMENT: development
+          FINNEXUS_ROOT: ''
+        run: pytest
+
+  frontend:
+    name: Frontend · typecheck + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cài đặt phụ thuộc
+        run: npm ci
+
+      - name: Kiểm tra kiểu
+        run: npx tsc --noEmit
+
+      - name: Build production
+        run: npm run build
+
+  config-safety:
+    name: Cấu hình · không có secret mặc định trong production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cài đặt phụ thuộc
+        run: pip install -r backend/requirements.txt
+
+      - name: ENVIRONMENT=production phải từ chối JWT secret mặc định
+        working-directory: backend
+        env:
+          ENVIRONMENT: production
+          JWT_SECRET_KEY: dev-secret-change-me
+          DATABASE_URL: sqlite:///./ci.db
+        run: |
+          if python -c "from app.core.config import Settings; Settings().validate_for_environment()" 2>/dev/null; then
+            echo "LỖI: cấu hình production chấp nhận JWT secret mặc định"
+            exit 1
+          fi
+          echo "OK: cấu hình production từ chối secret mặc định"

@@ -29,7 +29,8 @@ export interface NewsArticle {
   impact_score?: number
   predicted_trend?: string
   prediction_confidence?: number
-  prediction_explanation?: Record<string, unknown>
+  prediction_decision?: string
+  prediction_explanation?: PredictionExplanation
   is_analyzed: boolean
   needs_manual_label?: boolean
   manual_sentiment?: string
@@ -72,19 +73,132 @@ export interface DashboardStats {
   news_by_date: { date: string; count: number }[]
 }
 
+export interface KgExplanation {
+  kind: 'DIRECT_MENTION' | 'COMENTION_HISTORY' | 'INDIRECT_EXPOSURE' | string
+  detail?: string
+  path?: string
+  peers?: string[]
+}
+
+export interface ScoredSymbol {
+  symbol: string
+  predicted_label: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL'
+  confidence: number
+  decision: string
+  focus_role?: string
+}
+
+/** Đầu ra của bộ dự đoán, lưu nguyên trong NewsArticle.prediction_explanation.
+ *  `engine` cho biết kết quả đến từ mô hình đã kiểm chứng hay từ bộ luật —
+ *  giao diện phải hiển thị khác nhau cho hai trường hợp này. */
+export interface PredictionExplanation {
+  engine?: 'finnexus' | 'heuristic'
+  status?: 'SCORED' | 'REFUSED' | 'UNAVAILABLE' | string
+  stage?: string
+  reason?: string
+  message?: string
+  warning?: string
+  primary_symbol?: string
+  focus_role?: string
+  focus_reason?: string
+  predicted_label?: string
+  probabilities?: Record<string, number>
+  one_variable_baseline_label?: string
+  decision?: string
+  decision_reason?: string
+  human_explanation?: string
+  confidence_floor?: number
+  kg_explanation?: KgExplanation[]
+  article_type?: string
+  article_type_caveat?: string
+  label_meaning?: string
+  scored_symbols?: ScoredSymbol[]
+  refused_symbols?: { symbol: string; reason: string }[]
+  buy_reachable?: boolean
+  graph_view?: FinNexusGraphView
+  reasons?: string[]
+  composite_score?: number
+  fallback?: PredictionExplanation
+  fallback_trend?: string
+}
+
+export interface FinNexusGraphNode {
+  id: string
+  kind: 'stock' | 'peer'
+  role: string
+  label: string | null
+  confidence: number | null
+  decision: string | null
+}
+
+export interface FinNexusGraphView {
+  nodes: FinNexusGraphNode[]
+  edges: { source: string; target: string; kind: string }[]
+}
+
 export interface Prediction {
   stock_symbol: string
   trend: string
   confidence: number
+  decision?: string
   sentiment?: string
   events?: string[]
+  news_id?: number
   news_title?: string
   published_date?: string
-  explanation?: {
-    reasons: string[]
-    composite_score: number
+  engine?: string
+  is_primary?: boolean
+}
+
+/** Kết quả /api/prediction/stock/{symbol} — tổng hợp theo luật ở cấp mã.
+ *  KHÔNG phải đầu ra của mô hình FinNexus: mô hình chấm theo cặp bài–mã. */
+export interface StockPrediction {
+  stock_symbol: string
+  trend: string
+  confidence: number
+  decision?: string
+  based_on_news_count: number
+  is_investment_advice: boolean
+  explanation: PredictionExplanation
+}
+
+export interface PredictionList {
+  predictions: Prediction[]
+  refused_count: number
+  engine: string
+  is_investment_advice: boolean
+}
+
+/** Nguồn sự thật duy nhất cho mọi con số hiệu năng hiển thị trên giao diện. */
+export interface ModelInfo {
+  available: boolean
+  reason?: string
+  active_model: string
+  version?: string
+  status?: string
+  labels?: string[]
+  label_meaning?: string
+  frozen_threshold?: number
+  feature_count?: number
+  performance?: {
+    out_of_fold_macro_f1: number
+    baseline_macro_f1: number
+    delta_vs_baseline: number
+    baseline_description: string
+    beats_majority_on_accuracy: boolean
   }
-  features?: Record<string, number>
+  operating_point?: {
+    confidence_floor: number
+    coverage_on_development: number
+    expected_accuracy_at_this_coverage: number
+    evidence_grade: string
+    meaning: string
+  }
+  policy_gates?: Record<string, boolean>
+  buy_reachable?: boolean
+  is_investment_advice: boolean
+  tradeable: boolean
+  disclaimer?: string
 }
 
 export interface LiveQuote {
@@ -185,40 +299,36 @@ export interface FinancialStatements {
   available: boolean
 }
 
+/** Kết quả /api/prediction/evaluate — đo trên nhãn giá thật, kèm baseline.
+ *  Không còn trường nào lấy nhãn cảm xúc gán tay làm ground truth. */
 export interface ModelEvaluation {
-  accuracy: number
-  precision: number
-  recall: number
-  f1_score: number
-  confusion_matrix: number[][]
-  baseline_accuracy: number
-  graph_enhanced_accuracy: number
-  ecbm_accuracy?: number | null
-  ecbm_confusion_matrix?: number[][] | null
-  ecbm_class_report?: Record<string, Record<string, number>> | null
+  engine: string
+  ground_truth: string
   labels: string[]
-  class_report?: Record<string, Record<string, number>>
-  sample_size: number
   insufficient_data: boolean
+  sample_size: number
+  required_samples?: number
+  message?: string
+  accuracy?: number
+  precision?: number
+  recall?: number
+  f1_score?: number
+  macro_f1?: number
+  confusion_matrix?: number[][]
+  class_report?: Record<string, Record<string, number>>
+  baseline?: {
+    name: string
+    predicts: string
+    accuracy: number
+    macro_f1: number
+  }
+  delta_accuracy_vs_majority?: number
+  beats_majority?: boolean
+  label_distribution?: Record<string, number>
+  caveat?: string
+  is_investment_advice: boolean
 }
 
-export interface ModelInfo {
-  active_model: 'ecbm' | 'heuristic_baseline'
-  last_training_metrics: {
-    trained: boolean
-    sample_size?: number
-    real_price_labels?: number
-    sentiment_proxy_labels?: number
-    train_size?: number
-    val_size?: number
-    val_accuracy?: number
-    val_f1_weighted?: number
-    val_f1_macro?: number
-    epochs_run?: number
-    labels?: string[]
-    reason?: string
-  } | null
-}
 
 // ---- Admin ----
 
@@ -237,7 +347,10 @@ export interface DataQuality {
   missing_values: number
   duplicates: number
   return_label_consistency: number
-  split_leakage: number
+  pass_pct: number
+  checks: Record<string, boolean>
+  failed_checks: string[]
+  split_leakage_note: string
   overall_status: 'PASS' | 'FAIL'
 }
 

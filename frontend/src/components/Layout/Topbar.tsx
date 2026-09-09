@@ -1,27 +1,30 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Activity, CalendarDays, ChevronDown, LogOut } from 'lucide-react'
+import { Activity, CalendarDays, ChevronDown, LogOut, Menu } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useLayout } from '../../context/LayoutContext'
+import AnalysisIndicator from './AnalysisIndicator'
 
 const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
-  '/dashboard': { title: 'Tổng quan thị trường', breadcrumb: 'Dashboard' },
-  '/news': { title: 'Tin tức', breadcrumb: 'Danh sách tin tức & kết quả phân tích NLP' },
-  '/stocks': { title: 'Cổ phiếu', breadcrumb: 'Danh mục mã cổ phiếu theo dõi' },
-  '/events': { title: 'Sự kiện tài chính', breadcrumb: 'Sự kiện được nhận diện từ tin tức' },
-  '/sentiment': { title: 'Phân tích cảm xúc', breadcrumb: 'Tổng hợp Sentiment theo thời gian & cổ phiếu' },
-  '/prediction': { title: 'Dự đoán xu hướng', breadcrumb: 'Graph-enhanced Machine Learning' },
-  '/reports': { title: 'Báo cáo', breadcrumb: 'Đánh giá mô hình · Metrics' },
-  '/live': { title: 'Bảng giá Live', breadcrumb: 'Giá cổ phiếu thời gian thực' },
-  '/settings': { title: 'Cài đặt', breadcrumb: 'Hồ sơ cá nhân & giao diện' },
-  '/import': { title: 'Nhập dữ liệu tin tức', breadcrumb: 'Import · CSV / URL / Thủ công' },
+  '/dashboard': { title: 'Tổng quan', breadcrumb: 'Hôm nay thị trường có gì' },
+  '/feed': { title: 'Dòng tin', breadcrumb: 'Tin đã đọc · lọc theo tin tốt/xấu, sự việc, mã' },
+  '/stocks': { title: 'Cổ phiếu', breadcrumb: 'Danh mục theo dõi và toàn bộ mã' },
+  '/graph': { title: 'Knowledge Graph', breadcrumb: 'Sơ đồ liên kết giữa tin, mã, ngành và sự việc' },
+  '/reports': { title: 'Độ chính xác', breadcrumb: 'Hệ thống đoán đúng đến đâu' },
+  '/import': { title: 'Nhập dữ liệu', breadcrumb: 'CSV · URL · Thủ công' },
+  '/settings': { title: 'Cài đặt', breadcrumb: 'Hồ sơ cá nhân và giao diện' },
 }
 
 export default function Topbar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { toggleSidebar } = useLayout()
   const [menuOpen, setMenuOpen] = useState(false)
-  const info = PAGE_INFO[pathname] || { title: 'FinNexus KG', breadcrumb: '' }
+  const stockMatch = pathname.match(/^\/stocks\/([A-Za-z0-9]+)$/)
+  const info = stockMatch
+    ? { title: `Hồ sơ mã ${stockMatch[1].toUpperCase()}`, breadcrumb: 'Giá · biểu đồ · nhận định · liên kết · tin liên quan' }
+    : PAGE_INFO[pathname] || { title: 'FinNexus KG', breadcrumb: '' }
 
   const handleLogout = () => {
     logout()
@@ -47,8 +50,16 @@ export default function Topbar() {
         borderBottom: '1px solid var(--border-subtle)',
       }}
     >
-      <div className="flex items-center gap-3">
-        <div>
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          onClick={toggleSidebar}
+          aria-label="Mở menu điều hướng"
+          className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0"
+          style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
+        >
+          <Menu size={16} />
+        </button>
+        <div className="min-w-0">
           <h2 className="font-semibold text-[14px] leading-tight" style={{ color: 'var(--text-primary)' }}>{info.title}</h2>
           <p className="text-[11px] leading-tight mt-0.5" style={{ color: 'var(--text-faint)' }}>
             {info.breadcrumb}
@@ -56,8 +67,10 @@ export default function Topbar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5" style={{ color: 'var(--text-faint)' }}>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <AnalysisIndicator />
+
+        <div className="hidden md:flex items-center gap-1.5" style={{ color: 'var(--text-faint)' }}>
           <CalendarDays size={12} />
           <span className="text-[11px]">{dateStr}</span>
         </div>

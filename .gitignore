@@ -28,5 +28,13 @@ Thumbs.db
 *.log
 logs/
 
-# Regenerable cache (see backend/core/prediction/price_labels.py)
+# Regenerable cache (see backend/ground_truth/price_labels.py)
 backend/data/price_history_cache.csv
+
+# Cơ sở dữ liệu cục bộ
+*.db
+*.sqlite
+*.sqlite3
+
+# Môi trường ảo dùng để kiểm định
+.auditvenv/

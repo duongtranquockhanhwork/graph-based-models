@@ -25,6 +25,10 @@ class NewsResponse(BaseModel):
     impact_score: Optional[float]
     predicted_trend: Optional[str]
     prediction_confidence: Optional[float]
+    # Trạng thái mà bộ dự đoán trả về: SCORED / ABSTAIN / REFUSED / UNAVAILABLE.
+    # Không có trường này thì giao diện không phân biệt được "mô hình nói đi
+    # ngang" với "mô hình không trả lời được" — hai điều hoàn toàn khác nhau.
+    prediction_decision: Optional[str] = None
     prediction_explanation: Optional[Dict[str, Any]]
     is_analyzed: bool
     needs_manual_label: bool = False

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import toast from 'react-hot-toast'
+import { useAnalysisJobs } from '../context/AnalysisJobsContext'
 import {
   Upload, FileText, Plus, RefreshCw, Link2, CheckCircle2,
   AlertCircle, Loader2, Globe
@@ -10,6 +11,7 @@ import { newsApi } from '../services/api'
 type Tab = 'csv' | 'url' | 'manual'
 
 export default function ImportPage() {
+  const { track } = useAnalysisJobs()
   const [activeTab, setActiveTab] = useState<Tab>('csv')
 
   // CSV state
@@ -31,9 +33,11 @@ export default function ImportPage() {
     setUploadResult(null)
     try {
       const res = await newsApi.uploadCsv(files[0])
-      const count = res.data.ids.length
-      setUploadResult(count)
-      toast.success(`Đã import ${count} bài báo từ CSV`)
+      const ids: number[] = res.data.ids
+      setUploadResult(ids.length)
+      toast.success(`Đã nhập ${ids.length} bài báo. Đang phân tích…`)
+      // Phân tích chạy nền; theo dõi để báo và trỏ tới kết quả khi xong.
+      track(ids, `${ids.length} bài từ CSV`)
     } catch {
       toast.error('Lỗi khi upload file CSV')
     } finally {
@@ -55,7 +59,8 @@ export default function ImportPage() {
     try {
       const res = await newsApi.importUrl(urlInput.trim())
       setUrlPreview({ title: res.data.title, source: res.data.source })
-      toast.success('Đã import bài báo từ URL')
+      toast.success('Đã nhập bài báo. Đang phân tích…')
+      track([res.data.id], res.data.title)
       setUrlInput('')
     } catch (err: unknown) {
       const msg =
@@ -72,8 +77,9 @@ export default function ImportPage() {
     if (!form.title.trim()) return
     setSubmitting(true)
     try {
-      await newsApi.create(form)
-      toast.success('Đã thêm bài báo')
+      const res = await newsApi.create(form)
+      toast.success('Đã thêm bài báo. Đang phân tích…')
+      track([res.data.id], form.title)
       setForm({ title: '', content: '', source: '', published_date: '' })
     } catch {
       toast.error('Lỗi khi thêm bài báo')
@@ -98,7 +104,7 @@ export default function ImportPage() {
   ]
 
   return (
-    <div className="p-6 max-w-3xl fade-in">
+    <div className="p-4 sm:p-6 max-w-3xl fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -52,12 +52,40 @@ export const newsApi = {
   },
   importUrl: (url: string) => api.post('/news/import-url', { url }),
   analyze: (id: number) => api.post(`/news/${id}/analyze`),
+  /** Tiến trình phân tích nền của một lô bài vừa nhập. */
+  analysisStatus: (ids: number[]) =>
+    api.post<{
+      total: number
+      analyzed: number
+      pending: number
+      done: boolean
+      scored?: number
+      refused?: number
+      needs_review?: number
+      symbols?: string[]
+    }>('/news/analysis-status', { ids }),
   analyzeAll: () => api.post('/news/analyze-all'),
   delete: (id: number) => api.delete(`/news/${id}`),
 }
 
+export interface GraphFilters {
+  stock?: string
+  industry?: string
+  limit?: number
+}
+
 export const graphApi = {
+  data: (filters: GraphFilters = {}) => api.get('/graph/', { params: filters }),
+  stats: () => api.get('/graph/stats'),
   stockFeatures: (symbol: string) => api.get(`/graph/stock/${symbol}/features`),
+}
+
+export interface ScorePayload {
+  title: string
+  content?: string
+  published_date?: string
+  url?: string
+  source?: string
 }
 
 export const predictionApi = {
@@ -65,6 +93,8 @@ export const predictionApi = {
   forStock: (symbol: string) => api.get(`/prediction/stock/${symbol}`),
   evaluate: () => api.get('/prediction/evaluate'),
   modelInfo: () => api.get('/prediction/model-info'),
+  /** Chấm thử một bài mà không lưu. Trả cả trạng thái TỪ CHỐI của mô hình. */
+  score: (payload: ScorePayload) => api.post('/prediction/score', payload),
 }
 
 export const analyticsApi = {
