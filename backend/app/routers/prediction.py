@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.news import NewsArticle
-from app.services import finnexus_service
+from app.services import finnexus_service, nlp_service
 from app.services.graph_service import get_graph_features
 from app.services.prediction_service import (
     active_engine,
@@ -49,8 +49,19 @@ def score_one_article(payload: ScoreRequest):
     quả hợp lệ: mô hình không nhận ra mã, hoặc không đủ 20 phiên giá trước ngày
     đăng để dựng đặc trưng.
     """
+    # Truyền các mã mà bộ trích thực thể của app phân giải được, đúng như đường
+    # phân tích chính làm (prediction_service._score_with_finnexus).
+    #
+    # Thiếu dòng này, cùng một bài cho hai kết quả khác nhau: trang "chấm thử"
+    # báo không nhận ra mã nào, còn trang phân tích thì ra kết quả — vì bộ liên
+    # kết của mô hình chỉ bắt được mã viết tường minh kèm ngữ cảnh chứng khoán,
+    # trong khi báo tiếng Việt thường chỉ gọi tên công ty ("Vinamilk ký…").
+    linked = nlp_service.extract_stocks(
+        f"{payload.title}\n{payload.content or ''}"
+    )
     result = finnexus_service.score_article(
-        payload.title, payload.content, payload.published_date, payload.url, payload.source
+        payload.title, payload.content, payload.published_date,
+        payload.url, payload.source, linked_symbols=linked,
     )
     if result.get("status") == "UNAVAILABLE":
         raise HTTPException(
