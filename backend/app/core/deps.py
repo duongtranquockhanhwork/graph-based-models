@@ -30,9 +30,23 @@ def get_current_user(
     if user_id is None:
         raise credentials_exception
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    try:
+        user = db.query(User).filter(User.id == int(user_id)).first()
+    except (TypeError, ValueError):
+        raise credentials_exception
+
     if not user or not user.is_active:
         raise credentials_exception
+
+    # Đối chiếu phiên bản token. Đổi/đặt lại mật khẩu làm tăng token_version,
+    # nên mọi token phát hành trước đó ngừng hiệu lực ngay lập tức thay vì
+    # sống hết 7 ngày.
+    if int(payload.get("ver", 0)) != int(user.token_version or 0):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Phiên đăng nhập đã hết hiệu lực do mật khẩu vừa thay đổi. Vui lòng đăng nhập lại.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     return user
 

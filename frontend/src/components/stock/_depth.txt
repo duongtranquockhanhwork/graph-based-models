@@ -1,0 +1,83 @@
+function DepthRow({ label, bidPrice, bidVolume, askPrice, askVolume }: { label: string; bidPrice: number; bidVolume: number; askPrice: number; askVolume: number }) {
+  return (
+    <tr style={{ borderTop: '1px solid var(--border-subtle)' }}>
+      <td className="py-1.5 text-[11px]" style={{ color: 'var(--text-faint)' }}>{label}</td>
+      <td className="py-1.5 text-right text-[12px]" style={{ color: 'var(--text-faint)' }}>{bidVolume ? fmtNumber(bidVolume) : '—'}</td>
+      <td className="py-1.5 text-right text-[12px] font-medium" style={{ color: '#10b981' }}>{bidPrice ? fmtNumber(bidPrice) : '—'}</td>
+      <td className="py-1.5 pl-3 text-[12px] font-medium" style={{ color: '#ef4444' }}>{askPrice ? fmtNumber(askPrice) : '—'}</td>
+      <td className="py-1.5 text-[12px]" style={{ color: 'var(--text-faint)' }}>{askVolume ? fmtNumber(askVolume) : '—'}</td>
+    </tr>
+  )
+}
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Độ sâu thị trường</p>
+          <table className="w-full">
+            <thead>
+              <tr style={{ color: 'var(--text-faint)' }}>
+                <th className="text-left text-[10px] font-medium pb-1">Giá</th>
+                <th className="text-right text-[10px] font-medium pb-1">KL</th>
+                <th className="text-right text-[10px] font-medium pb-1">Mua</th>
+                <th className="text-left text-[10px] font-medium pb-1 pl-3">Bán</th>
+                <th className="text-left text-[10px] font-medium pb-1">KL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <DepthRow label="1" bidPrice={quote.bid_1_price} bidVolume={quote.bid_1_volume} askPrice={quote.ask_1_price} askVolume={quote.ask_1_volume} />
+              <DepthRow label="2" bidPrice={quote.bid_2_price} bidVolume={quote.bid_2_volume} askPrice={quote.ask_2_price} askVolume={quote.ask_2_volume} />
+              <DepthRow label="3" bidPrice={quote.bid_3_price} bidVolume={quote.bid_3_volume} askPrice={quote.ask_3_price} askVolume={quote.ask_3_volume} />
+            </tbody>
+          </table>
+          <div className="flex items-center justify-between text-[11px] mt-2" style={{ color: 'var(--text-faint)' }}>
+            <span>Dư mua: {fmtNumber(bidTotal)}</span>
+            <span>Dư bán: {fmtNumber(askTotal)}</span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden mt-1" style={{ background: 'rgba(239,68,68,0.2)' }}>
+            <div className="h-full" style={{ width: `${bidPct}%`, background: '#10b981' }} />
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Biểu đồ độ sâu</p>
+          <ResponsiveContainer width="100%" height={120}>
+            <BarChart data={depthData} layout="vertical" margin={{ top: 0, right: 8, left: 0, bottom: 0 }}>
+              <XAxis type="number" hide />
+              <YAxis type="category" dataKey="level" tick={{ fill: '#64748b', fontSize: 10 }} width={40} />
+              <Tooltip formatter={(v: number) => [fmtNumber(v), 'KL']} contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 10, fontSize: 11 }} />
+              <Bar dataKey="volume" isAnimationActive={false}>
+                {depthData.map((d, i) => <Cell key={i} fill={d.side === 'bid' ? '#10b981' : '#ef4444'} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>Khớp lệnh</p>
+          <div className="max-h-56 overflow-y-auto">
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr style={{ color: 'var(--text-faint)' }}>
+                  <th className="text-left font-medium pb-1">Thời gian</th>
+                  <th className="text-right font-medium pb-1">Giá</th>
+                  <th className="text-right font-medium pb-1">KL</th>
+                  <th className="text-right font-medium pb-1">M/B</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(trades || []).map((t) => (
+                  <tr key={t.id} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <td className="py-1" style={{ color: 'var(--text-faint)' }}>{t.time.slice(11, 19)}</td>
+                    <td className="py-1 text-right font-medium" style={{ color: t.match_type === 'buy' ? '#10b981' : '#ef4444' }}>{fmtNumber(t.price)}</td>
+                    <td className="py-1 text-right" style={{ color: 'var(--text-secondary)' }}>{fmtNumber(t.volume)}</td>
+                    <td className="py-1 text-right font-medium" style={{ color: t.match_type === 'buy' ? '#10b981' : '#ef4444' }}>
+                      {t.match_type === 'buy' ? 'M' : 'B'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>

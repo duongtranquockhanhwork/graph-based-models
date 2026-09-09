@@ -1,26 +1,25 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CalendarDays, ChevronDown, LogOut, ShieldHalf } from 'lucide-react'
+import { CalendarDays, ChevronDown, LogOut, Menu, ShieldHalf } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useLayout } from '../../context/LayoutContext'
 
 const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
-  '/admin/dashboard': { title: 'Dashboard Admin', breadcrumb: 'Quản trị hệ thống' },
-  '/admin/news': { title: 'Quản lý tin tức', breadcrumb: 'Danh sách & kiểm duyệt tin tức' },
-  '/admin/stocks': { title: 'Quản lý cổ phiếu', breadcrumb: 'Danh mục mã cổ phiếu theo dõi' },
-  '/admin/keywords': { title: 'Quản lý từ khoá sự kiện', breadcrumb: 'Từ điển nhận diện sự kiện NLP' },
-  '/admin/data-validation': { title: 'Kiểm định dữ liệu', breadcrumb: 'Chất lượng dữ liệu pipeline' },
-  '/admin/labeling': { title: 'Gán nhãn thủ công', breadcrumb: 'Hàng chờ xác nhận nhãn' },
-  '/admin/validation-results': { title: 'Kết quả kiểm định', breadcrumb: 'Độ chính xác so với nhãn thủ công' },
-  '/admin/users': { title: 'Quản lý người dùng', breadcrumb: 'Vai trò & trạng thái tài khoản' },
-  '/admin/live': { title: 'Bảng giá Live', breadcrumb: 'Giá cổ phiếu thời gian thực' },
-  '/admin/settings': { title: 'Cấu hình hệ thống', breadcrumb: 'Ngưỡng phân loại & xử lý' },
-  '/admin/profile': { title: 'Hồ sơ cá nhân', breadcrumb: 'Thông tin tài khoản & giao diện' },
+  '/admin/dashboard': { title: 'Tổng quan quản trị', breadcrumb: 'Cảnh báo · số liệu · nhật ký hoạt động' },
+  '/admin/news': { title: 'Dữ liệu tin tức', breadcrumb: 'Thêm, sửa, xoá và đọc lại' },
+  '/admin/labeling': { title: 'Tự đọc và xác nhận', breadcrumb: 'Những bài hệ thống không chắc chắn' },
+  '/admin/quality': { title: 'Chất lượng dữ liệu', breadcrumb: 'Dữ liệu có sạch không, máy đọc có giống người không' },
+  '/admin/tuning': { title: 'Cách đọc hiểu bài', breadcrumb: 'Mức nhạy và từ ngữ nhận diện' },
+  '/admin/users': { title: 'Người dùng', breadcrumb: 'Phân quyền và khoá tài khoản' },
+  '/admin/live': { title: 'Cổ phiếu', breadcrumb: 'Bảng giá và danh mục mã' },
+  '/admin/profile': { title: 'Hồ sơ của tôi', breadcrumb: 'Thông tin cá nhân và mật khẩu' },
 }
 
 export default function AdminTopbar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { toggleSidebar } = useLayout()
   const [menuOpen, setMenuOpen] = useState(false)
   const info = PAGE_INFO[pathname] || { title: 'FinNexus KG Admin', breadcrumb: '' }
 
@@ -48,8 +47,16 @@ export default function AdminTopbar() {
         borderBottom: '1px solid var(--border-subtle)',
       }}
     >
-      <div className="flex items-center gap-3">
-        <div>
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          onClick={toggleSidebar}
+          aria-label="Mở menu điều hướng"
+          className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0"
+          style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
+        >
+          <Menu size={16} />
+        </button>
+        <div className="min-w-0">
           <h2 className="font-semibold text-[14px] leading-tight" style={{ color: 'var(--text-primary)' }}>{info.title}</h2>
           <p className="text-[11px] leading-tight mt-0.5" style={{ color: 'var(--text-faint)' }}>
             {info.breadcrumb}
@@ -58,7 +65,7 @@ export default function AdminTopbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5" style={{ color: 'var(--text-faint)' }}>
+        <div className="hidden md:flex items-center gap-1.5" style={{ color: 'var(--text-faint)' }}>
           <CalendarDays size={12} />
           <span className="text-[11px]">{dateStr}</span>
         </div>

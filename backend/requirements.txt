@@ -9,8 +9,6 @@ pandas==2.2.2
 numpy==1.26.4
 scikit-learn==1.4.2
 networkx==3.3
-neo4j==5.20.0
-underthesea==6.8.4
 python-dotenv==1.0.1
 aiofiles==23.2.1
 requests==2.32.3
@@ -23,5 +21,11 @@ google-auth==2.29.0
 email-validator==2.1.1
 vnstock==4.0.4
 
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.3.1
+# Pipeline suy luận của FinNexus KG (repo nghiên cứu, trỏ qua FINNEXUS_ROOT).
+# Mô hình đóng băng V56 là XGBoost; PyYAML để đọc config suy luận.
+xgboost==2.0.3
+PyYAML==6.0.1
+
+# Test
+pytest==8.2.0
+httpx==0.27.0

@@ -5,11 +5,47 @@ import os
 
 from sqlalchemy.orm import Session
 
+from app.services.nlp_service import EVENT_LABELS_VI
+
 _dict_path = os.path.join(os.path.dirname(__file__), "../../data/stock_dictionary.json")
 with open(_dict_path, "r", encoding="utf-8") as f:
     STOCK_DICT = json.load(f)
 
 G = nx.DiGraph()
+
+# Tiền tố pháp lý lặp lại ở gần như mọi tên công ty VN. VIẾT TẮT chúng thay vì
+# xoá hẳn: xoá đi thì "Công ty Cổ phần FPT" thành "FPT", trùng y hệt nhãn của
+# nút cổ phiếu FPT bên cạnh và người xem không phân biệt được hai nút.
+_COMPANY_PREFIXES = (
+    ("Ngân hàng Thương mại Cổ phần ", "NH "),
+    ("Ngân hàng TMCP ", "NH "),
+    ("Ngân hàng ", "NH "),
+    ("Tổng Công ty Cổ phần ", "TCT "),
+    ("Tổng Công ty ", "TCT "),
+    ("Công ty Cổ phần Tập đoàn ", "CTCP TĐ "),
+    ("Công ty Cổ phần ", "CTCP "),
+    ("Tập đoàn ", "TĐ "),
+)
+
+
+def _short_company(name: str, symbol: Optional[str] = None) -> str:
+    """Rút gọn tên công ty cho vừa một nút đồ thị, nhưng vẫn khác nhãn mã.
+
+    Ưu tiên tên thương hiệu trong ngoặc đơn ("Vinamilk", "PV Gas") vì người đọc
+    nhận ra ngay. Nếu tên đó trùng chính mã cổ phiếu thì bỏ qua, vì hai nút
+    cạnh nhau mang cùng một chữ là vô nghĩa.
+    """
+    if "(" in name and ")" in name:
+        brand = name[name.index("(") + 1 : name.rindex(")")].strip()
+        if 1 < len(brand) <= 28 and brand.upper() != (symbol or "").upper():
+            return brand
+
+    short = name
+    for prefix, abbrev in _COMPANY_PREFIXES:
+        if short.startswith(prefix):
+            short = abbrev + short[len(prefix):]
+            break
+    return short if len(short) <= 28 else short[:27].rstrip() + "…"
 
 NODE_COLORS = {
     "news": "#3B82F6",
@@ -21,9 +57,35 @@ NODE_COLORS = {
 }
 
 
-def add_news_to_graph(news_id: int, analysis: Dict) -> None:
+# Nhãn hiển thị cho nút cảm xúc. Đồ thị được người Việt đọc, nên nhãn phải là
+# tiếng Việt — trước đây nút hiện "Positive"/"Neutral"/"Negative".
+SENTIMENT_LABELS_VI = {
+    "Positive": "Tích cực",
+    "Negative": "Tiêu cực",
+    "Neutral": "Trung lập",
+}
+
+
+def _news_label(news_id: int, title: Optional[str]) -> str:
+    """Nhãn nút tin tức.
+
+    Trước đây là "News #12" — một con số không nói lên điều gì, khiến đồ thị
+    đầy những nút vô danh. Dùng tiêu đề bài báo, cắt ngắn để không phá bố cục.
+    """
+    if not title:
+        return f"Tin #{news_id}"
+    clean = " ".join(title.split())
+    return clean if len(clean) <= 42 else clean[:41].rstrip() + "…"
+
+
+def add_news_to_graph(news_id: int, analysis: Dict, title: Optional[str] = None) -> None:
     news_node = f"news_{news_id}"
-    G.add_node(news_node, node_type="news", label=f"News #{news_id}")
+    G.add_node(
+        news_node,
+        node_type="news",
+        label=_news_label(news_id, title),
+        title=title or "",
+    )
 
     for stock in analysis.get("stocks", []):
         info = STOCK_DICT.get(stock, {})
@@ -34,7 +96,15 @@ def add_news_to_graph(news_id: int, analysis: Dict) -> None:
 
         company = info.get("company")
         if company:
-            G.add_node(company, node_type="company", label=company)
+            # Tên công ty đầy đủ ("Công ty Cổ phần Sữa Việt Nam (Vinamilk)")
+            # dài gấp nhiều lần đường kính nút. Giữ tên đầy đủ trong thuộc tính
+            # để bảng bên hiển thị, còn nhãn trên đồ thị dùng bản rút gọn.
+            G.add_node(
+                company,
+                node_type="company",
+                label=_short_company(company, stock),
+                full_name=company,
+            )
             G.add_edge(stock, company, relation="represents")
 
         industry = info.get("industry")
@@ -45,14 +115,20 @@ def add_news_to_graph(news_id: int, analysis: Dict) -> None:
 
     for event in analysis.get("events", []):
         ev_node = f"event_{event}"
-        G.add_node(ev_node, node_type="event", label=event.replace("_", " ").title())
+        # EVENT_LABELS_VI là cùng bảng nhãn mà giao diện và bộ phân tích dùng,
+        # nên một sự kiện hiện ra giống nhau ở đồ thị, dòng tin và thẻ tin.
+        G.add_node(
+            ev_node,
+            node_type="event",
+            label=EVENT_LABELS_VI.get(event, event.replace("_", " ").title()),
+        )
         G.add_edge(news_node, ev_node, relation="contains_event")
         for stock in analysis.get("stocks", []):
             G.add_edge(ev_node, stock, relation="affects")
 
     sentiment = analysis.get("sentiment", "Neutral")
     sent_node = f"sentiment_{sentiment}"
-    G.add_node(sent_node, node_type="sentiment", label=sentiment)
+    G.add_node(sent_node, node_type="sentiment", label=SENTIMENT_LABELS_VI.get(sentiment, sentiment))
     G.add_edge(news_node, sent_node, relation="has_sentiment")
 
     stocks = analysis.get("stocks", [])
@@ -69,11 +145,15 @@ def rebuild_graph_from_db(db: Session) -> None:
     G.clear()
     articles = db.query(NewsArticle).filter(NewsArticle.graph_built == True).all()  # noqa: E712
     for n in articles:
-        add_news_to_graph(n.id, {
-            "stocks": n.stocks_mentioned or [],
-            "events": n.events_detected or [],
-            "sentiment": n.sentiment or "Neutral",
-        })
+        add_news_to_graph(
+            n.id,
+            {
+                "stocks": n.stocks_mentioned or [],
+                "events": n.events_detected or [],
+                "sentiment": n.sentiment or "Neutral",
+            },
+            title=n.title,
+        )
 
 
 def get_graph_data(stock_filter: Optional[str] = None,

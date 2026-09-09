@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import { Newspaper, Link2, CheckCircle2, ShieldCheck, PenLine, XCircle, AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ArrowRight, CheckCircle2, Link2, Newspaper, PenLine, ShieldCheck, XCircle } from 'lucide-react'
 import adminApi from '../../services/adminApi'
 import type { AdminDashboardStats } from '../../types'
 import { StatCard, SectionCard, SkeletonBlock, StatusBadge, CHART_TOOLTIP_STYLE } from '../../components/Admin/AdminWidgets'
@@ -41,27 +41,32 @@ export default function AdminDashboardPage() {
   const sentimentData = Object.entries(sentiment_distribution).map(([name, value]) => ({ name, value }))
 
   return (
-    <div className="p-6 space-y-5 fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard icon={Newspaper} label="Tổng số tin" value={stats.total_news} accent="#14b8a6" />
-        <StatCard icon={Link2} label="Dòng dữ liệu" value={stats.news_symbol_rows} accent="#84cc16" sub="news-symbol" />
-        <StatCard icon={CheckCircle2} label="Dòng model-ready" value={stats.model_ready_rows} accent="#0ea5e9" />
-        <StatCard icon={ShieldCheck} label="Dòng PASS" value={stats.pass_count} sub={`${stats.pass_pct}%`} accent="#10b981" />
-        <StatCard icon={PenLine} label="Dòng REVIEW" value={stats.review_count} accent="#f59e0b" />
-        <StatCard icon={XCircle} label="Dòng DROP" value={stats.drop_count} accent="#ef4444" />
+    <div className="p-4 sm:p-6 space-y-5 fade-in">
+      <div>
+        <p className="text-[11px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
+          Dữ liệu đi qua các bước
+        </p>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <StatCard icon={Newspaper} label="Tổng số tin" value={stats.total_news} accent="#14b8a6" sub="Đã nhập vào hệ thống" />
+          <StatCard icon={Link2} label="Lần bài gắn với mã" value={stats.news_symbol_rows} accent="#84cc16" sub="Sau khi tìm ra mã trong bài" />
+          <StatCard icon={CheckCircle2} label="Đủ thông tin để nhận định" value={stats.model_ready_rows} accent="#0ea5e9" sub="Có đủ tin tốt/xấu, dự đoán và mã" />
+          <StatCard icon={ShieldCheck} label="Dùng được" value={stats.pass_count} sub={`${stats.pass_pct}% số tin đã xử lý`} accent="#10b981" />
+          <StatCard icon={PenLine} label="Chờ gán nhãn" value={stats.review_count} accent="#f59e0b" sub="Hệ thống không đủ chắc chắn" />
+          <StatCard icon={XCircle} label="Bỏ qua" value={stats.drop_count} accent="#ef4444" sub="Không tìm thấy mã nào trong bài" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <SectionCard title="Chất lượng dữ liệu" action={<StatusBadge status={data_quality.overall_status} />}>
           <div className="space-y-2.5">
-            <QualityRow label="Missing values (các cột quan trọng)" value={data_quality.missing_values} />
-            <QualityRow label="Return-Label Consistency" value={`${data_quality.return_label_consistency}%`} />
-            <QualityRow label="News_id leakage giữa các split" value={data_quality.split_leakage} />
-            <QualityRow label="Trùng lặp (title + mã cổ phiếu)" value={data_quality.duplicates} />
+            <QualityRow label="Bản ghi thiếu thông tin" value={data_quality.missing_values} />
+            <QualityRow label="Tin tốt/xấu khớp chiều dự đoán" value={`${data_quality.return_label_consistency}%`} />
+            <QualityRow label="Tỉ lệ bài dùng được" value={`${data_quality.pass_pct}%`} />
+            <QualityRow label="Bài trùng lặp" value={data_quality.duplicates} />
           </div>
         </SectionCard>
 
-        <SectionCard title="Phân bố nhãn xu hướng">
+        <SectionCard title="Hệ thống dự đoán ra sao">
           {trendData.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -77,7 +82,7 @@ export default function AdminDashboardPage() {
           <Legend items={trendData} colors={TREND_COLORS} />
         </SectionCard>
 
-        <SectionCard title="Phân bố cảm xúc">
+        <SectionCard title="Tin tốt hay tin xấu">
           {sentimentData.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -131,12 +136,20 @@ export default function AdminDashboardPage() {
               <span className="text-[13px]">Không có cảnh báo</span>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
+              {/* Mỗi cảnh báo dẫn thẳng tới nơi khắc phục được nó. Trước đây
+                  chúng chỉ là dòng chữ, admin phải tự đoán vào trang nào. */}
               {alerts.map((a, i) => (
-                <div key={i} className="flex items-start gap-2 text-[12px]" style={{ color: '#b45309' }}>
+                <Link
+                  key={i}
+                  to={alertTarget(a)}
+                  className="flex items-start gap-2 text-[12px] px-2 py-1.5 rounded-lg transition-colors hover:bg-black/5"
+                  style={{ color: '#b45309' }}
+                >
                   <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
-                  <span>{a}</span>
-                </div>
+                  <span className="flex-1">{a}</span>
+                  <ArrowRight size={12} className="flex-shrink-0 mt-0.5" />
+                </Link>
               ))}
             </div>
           )}
@@ -144,17 +157,25 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <SummaryLink to="/admin/data-validation" title="Kiểm định dữ liệu" detail={data_quality.overall_status} />
-        <SummaryLink to="/admin/labeling" title="Gán nhãn thủ công" detail={`${stats.review_count} mẫu chờ gán nhãn`} />
         <SummaryLink
-          to="/admin/validation-results"
-          title="Kết quả kiểm định"
-          detail={`Sentiment ${validation_results.accuracy_sentiment ?? '—'}% · Event ${validation_results.accuracy_event ?? '—'}%`}
+          to="/admin/quality"
+          title="Chất lượng dữ liệu"
+          detail={`${data_quality.overall_status} · khớp nhãn ${validation_results.accuracy_sentiment ?? '—'}%`}
         />
-        <SummaryLink to="/admin/users" title="Quản lý người dùng" detail={`${users_summary.total} tài khoản`} />
+        <SummaryLink to="/admin/labeling" title="Tự đọc và xác nhận" detail={`${stats.review_count} mẫu đang chờ`} />
+        <SummaryLink to="/admin/tuning" title="Cách đọc hiểu bài" detail="Ngưỡng và từ khoá sự kiện" />
+        <SummaryLink to="/admin/users" title="Người dùng" detail={`${users_summary.total} tài khoản`} />
       </div>
     </div>
   )
+}
+
+/** Đưa mỗi cảnh báo về đúng trang xử lý được nó.
+ *  Cảnh báo do backend sinh ra (admin/dashboard.py), nên khớp theo nội dung. */
+function alertTarget(alert: string): string {
+  if (alert.includes('gán nhãn')) return '/admin/labeling'
+  if (alert.includes('trùng lặp')) return '/admin/news'
+  return '/admin/quality'
 }
 
 function QualityRow({ label, value }: { label: string; value: string | number }) {

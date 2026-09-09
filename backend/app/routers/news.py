@@ -1,21 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
-from sqlalchemy.orm import Session
-from typing import List, Optional
-import pandas as pd
 import io
+import logging
+from typing import List, Optional
+from urllib.parse import urlparse
 
-from app.core.database import get_db
+import pandas as pd
+from bs4 import BeautifulSoup
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from pydantic import BaseModel
+from sqlalchemy import Text, cast
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.core.database import SessionLocal, get_db
 from app.core.deps import get_current_user, require_admin
+from app.core.ratelimit import import_url_limit, upload_limit
 from app.core.settings_store import get_float_setting
+from app.core.url_guard import UnsafeUrl, safe_get
 from app.models.news import NewsArticle
 from app.models.user import User
 from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
-from app.services.nlp_service import analyze_article
-from app.services.graph_service import add_news_to_graph, get_graph_features
-from app.services.prediction_service import predict_trend_active
 from app.services import watchlist_service
-from pydantic import BaseModel
+from app.services.graph_service import add_news_to_graph, get_graph_features
+from app.services.nlp_service import analyze_article
+from app.services.prediction_service import predict_for_article
+
+logger = logging.getLogger("finnexus.news")
 
 router = APIRouter()
 
@@ -58,39 +68,66 @@ def _extract_by_paragraph_density(soup) -> Optional[str]:
     return None
 
 
-def _run_analysis(news_id: int, db: Session, importer_user_id: Optional[int] = None):
-    news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
-    if not news:
-        return
-    result = analyze_article(news.title, news.content, db=db)
-    gf = {}
-    for stock in result.get("stocks", []):
-        gf.update(get_graph_features(stock))
-    # Luôn chạy predict_trend_active để mọi bài báo đã phân tích đều có "lý do"
-    # cụ thể, kể cả khi không nhận diện được mã cổ phiếu nào (gf sẽ rỗng).
-    pred = predict_trend_active(result, gf)
-    news.stocks_mentioned = result["stocks"]
-    news.companies_mentioned = result["companies"]
-    news.industries_mentioned = result["industries"]
-    news.events_detected = result["events"]
-    news.sentiment = result["sentiment"]
-    news.impact_score = result["impact_score"]
-    news.predicted_trend = pred["trend"]
-    news.prediction_confidence = pred["confidence"]
-    news.prediction_explanation = pred["explanation"]
-    news.is_analyzed = True
-    review_threshold = get_float_setting(db, "manual_review_confidence_threshold", 0.6)
-    news.needs_manual_label = pred["confidence"] < review_threshold
-    add_news_to_graph(news_id, result)
-    news.graph_built = True
-    db.commit()
+def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
+    """Phân tích một bài báo trong tác vụ nền.
 
-    if importer_user_id is not None:
+    Tác vụ này mở phiên CSDL của riêng nó. Bản trước nhận phiên của request
+    truyền vào; từ FastAPI 0.106 phần dọn dẹp của dependency ``yield`` chạy
+    TRƯỚC khi response được gửi, nên tác vụ nền nhận một phiên đã đóng — và
+    nhiều tác vụ từ cùng một request dùng chung một đối tượng Session vốn
+    không an toàn với đa luồng.
+    """
+    with SessionLocal() as db:
+        news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
+        if not news:
+            return
+
+        result = analyze_article(news.title, news.content, db=db)
+
+        gf = {}
         for stock in result.get("stocks", []):
-            watchlist_service.add_symbol(db, importer_user_id, stock)
+            gf.update(get_graph_features(stock))
+
+        prediction = predict_for_article(
+            analysis=result,
+            graph_features=gf,
+            title=news.title,
+            content=news.content,
+            published_date=news.published_date,
+            url=news.url,
+            source=news.source,
+        )
+
+        news.stocks_mentioned = result["stocks"]
+        news.companies_mentioned = result["companies"]
+        news.industries_mentioned = result["industries"]
+        news.events_detected = result["events"]
+        news.sentiment = result["sentiment"]
+        news.impact_score = result["impact_score"]
+        news.predicted_trend = prediction["predicted_trend"]
+        news.prediction_confidence = prediction["prediction_confidence"]
+        news.prediction_decision = prediction["prediction_decision"]
+        news.prediction_explanation = prediction["prediction_explanation"]
+        news.is_analyzed = True
+
+        # Vào hàng chờ gán nhãn khi mô hình KHÔNG trả lời được, hoặc trả lời
+        # với độ tin cậy dưới ngưỡng. Bài mô hình đã chấm dứt khoát thì không
+        # cần người xem lại — trước đây ngưỡng 0.6 cao hơn mọi độ tin cậy mà
+        # bộ dự đoán từng sinh ra, nên 100% bài rơi vào hàng chờ.
+        review_threshold = get_float_setting(db, "manual_review_confidence_threshold", 0.45)
+        confidence = news.prediction_confidence
+        news.needs_manual_label = confidence is None or confidence < review_threshold
+
+        add_news_to_graph(news_id, result, title=news.title)
+        news.graph_built = True
+        db.commit()
+
+        if importer_user_id is not None:
+            for stock in result.get("stocks", []):
+                watchlist_service.add_symbol(db, importer_user_id, stock)
 
 
-@router.post("/upload-csv")
+@router.post("/upload-csv", dependencies=[Depends(upload_limit)])
 async def upload_csv(
     file: UploadFile = File(...),
     background_tasks: BackgroundTasks = BackgroundTasks(),
@@ -98,33 +135,54 @@ async def upload_csv(
     db: Session = Depends(get_db),
 ):
     raw = await file.read()
+    if len(raw) > settings.MAX_CSV_BYTES:
+        raise HTTPException(
+            413,
+            f"File vượt quá giới hạn {settings.MAX_CSV_BYTES // (1024 * 1024)} MB.",
+        )
+
     try:
         df = pd.read_csv(io.StringIO(raw.decode("utf-8")))
+    except UnicodeDecodeError:
+        df = pd.read_csv(io.StringIO(raw.decode("utf-8-sig", errors="replace")))
     except Exception:
-        df = pd.read_csv(io.StringIO(raw.decode("utf-8-sig")))
+        raise HTTPException(400, "Không đọc được file CSV. Kiểm tra định dạng và mã hoá UTF-8.")
 
     if "title" not in df.columns:
-        raise HTTPException(400, "CSV must contain a 'title' column")
-
-    ids = []
-    for _, row in df.iterrows():
-        n = NewsArticle(
-            title=str(row.get("title", "")),
-            content=str(row["content"]) if "content" in row and pd.notna(row["content"]) else None,
-            source=str(row["source"]) if "source" in row and pd.notna(row["source"]) else None,
-            published_date=str(row["published_date"]) if "published_date" in row and pd.notna(row["published_date"]) else None,
-            url=str(row["url"]) if "url" in row and pd.notna(row["url"]) else None,
+        raise HTTPException(400, "CSV phải có cột 'title'")
+    if len(df) > settings.MAX_CSV_ROWS:
+        raise HTTPException(
+            413, f"CSV có {len(df)} dòng, vượt giới hạn {settings.MAX_CSV_ROWS} dòng mỗi lần nhập."
         )
-        db.add(n)
-        db.commit()
-        db.refresh(n)
-        background_tasks.add_task(_run_analysis, n.id, db, current_user.id)
-        ids.append(n.id)
 
-    return {"message": f"Imported {len(ids)} articles", "ids": ids}
+    def cell(row, name):
+        return str(row[name]) if name in row and pd.notna(row[name]) else None
+
+    articles = [
+        NewsArticle(
+            title=str(row.get("title", ""))[:500],
+            content=cell(row, "content"),
+            source=cell(row, "source"),
+            published_date=cell(row, "published_date"),
+            url=cell(row, "url"),
+        )
+        for _, row in df.iterrows()
+        if str(row.get("title", "")).strip()
+    ]
+
+    # Một transaction cho cả lô thay vì commit từng dòng.
+    db.add_all(articles)
+    db.commit()
+    ids = []
+    for article in articles:
+        db.refresh(article)
+        ids.append(article.id)
+        background_tasks.add_task(_run_analysis, article.id, current_user.id)
+
+    return {"message": f"Đã nhập {len(ids)} bài báo", "ids": ids}
 
 
-@router.post("/import-url")
+@router.post("/import-url", dependencies=[Depends(import_url_limit)])
 def import_from_url(
     req: UrlImportRequest,
     background_tasks: BackgroundTasks,
@@ -132,101 +190,68 @@ def import_from_url(
     db: Session = Depends(get_db),
 ):
     try:
-        import requests as http_req
-        from bs4 import BeautifulSoup
-        from urllib.parse import urlparse
-
-        headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/124.0.0.0 Safari/537.36"
-            ),
-            "Accept-Language": "vi-VN,vi;q=0.9,en;q=0.8",
-        }
-
-        response = http_req.get(req.url, headers=headers, timeout=15)
-        response.raise_for_status()
-        response.encoding = response.apparent_encoding or "utf-8"
-
-        soup = BeautifulSoup(response.text, "lxml")
-
-        # Remove noise tags
-        for tag in soup(["script", "style", "nav", "header", "footer", "aside", "form", "iframe"]):
-            tag.decompose()
-
-        # Extract title
-        title = None
-        for sel in [
-            "h1.title-detail", "h1.article-title", "h1.post-title",
-            ".article-title h1", ".title-detail", "h1",
-        ]:
-            elem = soup.select_one(sel)
-            if elem:
-                title = elem.get_text(strip=True)
-                break
-
-        if not title:
-            og_title = soup.find("meta", property="og:title")
-            if og_title:
-                title = og_title.get("content", "").strip()
-
-        if not title:
-            title_tag = soup.find("title")
-            if title_tag:
-                title = title_tag.get_text(strip=True)
-
-        if not title or len(title) < 5:
-            raise HTTPException(400, "Không thể trích xuất tiêu đề từ URL này")
-
-        # Extract content. Known selectors are a fast path for sites we've
-        # already checked; they inevitably go stale as sites redesign
-        # (vietstock.vn moved its article body to .article-content at some
-        # point, silently making every import from it return empty content -
-        # the exact "crawler breaks when site structure changes" risk the
-        # project proposal itself calls out). The density fallback below
-        # covers any site not in the list, and any site whose markup changes
-        # again later, without needing a new selector added every time.
-        content = _extract_by_known_selectors(soup) or _extract_by_paragraph_density(soup)
-
-        # Extract published date from meta
-        published_date = None
-        for prop in ["article:published_time", "og:updated_time"]:
-            meta = soup.find("meta", property=prop) or soup.find("meta", attrs={"name": prop})
-            if meta:
-                raw_date = meta.get("content", "")
-                if raw_date:
-                    published_date = raw_date[:10]
-                    break
-
-        # Extract source domain
-        parsed = urlparse(req.url)
-        source = parsed.netloc.replace("www.", "")
-
-        news_item = NewsArticle(
-            title=title,
-            content=content,
-            source=source,
-            published_date=published_date,
-            url=req.url,
+        html, final_url = safe_get(
+            req.url, timeout=15, max_bytes=settings.MAX_FETCH_BYTES
         )
-        db.add(news_item)
-        db.commit()
-        db.refresh(news_item)
-        background_tasks.add_task(_run_analysis, news_item.id, db, current_user.id)
+    except UnsafeUrl as exc:
+        # Thông điệp đã được url_guard làm sạch: không lộ lỗi upstream, nên
+        # endpoint này không dùng được để dò quét mạng nội bộ.
+        raise HTTPException(400, str(exc))
 
-        return {
-            "id": news_item.id,
-            "title": title,
-            "source": source,
-            "published_date": published_date,
-            "message": "Đã import và đang phân tích",
-        }
+    soup = BeautifulSoup(html, "lxml")
+    for tag in soup(["script", "style", "nav", "header", "footer", "aside", "form", "iframe"]):
+        tag.decompose()
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(400, f"Lỗi khi import URL: {str(e)}")
+    title = None
+    for sel in ["h1.title-detail", "h1.article-title", "h1.post-title", ".article-title h1", ".title-detail", "h1"]:
+        elem = soup.select_one(sel)
+        if elem:
+            title = elem.get_text(strip=True)
+            break
+    if not title:
+        og_title = soup.find("meta", property="og:title")
+        if og_title:
+            title = (og_title.get("content") or "").strip()
+    if not title:
+        title_tag = soup.find("title")
+        if title_tag:
+            title = title_tag.get_text(strip=True)
+    if not title or len(title) < 5:
+        raise HTTPException(400, "Không thể trích xuất tiêu đề từ URL này")
+
+    # Known selectors are a fast path for sites we've already checked; they
+    # inevitably go stale as sites redesign. The density fallback covers any
+    # site not in the list without needing a new selector added every time.
+    content = _extract_by_known_selectors(soup) or _extract_by_paragraph_density(soup)
+
+    published_date = None
+    for prop in ["article:published_time", "og:updated_time"]:
+        meta = soup.find("meta", property=prop) or soup.find("meta", attrs={"name": prop})
+        if meta and meta.get("content"):
+            published_date = meta["content"][:10]
+            break
+
+    source = urlparse(final_url).netloc.replace("www.", "")
+
+    news_item = NewsArticle(
+        title=title[:500],
+        content=content,
+        source=source,
+        published_date=published_date,
+        url=final_url[:500],
+    )
+    db.add(news_item)
+    db.commit()
+    db.refresh(news_item)
+    background_tasks.add_task(_run_analysis, news_item.id, current_user.id)
+
+    return {
+        "id": news_item.id,
+        "title": title,
+        "source": source,
+        "published_date": published_date,
+        "message": "Đã import và đang phân tích",
+    }
 
 
 @router.post("/")
@@ -240,8 +265,8 @@ def create_news(
     db.add(n)
     db.commit()
     db.refresh(n)
-    background_tasks.add_task(_run_analysis, n.id, db, current_user.id)
-    return {"id": n.id, "message": "Created and queued for analysis"}
+    background_tasks.add_task(_run_analysis, n.id, current_user.id)
+    return {"id": n.id, "message": "Đã tạo và đưa vào hàng đợi phân tích"}
 
 
 @router.get("/", response_model=List[NewsResponse])
@@ -257,6 +282,7 @@ def list_news(
     date_to: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
+    limit = max(1, min(limit, 200))
     query = db.query(NewsArticle)
     if q:
         query = query.filter(NewsArticle.title.ilike(f"%{q}%"))
@@ -270,9 +296,16 @@ def list_news(
         query = query.filter(NewsArticle.published_date <= date_to)
 
     if event_type or stock:
-        # Generic JSON column has no portable containment operator, so
-        # filter these criteria in Python after the rest are applied.
-        rows = query.order_by(NewsArticle.id.desc()).all()
+        # Cột JSON generic không có toán tử "chứa" dùng chung được cho mọi
+        # dialect. Lọc thô bằng LIKE trên biểu diễn text ngay tại CSDL để
+        # không phải nạp cả bảng vào Python (cách làm cũ), rồi lọc chính xác
+        # trong Python trên tập đã hẹp lại.
+        if event_type:
+            query = query.filter(cast(NewsArticle.events_detected, Text).ilike(f"%{event_type}%"))
+        if stock:
+            query = query.filter(cast(NewsArticle.stocks_mentioned, Text).ilike(f"%{stock.upper()}%"))
+
+        rows = query.order_by(NewsArticle.id.desc()).limit(skip + limit * 5).all()
         if event_type:
             rows = [n for n in rows if event_type in (n.events_detected or [])]
         if stock:
@@ -283,11 +316,58 @@ def list_news(
     return query.order_by(NewsArticle.id.desc()).offset(skip).limit(limit).all()
 
 
+class AnalysisStatusRequest(BaseModel):
+    ids: List[int]
+
+
+@router.post("/analysis-status")
+def analysis_status(payload: AnalysisStatusRequest, db: Session = Depends(get_db)):
+    """Tiến trình phân tích của một lô bài vừa nhập.
+
+    Phân tích chạy trong tác vụ nền, nên response của lệnh nhập trả về ngay khi
+    bài đã được lưu — chưa phân tích xong. Trước đây giao diện không có cách nào
+    biết lúc nào xong: người dùng phải tự bấm "Làm mới" và đoán. Endpoint này
+    cho phép giao diện theo dõi và báo khi hoàn tất.
+
+    Trả về cả những mã mô hình chấm được lẫn số bài mô hình từ chối, để thông
+    báo nói đúng chuyện đã xảy ra thay vì chỉ "xong rồi".
+    """
+    ids = payload.ids[:500]
+    if not ids:
+        return {"total": 0, "analyzed": 0, "pending": 0, "done": True}
+
+    rows = db.query(NewsArticle).filter(NewsArticle.id.in_(ids)).all()
+    analyzed = [n for n in rows if n.is_analyzed]
+    scored = [n for n in analyzed if n.predicted_trend]
+
+    symbols: List[str] = []
+    for n in scored:
+        explanation = n.prediction_explanation or {}
+        primary = explanation.get("primary_symbol")
+        if primary and primary not in symbols:
+            symbols.append(primary)
+
+    # Bài đã bị xoá giữa chừng vẫn phải tính là "xong", nếu không giao diện sẽ
+    # chờ mãi một id không bao giờ xuất hiện.
+    missing = len(ids) - len(rows)
+
+    return {
+        "total": len(ids),
+        "analyzed": len(analyzed) + missing,
+        "pending": len(ids) - len(analyzed) - missing,
+        "done": len(analyzed) + missing >= len(ids),
+        "scored": len(scored),
+        "refused": len(analyzed) - len(scored),
+        "needs_review": sum(1 for n in analyzed if n.needs_manual_label),
+        "symbols": symbols[:12],
+    }
+
+
 @router.get("/{news_id}", response_model=NewsResponse)
 def get_news(news_id: int, db: Session = Depends(get_db)):
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
-        raise HTTPException(404, "Not found")
+        raise HTTPException(404, "Không tìm thấy bài báo")
     return n
 
 
@@ -300,7 +380,7 @@ def patch_news(
 ):
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
-        raise HTTPException(404, "Not found")
+        raise HTTPException(404, "Không tìm thấy bài báo")
     for field, value in payload.model_dump(exclude_unset=True).items():
         setattr(n, field, value)
     db.commit()
@@ -309,27 +389,43 @@ def patch_news(
 
 
 @router.post("/{news_id}/analyze")
-def analyze_news(news_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def analyze_news(
+    news_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin),
+):
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
-        raise HTTPException(404, "Not found")
-    background_tasks.add_task(_run_analysis, news_id, db)
-    return {"message": "Queued", "news_id": news_id}
+        raise HTTPException(404, "Không tìm thấy bài báo")
+    background_tasks.add_task(_run_analysis, news_id, None)
+    return {"message": "Đã đưa vào hàng đợi", "news_id": news_id}
 
 
 @router.post("/analyze-all")
-def analyze_all(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    pending = db.query(NewsArticle).filter(NewsArticle.is_analyzed == False).all()
+def analyze_all(
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    pending = db.query(NewsArticle).filter(NewsArticle.is_analyzed == False).all()  # noqa: E712
     for n in pending:
-        background_tasks.add_task(_run_analysis, n.id, db)
-    return {"message": f"Queued {len(pending)} articles"}
+        background_tasks.add_task(_run_analysis, n.id, None)
+    return {"message": f"Đã đưa {len(pending)} bài vào hàng đợi"}
 
 
 @router.delete("/{news_id}")
-def delete_news(news_id: int, db: Session = Depends(get_db)):
+def delete_news(
+    news_id: int,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin),
+):
+    """Bảng tin tức là tài nguyên dùng chung của toàn hệ thống, không thuộc về
+    một người dùng nào. Bản trước không kiểm quyền ở đây, nên bất kỳ tài khoản
+    nào cũng xoá được dữ liệu của người khác."""
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
-        raise HTTPException(404, "Not found")
+        raise HTTPException(404, "Không tìm thấy bài báo")
     db.delete(n)
     db.commit()
-    return {"message": "Deleted"}
+    return {"message": "Đã xoá"}

@@ -2,38 +2,75 @@ import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
   Newspaper,
-  TrendingUp,
-  Tags,
-  ShieldCheck,
   PenLine,
-  Gauge,
-  Users,
   Settings,
-  ShieldHalf,
-  Radio,
+  ShieldCheck,
+  Sliders,
+  TrendingUp,
+  Users,
 } from 'lucide-react'
+import BrandMark from '../common/BrandMark'
 import { useAuth } from '../../context/AuthContext'
+import { useLayout } from '../../context/LayoutContext'
 
-const links = [
-  { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/news', icon: Newspaper, label: 'Quản lý tin tức' },
-  { to: '/admin/stocks', icon: TrendingUp, label: 'Quản lý cổ phiếu' },
-  { to: '/admin/keywords', icon: Tags, label: 'Quản lý từ khoá sự kiện' },
-  { to: '/admin/data-validation', icon: ShieldCheck, label: 'Kiểm định dữ liệu' },
-  { to: '/admin/labeling', icon: PenLine, label: 'Gán nhãn thủ công' },
-  { to: '/admin/validation-results', icon: Gauge, label: 'Kết quả kiểm định' },
-  { to: '/admin/users', icon: Users, label: 'Quản lý người dùng' },
-  { to: '/admin/live', icon: Radio, label: 'Bảng giá Live' },
-  { to: '/admin/settings', icon: Settings, label: 'Cấu hình hệ thống' },
+/** Điều hướng quản trị, gom theo việc admin thực sự làm.
+ *
+ * Bản trước có 10 mục phẳng, trong đó:
+ *  - "Kiểm định dữ liệu" và "Kết quả kiểm định" cùng đọc validation_service và
+ *    cùng trả lời một câu hỏi; nội dung của cả hai đã có sẵn trên Dashboard.
+ *  - "Cấu hình hệ thống" và "Quản lý từ khoá sự kiện" cùng thay đổi cách phân
+ *    tích diễn giải bài báo.
+ *  - "Quản lý cổ phiếu" là bảng chỉ-đọc từ cùng service với trang Cổ phiếu,
+ *    không có thao tác quản trị nào, và kém hơn trang Bảng giá đã có.
+ * 9/10 trang không có một liên kết đi tiếp nào.
+ */
+const groups: { title: string; links: { to: string; icon: typeof LayoutDashboard; label: string }[] }[] = [
+  {
+    title: 'Vận hành',
+    links: [
+      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
+      { to: '/admin/news', icon: Newspaper, label: 'Dữ liệu tin tức' },
+      { to: '/admin/labeling', icon: PenLine, label: 'Tự đọc và xác nhận' },
+    ],
+  },
+  {
+    title: 'Chất lượng',
+    links: [
+      { to: '/admin/quality', icon: ShieldCheck, label: 'Chất lượng dữ liệu' },
+      { to: '/admin/tuning', icon: Sliders, label: 'Cách đọc hiểu bài' },
+    ],
+  },
+  {
+    title: 'Hệ thống',
+    links: [
+      { to: '/admin/users', icon: Users, label: 'Người dùng' },
+      { to: '/admin/live', icon: TrendingUp, label: 'Cổ phiếu' },
+      { to: '/admin/profile', icon: Settings, label: 'Hồ sơ của tôi' },
+    ],
+  },
 ]
+
 
 export default function AdminSidebar() {
   const { user } = useAuth()
+  const { sidebarOpen, closeSidebar } = useLayout()
   const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
 
   return (
+    <>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ background: 'rgba(15,23,42,0.45)' }}
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
     <aside
-      className="w-64 flex flex-col flex-shrink-0"
+      className={`w-64 flex flex-col flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:static lg:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+      aria-label="Điều hướng quản trị"
       style={{
         background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%)',
         borderRight: '2px solid #10b981',
@@ -44,13 +81,10 @@ export default function AdminSidebar() {
       <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{
-              background: 'linear-gradient(135deg, #047857 0%, #10b981 100%)',
-              boxShadow: '0 0 20px rgba(16,185,129,0.4), 0 2px 8px rgba(0,0,0,0.15)',
-            }}
+            className="flex-shrink-0 rounded-xl"
+            style={{ boxShadow: '0 0 20px rgba(16,185,129,0.4), 0 2px 8px rgba(0,0,0,0.15)' }}
           >
-            <ShieldHalf size={17} className="text-white" />
+            <BrandMark size={36} tone="admin" />
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-[15px] leading-tight" style={{ color: 'var(--text-primary)' }}>
@@ -64,52 +98,60 @@ export default function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
-        <p
-          className="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: 'var(--text-faint)' }}
-        >
-          Quản trị hệ thống
-        </p>
-        {links.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group relative"
-            style={({ isActive }) =>
-              isActive
-                ? {
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(5,150,105,0.08) 100%)',
-                    borderLeft: '3px solid #10b981',
-                    paddingLeft: '9px',
-                    color: 'var(--text-primary)',
+      <nav className="flex-1 px-3 py-3 overflow-y-auto">
+        {groups.map((group) => (
+          <div key={group.title} className="mb-3">
+            <p
+              className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: 'var(--text-faint)' }}
+            >
+              {group.title}
+            </p>
+            <div className="space-y-0.5">
+              {group.links.map(({ to, icon: Icon, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={closeSidebar}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative"
+                  style={({ isActive }) =>
+                    isActive
+                      ? {
+                          background: 'linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(5,150,105,0.08) 100%)',
+                          borderLeft: '3px solid #10b981',
+                          paddingLeft: '9px',
+                          color: 'var(--text-primary)',
+                        }
+                      : { color: 'var(--text-secondary)', borderLeft: '3px solid transparent', paddingLeft: '9px' }
                   }
-                : { color: 'var(--text-secondary)', borderLeft: '3px solid transparent', paddingLeft: '9px' }
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon
-                  size={15}
-                  className="flex-shrink-0 transition-colors"
-                  style={{ color: isActive ? '#10b981' : 'var(--text-muted)' }}
-                />
-                <span className="flex-1 text-[13px]">{label}</span>
-                {isActive && (
-                  <div
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ background: '#10b981', boxShadow: '0 0 6px #10b981' }}
-                  />
-                )}
-              </>
-            )}
-          </NavLink>
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        size={15}
+                        className="flex-shrink-0 transition-colors"
+                        style={{ color: isActive ? '#10b981' : 'var(--text-muted)' }}
+                      />
+                      <span className="flex-1 text-[13px]">{label}</span>
+                      {isActive && (
+                        <div
+                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{ background: '#10b981', boxShadow: '0 0 6px #10b981' }}
+                        />
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
       {/* Profile footer */}
       <NavLink
         to="/admin/profile"
+        onClick={closeSidebar}
         className="block px-4 py-3 transition-colors hover:bg-black/5"
         style={{ borderTop: '1px solid var(--border-subtle)' }}
       >
@@ -133,5 +175,6 @@ export default function AdminSidebar() {
         </div>
       </NavLink>
     </aside>
+    </>
   )
 }

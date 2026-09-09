@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Sidebar from './components/Layout/Sidebar'
 import Topbar from './components/Layout/Topbar'
@@ -6,57 +7,82 @@ import AdminSidebar from './components/Layout/AdminSidebar'
 import AdminTopbar from './components/Layout/AdminTopbar'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import GuestRoute from './components/Auth/GuestRoute'
+import { LayoutProvider } from './context/LayoutContext'
+import { AnalysisJobsProvider } from './context/AnalysisJobsContext'
+
+// Các trang xác thực nằm trong bundle chính: chúng là thứ đầu tiên mọi khách
+// truy cập nhìn thấy, nên không nên phải chờ tải thêm chunk.
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
-import DashboardPage from './pages/DashboardPage'
-import ImportPage from './pages/ImportPage'
-import AnalysisPage from './pages/AnalysisPage'
-import StocksPage from './pages/StocksPage'
-import StockDetailPage from './pages/StockDetailPage'
-import EventsPage from './pages/EventsPage'
-import SentimentPage from './pages/SentimentPage'
-import PredictionPage from './pages/PredictionPage'
-import EvaluationPage from './pages/EvaluationPage'
-import LivePage from './pages/LivePage'
-import SettingsPage from './pages/SettingsPage'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
-import AdminNewsPage from './pages/admin/AdminNewsPage'
-import AdminStocksPage from './pages/admin/AdminStocksPage'
-import AdminEventKeywordsPage from './pages/admin/AdminEventKeywordsPage'
-import AdminDataValidationPage from './pages/admin/AdminDataValidationPage'
-import AdminLabelingPage from './pages/admin/AdminLabelingPage'
-import AdminValidationResultsPage from './pages/admin/AdminValidationResultsPage'
-import AdminUsersPage from './pages/admin/AdminUsersPage'
-import AdminSettingsPage from './pages/admin/AdminSettingsPage'
-import AdminProfilePage from './pages/admin/AdminProfilePage'
+
+// Phần còn lại tách thành chunk riêng. Trước đây toàn bộ ứng dụng — kể cả 10
+// trang quản trị và thư viện biểu đồ — nằm trong một file 919 kB mà trang
+// đăng nhập cũng phải tải hết.
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ImportPage = lazy(() => import('./pages/ImportPage'))
+const FeedPage = lazy(() => import('./pages/FeedPage'))
+const GraphPage = lazy(() => import('./pages/GraphPage'))
+const StocksPage = lazy(() => import('./pages/StocksPage'))
+const StockWorkspacePage = lazy(() => import('./pages/StockWorkspacePage'))
+const EvaluationPage = lazy(() => import('./pages/EvaluationPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
+const AdminNewsPage = lazy(() => import('./pages/admin/AdminNewsPage'))
+const AdminLabelingPage = lazy(() => import('./pages/admin/AdminLabelingPage'))
+const AdminQualityPage = lazy(() => import('./pages/admin/AdminQualityPage'))
+const AdminTuningPage = lazy(() => import('./pages/admin/AdminTuningPage'))
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'))
+const AdminProfilePage = lazy(() => import('./pages/admin/AdminProfilePage'))
+
+function PageFallback() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="w-8 h-8 rounded-full skeleton" />
+    </div>
+  )
+}
 
 function AppLayout() {
   return (
     <ProtectedRoute role="customer">
-      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Topbar />
-          <main className="flex-1 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/news" element={<AnalysisPage />} />
-              <Route path="/stocks" element={<StocksPage />} />
-              <Route path="/stocks/:symbol" element={<StockDetailPage />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/sentiment" element={<SentimentPage />} />
-              <Route path="/prediction" element={<PredictionPage />} />
-              <Route path="/reports" element={<EvaluationPage />} />
-              <Route path="/live" element={<LivePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/import" element={<ImportPage />} />
-            </Routes>
-          </main>
+      <LayoutProvider>
+        <AnalysisJobsProvider>
+        <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+          <Sidebar />
+          <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+            <Topbar />
+            <main className="flex-1 overflow-y-auto">
+              <Suspense fallback={<PageFallback />}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/feed" element={<FeedPage />} />
+                  <Route path="/graph" element={<GraphPage />} />
+                  <Route path="/stocks" element={<StocksPage />} />
+                  <Route path="/stocks/:symbol" element={<StockWorkspacePage />} />
+                  <Route path="/reports" element={<EvaluationPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/import" element={<ImportPage />} />
+
+                  {/* Đường dẫn cũ vẫn dùng được: liên kết đã chia sẻ, dấu
+                      trang, và mọi chỗ trong mã còn trỏ tới chúng đều đáp
+                      xuống đúng lát cắt tương ứng của trang mới. */}
+                  <Route path="/news" element={<Navigate to="/feed" replace />} />
+                  <Route path="/events" element={<Navigate to="/feed" replace />} />
+                  <Route path="/sentiment" element={<Navigate to="/feed" replace />} />
+                  <Route path="/prediction" element={<Navigate to="/feed?has_prediction=1" replace />} />
+                  <Route path="/live" element={<Navigate to="/stocks" replace />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </Suspense>
+            </main>
+          </div>
         </div>
-      </div>
+        </AnalysisJobsProvider>
+      </LayoutProvider>
     </ProtectedRoute>
   )
 }
@@ -64,28 +90,41 @@ function AppLayout() {
 function AdminLayout() {
   return (
     <ProtectedRoute role="admin">
-      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-        <AdminSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <AdminTopbar />
-          <main className="flex-1 overflow-y-auto">
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/news" element={<AdminNewsPage />} />
-              <Route path="/stocks" element={<AdminStocksPage />} />
-              <Route path="/keywords" element={<AdminEventKeywordsPage />} />
-              <Route path="/data-validation" element={<AdminDataValidationPage />} />
-              <Route path="/labeling" element={<AdminLabelingPage />} />
-              <Route path="/validation-results" element={<AdminValidationResultsPage />} />
-              <Route path="/users" element={<AdminUsersPage />} />
-              <Route path="/live" element={<LivePage />} />
-              <Route path="/settings" element={<AdminSettingsPage />} />
-              <Route path="/profile" element={<AdminProfilePage />} />
-            </Routes>
-          </main>
+      <LayoutProvider>
+        <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+            <AdminTopbar />
+            <main className="flex-1 overflow-y-auto">
+              <Suspense fallback={<PageFallback />}>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<AdminDashboardPage />} />
+                  <Route path="/news" element={<AdminNewsPage />} />
+                  <Route path="/labeling" element={<AdminLabelingPage />} />
+                  <Route path="/quality" element={<AdminQualityPage />} />
+                  <Route path="/tuning" element={<AdminTuningPage />} />
+                  <Route path="/users" element={<AdminUsersPage />} />
+                  {/* Quản trị viên bị ProtectedRoute chặn khỏi khu vực khách
+                      hàng, nên trang Cổ phiếu được gắn lại ở đây thay vì bắt
+                      họ đăng xuất để xem giá. */}
+                  <Route path="/live" element={<StocksPage />} />
+                  <Route path="/stocks/:symbol" element={<StockWorkspacePage />} />
+                  <Route path="/profile" element={<AdminProfilePage />} />
+
+                  {/* Đường dẫn cũ vẫn đáp xuống đúng trang đã gộp. */}
+                  <Route path="/data-validation" element={<Navigate to="/admin/quality" replace />} />
+                  <Route path="/validation-results" element={<Navigate to="/admin/quality" replace />} />
+                  <Route path="/keywords" element={<Navigate to="/admin/tuning" replace />} />
+                  <Route path="/settings" element={<Navigate to="/admin/tuning" replace />} />
+                  <Route path="/stocks" element={<Navigate to="/admin/live" replace />} />
+                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                </Routes>
+              </Suspense>
+            </main>
+          </div>
         </div>
-      </div>
+      </LayoutProvider>
     </ProtectedRoute>
   )
 }

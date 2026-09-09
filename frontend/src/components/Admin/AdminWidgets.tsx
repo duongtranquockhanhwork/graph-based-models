@@ -15,17 +15,17 @@ export function StatCard({
 }) {
   return (
     <div
-      className="section-card card-glow flex items-center gap-4"
+      className="section-card card-glow flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
         style={{ background: accent + '22', border: `1px solid ${accent}33` }}
       >
         <Icon size={20} style={{ color: accent }} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5 truncate" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-[11px] uppercase tracking-wide font-medium mb-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>
           {label}
         </p>
         <p className="text-2xl font-bold leading-tight break-words" style={{ color: 'var(--text-primary)' }}>{value}</p>

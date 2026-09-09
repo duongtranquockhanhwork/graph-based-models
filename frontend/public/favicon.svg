@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="FinNexus KG">
+  <!--
+    Bản rút gọn của icon.svg, dành riêng cho tab trình duyệt (16–32px).
+
+    Ở cỡ đó, bốn nút và nhánh phụ nhoè thành một vệt. Bản này bỏ nhánh phụ, còn
+    ba nút, cạnh dày hơn và nút chủ thể to hơn — giữ đúng ý tưởng nhưng đọc được
+    khi chỉ cao 16 pixel.
+  -->
+  <defs>
+    <linearGradient id="fnxFavTile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="14" fill="url(#fnxFavTile)" />
+
+  <path
+    d="M17 45 L30 30 L44 20"
+    fill="none"
+    stroke="#ffffff"
+    stroke-opacity="0.9"
+    stroke-width="4.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <circle cx="17" cy="45" r="5.5" fill="#ffffff" fill-opacity="0.85" />
+  <circle cx="30" cy="30" r="5.5" fill="#ffffff" fill-opacity="0.85" />
+  <circle cx="45" cy="19" r="9.5" fill="#ffffff" />
+</svg>
