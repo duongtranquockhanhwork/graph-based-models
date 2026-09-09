@@ -25,6 +25,11 @@ _TMPDIR = tempfile.mkdtemp(prefix="finnexus-tests-")
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{_TMPDIR}/test.db")
 os.environ.setdefault("JWT_SECRET_KEY", "test-secret-not-used-anywhere-real")
 os.environ.setdefault("ENVIRONMENT", "development")
+# Cất giá trị gốc sang một tên khác TRƯỚC khi xoá. Bộ test đối chiếu đặc trưng
+# (test_feature_parity.py) bắt buộc phải có mô hình thật, nên nó đọc biến này và
+# tự bật lại trong phạm vi của riêng nó rồi trả về nguyên trạng. Mọi test còn
+# lại vẫn thấy "mô hình không khả dụng", đúng như đoạn ghi chú ở đầu file.
+os.environ["FINNEXUS_PARITY_ROOT"] = os.environ.get("FINNEXUS_ROOT", "")
 os.environ["FINNEXUS_ROOT"] = ""
 
 

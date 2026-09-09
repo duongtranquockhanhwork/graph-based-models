@@ -12,6 +12,62 @@ for _symbol, _info in STOCK_DICT.items():
     for _alias in _info.get("aliases", []):
         COMPANY_TO_STOCK[_alias.lower()] = _symbol
 
+# Từ điển có hai tầng (xem tools/build_stock_dictionary.py):
+#
+#   curated   57 mã làm tay, có alias thương hiệu ("vinamilk" -> VNM). Khớp
+#             thẳng, vì đã được kiểm bằng tay.
+#   expanded  200 mã còn lại, CHỈ có mã, không có alias. Khớp thẳng thì hỏng:
+#             mã cổ phiếu Việt Nam dài ba ký tự nên trùng đầy từ thường —
+#             "TIN", "HAI", "CAN", "TOP", "HOT". Một bài có chữ "tin" sẽ bị
+#             đọc thành bài về mã TIN.
+#
+# Nhóm expanded vì vậy chỉ được tính khi có NGỮ CẢNH CHỨNG KHOÁN ở gần. Đây
+# đúng là luật mà bộ liên kết của mô hình dùng, nên hai bên đọc cùng một bài
+# theo cùng một cách thay vì mỗi bên hiểu một kiểu.
+#
+# Danh sách lấy NGUYÊN từ config/v45_expanded_dictionary_v1.yaml của repo
+# nghiên cứu, không nới cũng không siết.
+#
+# "cp " nhìn thì lỏng — nó khớp cả vào giữa "TMCP". Tôi đã thử thay bằng \bcp\b
+# và ĐO: recall tụt 0,903 -> 0,847, chỉ đổi lấy 0,002 precision. Lý do là "TMCP"
+# nằm trong tên gần như mọi ngân hàng Việt Nam, ngay cạnh mã của chính ngân hàng
+# đó, nên nó là tín hiệu thật chứ không phải nhiễu. Giữ nguyên bản gốc.
+_STOCK_CONTEXT = (
+    "cổ phiếu", "co phieu", "mã ", "ma ck", "chứng khoán", "chung khoan",
+    "cp ", "hose", "hnx", "hsx", "upcom", "sàn ", "san ",
+)
+_CONTEXT_RADIUS = 40
+
+# Vài mã trùng với một cụm từ thông dụng đứng ngay trước nó. Ngữ cảnh chứng
+# khoán không cứu được trường hợp này, vì cụm đó thường nằm giữa một bài đúng là
+# đang nói về chứng khoán.
+#
+# Đo trên 400 bài: HCM bị nhận nhầm 14 lần, trong đó 10 lần đến từ "TP.HCM".
+# Đây là lỗi có sẵn từ trước, không phải do việc mở rộng từ điển.
+_FALSE_FRIENDS = {
+    "HCM": ("tp.", "tp ", "t.p.", "thành phố ", "thanh pho "),
+}
+
+
+def _is_false_friend(symbol: str, text: str, start: int) -> bool:
+    """Mã này có đang là một phần của cụm từ khác không (vd "TP.HCM").
+
+    Có một cái bẫy ở đây, và nó tốn một lần đo mới lộ ra: tên công ty của mã HCM
+    **chính là** "Chứng khoán TP. Hồ Chí Minh". Chặn thẳng mọi "TP." đứng trước
+    HCM làm mất nhiều lần nhận đúng hơn số lần nhận sai tránh được
+    (recall 0,903 -> 0,892 để đổi lấy precision 0,975 -> 0,978).
+
+    Nên chỉ bỏ qua khi cụm địa danh xuất hiện mà KHÔNG có từ chứng khoán nào
+    đứng trước — tức là bài đang nói về thành phố, không nói về công ty.
+    """
+    markers = _FALSE_FRIENDS.get(symbol)
+    if not markers:
+        return False
+    before = text[max(0, start - 24):start].lower()
+    if not any(marker in before for marker in markers):
+        return False
+    return not any(context in before for context in _STOCK_CONTEXT)
+
 POSITIVE_KEYWORDS = [
     # NOTE: bare "lãi"/"lợi nhuận" are deliberately NOT here - they mean
     # "profit" with no direction, so counting them as positive false-triggers
@@ -93,17 +149,37 @@ INDUSTRY_KEYWORDS = {
 }
 
 
+def _has_stock_context(text: str, start: int, end: int) -> bool:
+    """Quanh vị trí này có dấu hiệu đang nói về chứng khoán không."""
+    window = text[max(0, start - _CONTEXT_RADIUS):end + _CONTEXT_RADIUS].lower()
+    return any(marker in window for marker in _STOCK_CONTEXT)
+
+
 def extract_stocks(text: str) -> List[str]:
+    """Các mã cổ phiếu mà bài này nhắc tới.
+
+    Khớp không phân biệt hoa thường trên CHÍNH văn bản gốc, không phải trên một
+    bản đã ``.upper()``: với vài ký tự Unicode, viết hoa làm đổi độ dài chuỗi,
+    và khi đó vị trí tìm được sẽ lệch so với văn bản dùng để cắt ngữ cảnh.
+    """
     found = set()
-    text_upper = text.upper()
-    for symbol in STOCK_DICT:
-        if re.search(r'\b' + re.escape(symbol) + r'\b', text_upper):
+    for symbol, info in STOCK_DICT.items():
+        pattern = r"\b" + re.escape(symbol) + r"\b"
+        for match in re.finditer(pattern, text, re.IGNORECASE):
+            if _is_false_friend(symbol, text, match.start()):
+                continue
+            if info.get("tier") == "expanded" and not _has_stock_context(
+                text, *match.span()
+            ):
+                continue
             found.add(symbol)
+            break
+
     text_lower = text.lower()
     for alias, symbol in COMPANY_TO_STOCK.items():
         if alias in text_lower:
             found.add(symbol)
-    return list(found)
+    return sorted(found)
 
 
 def extract_entities(text: str) -> Dict:

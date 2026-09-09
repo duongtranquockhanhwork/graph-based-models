@@ -64,6 +64,15 @@ class Settings(BaseSettings):
 settings = Settings()
 settings.validate_for_environment()
 
-# Cho phép test ghi đè mà không cần biến môi trường.
-if os.getenv("FINNEXUS_ROOT"):
+# Biến môi trường thắng file .env, và "đặt thành rỗng" là một lựa chọn có ý,
+# khác với "không đặt gì". Bộ test dựa vào đúng khác biệt này: nó đặt rỗng để
+# chạy trong tình huống không có mô hình, và không được để phần tự dò bên dưới
+# lặng lẽ bật mô hình lên lại.
+if "FINNEXUS_ROOT" in os.environ:
     settings.FINNEXUS_ROOT = os.environ["FINNEXUS_ROOT"]
+elif not settings.FINNEXUS_ROOT.strip():
+    # Bản demo đóng gói sẵn mô hình ở <gốc kho>/model, nên clone về là chạy
+    # được ngay mà không phải cấu hình gì.
+    _bundled = os.path.join(os.path.dirname(__file__), "..", "..", "..", "model")
+    if os.path.isdir(os.path.join(_bundled, "config")):
+        settings.FINNEXUS_ROOT = os.path.abspath(_bundled)

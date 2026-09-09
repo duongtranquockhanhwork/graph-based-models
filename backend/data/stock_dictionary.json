@@ -1,4 +1,561 @@
 {
+  "AAA": {
+    "company": "CTCP Nhựa An Phát Xanh",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "AAM": {
+    "company": "CTCP Thủy sản MeKong",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "ABT": {
+    "company": "CTCP Xuất nhập khẩu Thủy sản Bến Tre",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "ACB": {
+    "company": "Ngân hàng TMCP Á Châu",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "ngân hàng tmcp á châu",
+      "á châu"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "ACL": {
+    "company": "CTCP Xuất nhập khẩu Thủy sản Cửu Long An Giang",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "AGG": {
+    "company": "CTCP Đầu tư và Phát triển Bất động sản An Gia",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "AGR": {
+    "company": "CTCP Chứng khoán Agribank",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "AMV": {
+    "company": "CTCP Sản xuất Kinh doanh Dược và Trang thiết bị Y tế Việt Mỹ",
+    "industry": "SX Phụ trợ",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "ANV": {
+    "company": "Công ty Cổ phần Nam Việt",
+    "industry": "Thủy sản",
+    "aliases": [
+      "công ty cổ phần nam việt",
+      "nam việt"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "APG": {
+    "company": "CTCP Chứng khoán APG",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "APS": {
+    "company": "CTCP Chứng khoán Châu Á Thái Bình Dương",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "ASM": {
+    "company": "Công ty Cổ phần Tập đoàn Sao Mai",
+    "industry": "Thủy sản",
+    "aliases": [
+      "công ty cổ phần tập đoàn sao mai",
+      "sao mai"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "AST": {
+    "company": "CTCP Dịch vụ Hàng không Taseco",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BAX": {
+    "company": "CTCP Thống Nhất",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BCM": {
+    "company": "Tập đoàn Đầu tư và Phát triển Công nghiệp Becamex - CTCP",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BFC": {
+    "company": "CTCP Phân bón Bình Điền",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BID": {
+    "company": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "bidv",
+      "ngân hàng bidv",
+      "đầu tư và phát triển việt nam"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "BMP": {
+    "company": "CTCP Nhựa Bình Minh",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BSI": {
+    "company": "CTCP Chứng khoán BIDV",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BSR": {
+    "company": "CTCP - Tổng Công ty Lọc hóa dầu Việt Nam",
+    "industry": "SX Phụ trợ",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BVB": {
+    "company": "Ngân hàng TMCP Bản Việt",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BVH": {
+    "company": "Tập đoàn Bảo Việt",
+    "industry": "Bảo hiểm",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BVS": {
+    "company": "CTCP Chứng khoán Bảo Việt",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "BWE": {
+    "company": "CTCP - Tổng công ty nước - môi trường Bình Dương",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "C32": {
+    "company": "CTCP Đầu tư và Xây dựng 3-2",
+    "industry": "Khai khoáng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CDN": {
+    "company": "CTCP Cảng Đà Nẵng",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CET": {
+    "company": "CTCP HTC Holding",
+    "industry": "SX Phụ trợ",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CII": {
+    "company": "CTCP Đầu tư Hạ tầng Kỹ thuật Thành phố Hồ Chí Minh",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CKG": {
+    "company": "CTCP Tập đoàn CIC",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CMG": {
+    "company": "Công ty Cổ phần Tập đoàn Công nghệ CMC",
+    "industry": "Công nghệ",
+    "aliases": [
+      "cmc",
+      "công nghệ cmc",
+      "tập đoàn cmc",
+      "cmc technology"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "CMX": {
+    "company": "CTCP Camimex Group",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CNG": {
+    "company": "CTCP CNG Việt Nam",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CRE": {
+    "company": "CTCP Bất động sản Thế Kỷ",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CTD": {
+    "company": "CTCP Xây dựng Coteccons",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CTG": {
+    "company": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "vietinbank",
+      "công thương",
+      "ngân hàng vietinbank",
+      "ngân hàng công thương"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "CTI": {
+    "company": "CTCP Đầu tư Phát triển Cường Thuận IDICO",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "CTR": {
+    "company": "Tổng Công ty Cổ phần Công trình Viettel",
+    "industry": "Viễn thông",
+    "aliases": [
+      "công trình viettel",
+      "tổng công ty cổ phần công trình viettel"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "CTS": {
+    "company": "CTCP Chứng khoán VietinBank",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "D11": {
+    "company": "CTCP Địa ốc 11",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "D2D": {
+    "company": "CTCP Phát triển Đô thị Công nghiệp số 2",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DAH": {
+    "company": "CTCP Tập đoàn Khách sạn Đông Á",
+    "industry": "Dịch vụ lưu trú, ăn uống, giải trí",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DAT": {
+    "company": "CTCP Đầu tư du lịch và Phát triển Thủy sản",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DBC": {
+    "company": "CTCP Tập đoàn Dabaco Việt Nam",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DBT": {
+    "company": "CTCP Dược phẩm Bến Tre",
+    "industry": "Chăm sóc sức khỏe",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DCM": {
+    "company": "Công ty Cổ phần Phân bón Dầu khí Cà Mau",
+    "industry": "Hóa chất",
+    "aliases": [
+      "công ty cổ phần phân bón dầu khí cà mau",
+      "phân bón dầu khí cà mau"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DGC": {
+    "company": "Công ty Cổ phần Tập đoàn Hóa chất Đức Giang",
+    "industry": "Hóa chất",
+    "aliases": [
+      "công ty cổ phần tập đoàn hóa chất đức giang",
+      "hóa chất đức giang"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DGW": {
+    "company": "Công ty Cổ phần Thế Giới Số",
+    "industry": "Bán lẻ",
+    "aliases": [
+      "công ty cổ phần thế giới số",
+      "thế giới số"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DHC": {
+    "company": "CTCP Đông Hải Bến Tre",
+    "industry": "SX Phụ trợ",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DHG": {
+    "company": "Công ty Cổ phần Dược Hậu Giang",
+    "industry": "Dược phẩm",
+    "aliases": [
+      "dược hậu giang",
+      "hau giang pharma",
+      "dhg pharma"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DHP": {
+    "company": "CTCP Điện cơ Hải Phòng",
+    "industry": "Thiết bị điện",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DIG": {
+    "company": "Tổng Công ty cổ phần Đầu tư Phát triển Xây dựng",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DIH": {
+    "company": "CTCP Đầu tư Phát triển Xây dựng - Hội An",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DL1": {
+    "company": "CTCP Tập đoàn Alpha Seven",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DNP": {
+    "company": "CTCP DNP Holding",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DPG": {
+    "company": "CTCP Tập đoàn Đạt Phương",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DPM": {
+    "company": "Tổng Công ty Phân bón và Hóa chất Dầu khí",
+    "industry": "Hóa chất",
+    "aliases": [
+      "phân bón và hóa chất dầu khí",
+      "tổng công ty phân bón và hóa chất dầu khí"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DPR": {
+    "company": "CTCP Cao su Đồng Phú",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DRC": {
+    "company": "CTCP Cao su Đà Nẵng",
+    "industry": "Sản phẩm cao su",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DRH": {
+    "company": "CTCP DRH Holdings",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DTD": {
+    "company": "CTCP Đầu tư Phát triển Thành Đạt",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DTL": {
+    "company": "CTCP Đại Thiên Lộc",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DXG": {
+    "company": "Công ty Cổ phần Tập đoàn Đất Xanh",
+    "industry": "Bất động sản",
+    "aliases": [
+      "đất xanh",
+      "dat xanh",
+      "tập đoàn đất xanh"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "DXP": {
+    "company": "CTCP Cảng Đoạn Xá",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "DXS": {
+    "company": "CTCP Dịch vụ Bất động sản Đất Xanh",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "EIB": {
+    "company": "Ngân hàng TMCP Xuất nhập khẩu Việt Nam",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "EID": {
+    "company": "CTCP Đầu tư và Phát triển Giáo dục Hà Nội",
+    "industry": "Công nghệ và thông tin",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "ELC": {
+    "company": "Công ty Cổ phần Công nghệ - Viễn thông ELCOM",
+    "industry": "Công nghệ",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "EVS": {
+    "company": "CTCP Chứng khoán EVS",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "FCN": {
+    "company": "CTCP FECON",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "FDC": {
+    "company": "CTCP Ngoại thương và Phát triển Đầu tư Thành phố Hồ Chí Minh",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "FIR": {
+    "company": "CTCP Địa ốc First Real",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "FIT": {
+    "company": "CTCP Tập đoàn F.I.T",
+    "industry": "Chăm sóc sức khỏe",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "FMC": {
+    "company": "CTCP Thực phẩm Sao Ta",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
   "FPT": {
     "company": "Công ty Cổ phần FPT",
     "industry": "Công nghệ",
@@ -8,17 +565,152 @@
       "công ty fpt",
       "fpt software",
       "fpt telecom"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "VNM": {
-    "company": "Công ty Cổ phần Sữa Việt Nam (Vinamilk)",
-    "industry": "Hàng tiêu dùng",
+  "FRT": {
+    "company": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
+    "industry": "Bán lẻ",
     "aliases": [
-      "vinamilk",
-      "sữa việt nam",
-      "sữa vinamilk",
-      "vietnam dairy"
-    ]
+      "bán lẻ kỹ thuật số fpt",
+      "công ty cổ phần bán lẻ kỹ thuật số fpt"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "FTS": {
+    "company": "CTCP Chứng khoán FPT",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "GAS": {
+    "company": "Tổng Công ty Khí Việt Nam (PV Gas)",
+    "industry": "Dầu khí",
+    "aliases": [
+      "pv gas",
+      "khí việt nam",
+      "petrovietnam gas",
+      "pvgas"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "GEG": {
+    "company": "CTCP Điện Gia Lai",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "GEX": {
+    "company": "Công ty Cổ phần Tập đoàn GELEX",
+    "industry": "Công nghiệp",
+    "aliases": [
+      "công ty cổ phần tập đoàn gelex",
+      "gelex"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "GIC": {
+    "company": "CTCP VSC Green Logistics",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "GKM": {
+    "company": "CTCP GKM Holdings",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "GMD": {
+    "company": "Công ty Cổ phần Gemadept",
+    "industry": "Logistics",
+    "aliases": [
+      "công ty cổ phần gemadept",
+      "gemadept"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "GVR": {
+    "company": "Tập đoàn Công nghiệp Cao su Việt Nam - CTCP",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HAG": {
+    "company": "CTCP Hoàng Anh Gia Lai",
+    "industry": "Nông - Lâm - Ngư",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HAH": {
+    "company": "Công ty Cổ phần Vận tải và Xếp dỡ Hải An",
+    "industry": "Logistics",
+    "aliases": [
+      "công ty cổ phần vận tải và xếp dỡ hải an",
+      "vận tải và xếp dỡ hải an"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "HAX": {
+    "company": "CTCP Dịch vụ Ô tô Hàng Xanh",
+    "industry": "Bán lẻ",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HCM": {
+    "company": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
+    "industry": "Chứng khoán",
+    "aliases": [
+      "chứng khoán thành phố hồ chí minh",
+      "công ty cổ phần chứng khoán thành phố hồ chí minh"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "HDB": {
+    "company": "Ngân hàng TMCP Phát triển TP. Hồ Chí Minh (HDBank)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "hdbank",
+      "ngân hàng hdbank",
+      "hd bank"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "HDC": {
+    "company": "CTCP Phát triển Nhà Bà Rịa - Vũng Tàu",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HDG": {
+    "company": "CTCP Tập đoàn Hà Đô",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HMH": {
+    "company": "CTCP Hải Minh",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "HPG": {
     "company": "Công ty Cổ phần Tập đoàn Hòa Phát",
@@ -29,44 +721,238 @@
       "thép hòa phát",
       "tập đoàn hòa phát",
       "hoa phat group"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "VIC": {
-    "company": "Tập đoàn Vingroup",
+  "HPX": {
+    "company": "CTCP Đầu tư Hải Phát",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HQC": {
+    "company": "CTCP Tư vấn Thương mại Dịch vụ Địa Ốc Hoàng Quân",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HRC": {
+    "company": "CTCP Cao su Hòa Bình",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HSG": {
+    "company": "Công ty Cổ phần Tập đoàn Hoa Sen",
+    "industry": "Thép",
+    "aliases": [
+      "công ty cổ phần tập đoàn hoa sen",
+      "hoa sen"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "HT1": {
+    "company": "CTCP Xi Măng Vicem Hà Tiên",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HTC": {
+    "company": "CTCP Thương mại Hóc Môn",
+    "industry": "Bán lẻ",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HUT": {
+    "company": "CTCP Tasco",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "HVN": {
+    "company": "Tổng Công ty Hàng không Việt Nam",
+    "industry": "Hàng không",
+    "aliases": [
+      "hàng không việt nam",
+      "tổng công ty hàng không việt nam"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "IDI": {
+    "company": "CTCP Đầu tư và Phát triển Đa Quốc Gia - IDI",
+    "industry": "Chế biến Thủy sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "IDJ": {
+    "company": "CTCP Đầu tư IDJ Việt Nam",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "IDV": {
+    "company": "CTCP Phát triển Hạ tầng Vĩnh Phúc",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "IJC": {
+    "company": "CTCP Phát triển Hạ tầng Kỹ thuật",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "IMP": {
+    "company": "Công ty Cổ phần Dược phẩm Imexpharm",
+    "industry": "Dược phẩm",
+    "aliases": [
+      "công ty cổ phần dược phẩm imexpharm",
+      "dược phẩm imexpharm"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "INN": {
+    "company": "CTCP Bao bì và In Nông nghiệp",
+    "industry": "SX Phụ trợ",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "IPA": {
+    "company": "CTCP Tập đoàn Đầu tư I.P.A",
+    "industry": "Tài chính khác",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "KBC": {
+    "company": "Tổng Công ty Phát triển Đô thị Kinh Bắc - CTCP",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "KDC": {
+    "company": "CTCP Tập đoàn KIDO",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "KDH": {
+    "company": "Công ty Cổ phần Đầu tư và Kinh doanh Nhà Khang Điền",
     "industry": "Bất động sản",
     "aliases": [
-      "vingroup",
-      "tập đoàn vingroup",
-      "vin group"
-    ]
+      "công ty cổ phần đầu tư và kinh doanh nhà khang điền",
+      "đầu tư và kinh doanh nhà khang điền"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "BID": {
-    "company": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
-    "industry": "Ngân hàng",
-    "aliases": [
-      "bidv",
-      "ngân hàng bidv",
-      "đầu tư và phát triển việt nam"
-    ]
+  "KKC": {
+    "company": "CTCP Tập Đoàn Thành Thái",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "VCB": {
-    "company": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+  "KLB": {
+    "company": "Ngân hàng TMCP Kiên Long",
     "industry": "Ngân hàng",
-    "aliases": [
-      "vietcombank",
-      "ngoại thương",
-      "ngân hàng vietcombank",
-      "ngân hàng ngoại thương"
-    ]
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "TCB": {
-    "company": "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)",
+  "KSD": {
+    "company": "CTCP Đầu tư DNA",
+    "industry": "Thiết bị điện",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "L14": {
+    "company": "CTCP Licogi 14",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LAS": {
+    "company": "CTCP Supe Phốt phát và Hóa chất Lâm Thao",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LCG": {
+    "company": "CTCP Lizen",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LDG": {
+    "company": "CTCP Đầu tư LDG",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LGC": {
+    "company": "CTCP Đầu tư Cầu đường CII",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LHC": {
+    "company": "CTCP Đầu tư và Xây dựng Thủy lợi Lâm Đồng",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LHG": {
+    "company": "CTCP Long Hậu",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LPB": {
+    "company": "Ngân hàng TMCP Lộc Phát Việt Nam",
     "industry": "Ngân hàng",
-    "aliases": [
-      "techcombank",
-      "ngân hàng techcombank",
-      "kỹ thương"
-    ]
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "LSS": {
+    "company": "CTCP Mía Đường Lam Sơn",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MAC": {
+    "company": "CTCP Tập đoàn Macstar",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "MBB": {
     "company": "Ngân hàng TMCP Quân đội (MB Bank)",
@@ -75,25 +961,58 @@
       "mb bank",
       "ngân hàng quân đội",
       "mbbank"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "CTG": {
-    "company": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
+  "MBG": {
+    "company": "CTCP Tập đoàn MBG",
+    "industry": "Thiết bị điện",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MBS": {
+    "company": "CTCP Chứng khoán MB",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MCH": {
+    "company": "CTCP Hàng tiêu dùng Masan",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MHC": {
+    "company": "CTCP MHC",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MIG": {
+    "company": "Tổng Công ty cổ phần Bảo hiểm Quân Đội",
+    "industry": "Bảo hiểm",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "MSB": {
+    "company": "Ngân hàng TMCP Hàng hải Việt Nam",
     "industry": "Ngân hàng",
-    "aliases": [
-      "vietinbank",
-      "công thương",
-      "ngân hàng vietinbank",
-      "ngân hàng công thương"
-    ]
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "VHM": {
-    "company": "Công ty Cổ phần Vinhomes",
-    "industry": "Bất động sản",
-    "aliases": [
-      "vinhomes",
-      "công ty vinhomes"
-    ]
+  "MSH": {
+    "company": "CTCP May Sông Hồng",
+    "industry": "SX Hàng gia dụng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
   "MSN": {
     "company": "Công ty Cổ phần Tập đoàn Masan",
@@ -103,55 +1022,16 @@
       "tập đoàn masan",
       "công ty masan",
       "masan group"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "GAS": {
-    "company": "Tổng Công ty Khí Việt Nam (PV Gas)",
-    "industry": "Dầu khí",
-    "aliases": [
-      "pv gas",
-      "khí việt nam",
-      "petrovietnam gas",
-      "pvgas"
-    ]
-  },
-  "PLX": {
-    "company": "Tập đoàn Xăng dầu Việt Nam (Petrolimex)",
-    "industry": "Dầu khí",
-    "aliases": [
-      "petrolimex",
-      "xăng dầu việt nam",
-      "tập đoàn xăng dầu"
-    ]
-  },
-  "SAB": {
-    "company": "Công ty Cổ phần Bia - Rượu - NGK Sài Gòn (Sabeco)",
-    "industry": "Đồ uống",
-    "aliases": [
-      "sabeco",
-      "bia sài gòn",
-      "sài gòn beer",
-      "bia sabeco"
-    ]
-  },
-  "VRE": {
-    "company": "Công ty Cổ phần Vincom Retail",
-    "industry": "Bất động sản",
-    "aliases": [
-      "vincom retail",
-      "vincom",
-      "trung tâm thương mại vincom"
-    ]
-  },
-  "NVL": {
-    "company": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va (Novaland)",
-    "industry": "Bất động sản",
-    "aliases": [
-      "novaland",
-      "no va",
-      "địa ốc nova",
-      "nova land"
-    ]
+  "MST": {
+    "company": "CTCP Đầu tư MST",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "MWG": {
     "company": "Công ty Cổ phần Đầu tư Thế Giới Di Động",
@@ -161,71 +1041,160 @@
       "tgdđ",
       "the gioi di dong",
       "thegioididong"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "DXG": {
-    "company": "Công ty Cổ phần Tập đoàn Đất Xanh",
+  "NAF": {
+    "company": "CTCP Nafoods Group",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NBB": {
+    "company": "CTCP Đầu tư Năm Bảy Bảy",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NCT": {
+    "company": "CTCP Dịch vụ Hàng hóa Nội Bài",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NDN": {
+    "company": "CTCP Đầu tư Phát triển Nhà Đà Nẵng",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NHA": {
+    "company": "Tổng Công ty Đầu tư Phát triển Nhà và Đô thị Nam Hà Nội",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NKG": {
+    "company": "Công ty Cổ phần Thép Nam Kim",
+    "industry": "Thép",
+    "aliases": [
+      "công ty cổ phần thép nam kim",
+      "thép nam kim"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "NLG": {
+    "company": "CTCP Đầu tư Nam Long",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NSH": {
+    "company": "CTCP Tập Đoàn Nhôm Sông Hồng Shalumi",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NT2": {
+    "company": "CTCP Điện lực Dầu khí Nhơn Trạch 2",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NTC": {
+    "company": "CTCP Khu Công nghiệp Nam Tân Uyên",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NTH": {
+    "company": "CTCP Thủy điện Nước Trong",
+    "industry": "Tiện ích",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NTL": {
+    "company": "CTCP Phát triển Đô thị Từ Liêm",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NTP": {
+    "company": "CTCP Nhựa Thiếu niên Tiền Phong",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NVB": {
+    "company": "Ngân hàng TMCP Quốc Dân",
+    "industry": "Ngân hàng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "NVL": {
+    "company": "Công ty Cổ phần Tập đoàn Đầu tư Địa ốc No Va (Novaland)",
     "industry": "Bất động sản",
     "aliases": [
-      "đất xanh",
-      "dat xanh",
-      "tập đoàn đất xanh"
-    ]
+      "novaland",
+      "no va",
+      "địa ốc nova",
+      "nova land"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "SSI": {
-    "company": "Công ty Cổ phần Chứng khoán SSI",
-    "industry": "Chứng khoán",
-    "aliases": [
-      "chứng khoán ssi",
-      "ssi securities",
-      "ssi chứng khoán"
-    ]
+  "NVT": {
+    "company": "CTCP Bất động sản Du lịch Ninh Vân Bay",
+    "industry": "Dịch vụ lưu trú, ăn uống, giải trí",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "HDB": {
-    "company": "Ngân hàng TMCP Phát triển TP. Hồ Chí Minh (HDBank)",
+  "OCB": {
+    "company": "Ngân hàng TMCP Phương Đông",
     "industry": "Ngân hàng",
-    "aliases": [
-      "hdbank",
-      "ngân hàng hdbank",
-      "hd bank"
-    ]
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "VPB": {
-    "company": "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)",
-    "industry": "Ngân hàng",
-    "aliases": [
-      "vpbank",
-      "việt nam thịnh vượng",
-      "vp bank"
-    ]
+  "OGC": {
+    "company": "CTCP Tập đoàn Đại Dương",
+    "industry": "Tài chính khác",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "CMG": {
-    "company": "Công ty Cổ phần Tập đoàn Công nghệ CMC",
-    "industry": "Công nghệ",
-    "aliases": [
-      "cmc",
-      "công nghệ cmc",
-      "tập đoàn cmc",
-      "cmc technology"
-    ]
+  "PAC": {
+    "company": "CTCP Pin Ắc quy Miền Nam",
+    "industry": "Thiết bị điện",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "REE": {
-    "company": "Công ty Cổ phần Cơ Điện Lạnh (REE)",
-    "industry": "Công nghiệp",
+  "PC1": {
+    "company": "Công ty Cổ phần Tập đoàn PC1",
+    "industry": "Điện",
     "aliases": [
-      "cơ điện lạnh",
-      "ree corporation",
-      "ree corp"
-    ]
-  },
-  "DHG": {
-    "company": "Công ty Cổ phần Dược Hậu Giang",
-    "industry": "Dược phẩm",
-    "aliases": [
-      "dược hậu giang",
-      "hau giang pharma",
-      "dhg pharma"
-    ]
+      "công ty cổ phần tập đoàn pc1",
+      "pc1"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "PDR": {
     "company": "Công ty Cổ phần Phát triển Bất động sản Phát Đạt",
@@ -234,159 +1203,69 @@
       "phát đạt",
       "bds phát đạt",
       "phat dat"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
-  "ACB": {
-    "company": "Ngân hàng TMCP Á Châu",
-    "industry": "Ngân hàng",
-    "aliases": [
-      "ngân hàng tmcp á châu",
-      "á châu"
-    ]
+  "PET": {
+    "company": "Tổng Công ty cổ phần Dịch vụ Tổng hợp Dầu khí",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "ANV": {
-    "company": "Công ty Cổ phần Nam Việt",
-    "industry": "Thủy sản",
-    "aliases": [
-      "công ty cổ phần nam việt",
-      "nam việt"
-    ]
+  "PGC": {
+    "company": "Tổng Công ty Gas Petrolimex - CTCP",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "ASM": {
-    "company": "Công ty Cổ phần Tập đoàn Sao Mai",
-    "industry": "Thủy sản",
-    "aliases": [
-      "công ty cổ phần tập đoàn sao mai",
-      "sao mai"
-    ]
+  "PGD": {
+    "company": "CTCP Phân phối khí thấp áp Dầu khí Việt Nam",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "CTR": {
-    "company": "Tổng Công ty Cổ phần Công trình Viettel",
-    "industry": "Viễn thông",
-    "aliases": [
-      "công trình viettel",
-      "tổng công ty cổ phần công trình viettel"
-    ]
+  "PGS": {
+    "company": "CTCP Kinh doanh Khí Miền Nam",
+    "industry": "Tiện ích",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "DCM": {
-    "company": "Công ty Cổ phần Phân bón Dầu khí Cà Mau",
-    "industry": "Hóa chất",
-    "aliases": [
-      "công ty cổ phần phân bón dầu khí cà mau",
-      "phân bón dầu khí cà mau"
-    ]
+  "PHC": {
+    "company": "CTCP Xây dựng Phục Hưng Holdings",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "DGC": {
-    "company": "Công ty Cổ phần Tập đoàn Hóa chất Đức Giang",
-    "industry": "Hóa chất",
-    "aliases": [
-      "công ty cổ phần tập đoàn hóa chất đức giang",
-      "hóa chất đức giang"
-    ]
+  "PHR": {
+    "company": "CTCP Cao su Phước Hòa",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "DGW": {
-    "company": "Công ty Cổ phần Thế Giới Số",
-    "industry": "Bán lẻ",
-    "aliases": [
-      "công ty cổ phần thế giới số",
-      "thế giới số"
-    ]
+  "PLC": {
+    "company": "Tổng Công ty Hóa dầu Petrolimex - CTCP",
+    "industry": "SX Phụ trợ",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
-  "DPM": {
-    "company": "Tổng Công ty Phân bón và Hóa chất Dầu khí",
-    "industry": "Hóa chất",
+  "PLX": {
+    "company": "Tập đoàn Xăng dầu Việt Nam (Petrolimex)",
+    "industry": "Dầu khí",
     "aliases": [
-      "phân bón và hóa chất dầu khí",
-      "tổng công ty phân bón và hóa chất dầu khí"
-    ]
-  },
-  "FRT": {
-    "company": "Công ty Cổ phần Bán lẻ Kỹ thuật số FPT",
-    "industry": "Bán lẻ",
-    "aliases": [
-      "bán lẻ kỹ thuật số fpt",
-      "công ty cổ phần bán lẻ kỹ thuật số fpt"
-    ]
-  },
-  "GEX": {
-    "company": "Công ty Cổ phần Tập đoàn GELEX",
-    "industry": "Công nghiệp",
-    "aliases": [
-      "công ty cổ phần tập đoàn gelex",
-      "gelex"
-    ]
-  },
-  "GMD": {
-    "company": "Công ty Cổ phần Gemadept",
-    "industry": "Logistics",
-    "aliases": [
-      "công ty cổ phần gemadept",
-      "gemadept"
-    ]
-  },
-  "HAH": {
-    "company": "Công ty Cổ phần Vận tải và Xếp dỡ Hải An",
-    "industry": "Logistics",
-    "aliases": [
-      "công ty cổ phần vận tải và xếp dỡ hải an",
-      "vận tải và xếp dỡ hải an"
-    ]
-  },
-  "HCM": {
-    "company": "Công ty Cổ phần Chứng khoán Thành phố Hồ Chí Minh",
-    "industry": "Chứng khoán",
-    "aliases": [
-      "chứng khoán thành phố hồ chí minh",
-      "công ty cổ phần chứng khoán thành phố hồ chí minh"
-    ]
-  },
-  "HSG": {
-    "company": "Công ty Cổ phần Tập đoàn Hoa Sen",
-    "industry": "Thép",
-    "aliases": [
-      "công ty cổ phần tập đoàn hoa sen",
-      "hoa sen"
-    ]
-  },
-  "HVN": {
-    "company": "Tổng Công ty Hàng không Việt Nam",
-    "industry": "Hàng không",
-    "aliases": [
-      "hàng không việt nam",
-      "tổng công ty hàng không việt nam"
-    ]
-  },
-  "IMP": {
-    "company": "Công ty Cổ phần Dược phẩm Imexpharm",
-    "industry": "Dược phẩm",
-    "aliases": [
-      "công ty cổ phần dược phẩm imexpharm",
-      "dược phẩm imexpharm"
-    ]
-  },
-  "KDH": {
-    "company": "Công ty Cổ phần Đầu tư và Kinh doanh Nhà Khang Điền",
-    "industry": "Bất động sản",
-    "aliases": [
-      "công ty cổ phần đầu tư và kinh doanh nhà khang điền",
-      "đầu tư và kinh doanh nhà khang điền"
-    ]
-  },
-  "NKG": {
-    "company": "Công ty Cổ phần Thép Nam Kim",
-    "industry": "Thép",
-    "aliases": [
-      "công ty cổ phần thép nam kim",
-      "thép nam kim"
-    ]
-  },
-  "PC1": {
-    "company": "Công ty Cổ phần Tập đoàn PC1",
-    "industry": "Điện",
-    "aliases": [
-      "công ty cổ phần tập đoàn pc1",
-      "pc1"
-    ]
+      "petrolimex",
+      "xăng dầu việt nam",
+      "tập đoàn xăng dầu"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "PNJ": {
     "company": "Công ty Cổ phần Vàng bạc Đá quý Phú Nhuận",
@@ -394,7 +1273,9 @@
     "aliases": [
       "công ty cổ phần vàng bạc đá quý phú nhuận",
       "vàng bạc đá quý phú nhuận"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "POM": {
     "company": "Công ty Cổ phần Thép Pomina",
@@ -402,7 +1283,9 @@
     "aliases": [
       "công ty cổ phần thép pomina",
       "thép pomina"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "POW": {
     "company": "Tổng Công ty Điện lực Dầu khí Việt Nam",
@@ -410,7 +1293,51 @@
     "aliases": [
       "tổng công ty điện lực dầu khí việt nam",
       "điện lực dầu khí việt nam"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "PPC": {
+    "company": "CTCP Nhiệt điện Phả Lại",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "PSD": {
+    "company": "CTCP Dịch vụ Phân phối Tổng hợp Dầu khí",
+    "industry": "Bán buôn",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "PSI": {
+    "company": "CTCP Chứng khoán Dầu khí",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "PTI": {
+    "company": "Tổng Công ty cổ phần Bảo hiểm Bưu điện",
+    "industry": "Bảo hiểm",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "PTL": {
+    "company": "CTCP Victory Group",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "PVB": {
+    "company": "CTCP Bọc ống Dầu khí Việt Nam",
+    "industry": "Khai khoáng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "PVD": {
     "company": "Tổng Công ty Cổ phần Khoan và Dịch vụ Khoan Dầu khí",
@@ -418,7 +1345,16 @@
     "aliases": [
       "khoan và dịch vụ khoan dầu khí",
       "tổng công ty cổ phần khoan và dịch vụ khoan dầu khí"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "PVI": {
+    "company": "CTCP PVI",
+    "industry": "Bảo hiểm",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "PVS": {
     "company": "Tổng Công ty Cổ phần Dịch vụ Kỹ thuật Dầu khí Việt Nam",
@@ -426,7 +1362,102 @@
     "aliases": [
       "dịch vụ kỹ thuật dầu khí việt nam",
       "tổng công ty cổ phần dịch vụ kỹ thuật dầu khí việt nam"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HNX"
+  },
+  "PVT": {
+    "company": "Tổng Công ty cổ phần Vận tải Dầu khí",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "QCG": {
+    "company": "CTCP Quốc Cường Gia Lai",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "REE": {
+    "company": "Công ty Cổ phần Cơ Điện Lạnh (REE)",
+    "industry": "Công nghiệp",
+    "aliases": [
+      "cơ điện lạnh",
+      "ree corporation",
+      "ree corp"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "SAB": {
+    "company": "Công ty Cổ phần Bia - Rượu - NGK Sài Gòn (Sabeco)",
+    "industry": "Đồ uống",
+    "aliases": [
+      "sabeco",
+      "bia sài gòn",
+      "sài gòn beer",
+      "bia sabeco"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "SBT": {
+    "company": "CTCP Thành Thành Công - Biên Hòa",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SCI": {
+    "company": "CTCP SCI E&C",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SCR": {
+    "company": "CTCP Địa ốc Sài Gòn Thương Tín",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SCS": {
+    "company": "CTCP Dịch vụ Hàng hóa Sài Gòn",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SDG": {
+    "company": "CTCP Sadico Cần Thơ",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SFI": {
+    "company": "CTCP Đại lý Vận tải SAFI",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SGN": {
+    "company": "CTCP Phục vụ Mặt đất Sài Gòn",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SHB": {
+    "company": "Ngân hàng TMCP Sài Gòn - Hà Nội",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
   "SHS": {
     "company": "Công ty Cổ phần Chứng khoán Sài Gòn - Hà Nội",
@@ -434,7 +1465,69 @@
     "aliases": [
       "chứng khoán sài gòn - hà nội",
       "công ty cổ phần chứng khoán sài gòn - hà nội"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HNX"
+  },
+  "SIP": {
+    "company": "CTCP Đầu tư Sài Gòn VRG",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SKG": {
+    "company": "CTCP Tàu cao tốc Superdong - Kiên Giang",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SLS": {
+    "company": "CTCP Mía Đường Sơn La",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SMA": {
+    "company": "CTCP Thiết bị Phụ tùng Sài Gòn",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SMB": {
+    "company": "CTCP Bia Sài Gòn - Miền Trung",
+    "industry": "Thực phẩm - Đồ uống",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SRA": {
+    "company": "CTCP Sara Việt Nam",
+    "industry": "Bán buôn",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SSB": {
+    "company": "Ngân hàng TMCP Đông Nam Á",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SSI": {
+    "company": "Công ty Cổ phần Chứng khoán SSI",
+    "industry": "Chứng khoán",
+    "aliases": [
+      "chứng khoán ssi",
+      "ssi securities",
+      "ssi chứng khoán"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "STB": {
     "company": "Ngân hàng TMCP Sài Gòn Thương Tín",
@@ -442,7 +1535,235 @@
     "aliases": [
       "ngân hàng tmcp sài gòn thương tín",
       "sài gòn thương tín"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "STK": {
+    "company": "CTCP Sợi Thế Kỷ",
+    "industry": "SX Hàng gia dụng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SVC": {
+    "company": "CTCP Dịch vụ Tổng hợp Sài Gòn",
+    "industry": "Bán lẻ",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SVN": {
+    "company": "CTCP Tập đoàn Vexilla Việt Nam",
+    "industry": "Nông - Lâm - Ngư",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SZB": {
+    "company": "CTCP Sonadezi Long Bình",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "SZC": {
+    "company": "CTCP Sonadezi Châu Đức",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TCB": {
+    "company": "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "techcombank",
+      "ngân hàng techcombank",
+      "kỹ thương"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "TCH": {
+    "company": "CTCP Đầu tư Dịch vụ Tài chính Hoàng Huy",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TCM": {
+    "company": "CTCP Dệt may - Đầu tư - Thương mại Thành Công",
+    "industry": "SX Hàng gia dụng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TCO": {
+    "company": "CTCP Janus Group",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TDG": {
+    "company": "CTCP Đầu tư TDG Global",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TDH": {
+    "company": "CTCP Phát triển Nhà Thủ Đức",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TDM": {
+    "company": "CTCP Nước Thủ Dầu Một",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TDP": {
+    "company": "CTCP Thuận Đức",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "THD": {
+    "company": "CTCP Thaiholdings",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TIG": {
+    "company": "CTCP Tập đoàn Đầu tư Thăng Long",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TMS": {
+    "company": "CTCP Transimex",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TNG": {
+    "company": "CTCP Đầu tư và Thương mại TNG",
+    "industry": "SX Hàng gia dụng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TNI": {
+    "company": "CTCP Tập đoàn Thành Nam",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TPB": {
+    "company": "Ngân hàng TMCP Tiên Phong",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TRA": {
+    "company": "CTCP Traphaco",
+    "industry": "Chăm sóc sức khỏe",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TSC": {
+    "company": "CTCP Vật tư Kỹ thuật nông nghiệp Cần Thơ",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TTF": {
+    "company": "CTCP Tập đoàn Kỹ nghệ gỗ Trường Thành",
+    "industry": "SX Hàng gia dụng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TVC": {
+    "company": "CTCP Tập đoàn Quản lý tài sản T-Corp",
+    "industry": "Tài chính khác",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TVD": {
+    "company": "CTCP Than Vàng Danh - Vinacomin",
+    "industry": "Khai khoáng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "TVS": {
+    "company": "CTCP Chứng khoán Thiên Việt",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VAB": {
+    "company": "Ngân hàng TMCP Việt Á",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VBB": {
+    "company": "Ngân hàng TMCP Việt Nam Thương Tín",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VC3": {
+    "company": "CTCP Tập đoàn Nam Mê Kông",
+    "industry": "Bất động sản",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VC9": {
+    "company": "CTCP Xây dựng số 9 - VC9",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VCB": {
+    "company": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "vietcombank",
+      "ngoại thương",
+      "ngân hàng vietcombank",
+      "ngân hàng ngoại thương"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VCG": {
+    "company": "Tổng Công ty cổ phần Xuất nhập khẩu và Xây dựng Việt Nam",
+    "industry": "Xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   },
   "VCI": {
     "company": "Công ty Cổ phần Chứng khoán Vietcap",
@@ -450,7 +1771,37 @@
     "aliases": [
       "chứng khoán vietcap",
       "công ty cổ phần chứng khoán vietcap"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VCS": {
+    "company": "CTCP Vicostone",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VDS": {
+    "company": "CTCP Chứng khoán Rồng Việt",
+    "industry": "Chứng khoán",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VGC": {
+    "company": "Tổng Công ty Viglacera - CTCP",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VGS": {
+    "company": "CTCP Ống thép Việt - Đức VG PIPE",
+    "industry": "Vật liệu xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "VHC": {
     "company": "Công ty Cổ phần Vĩnh Hoàn",
@@ -458,7 +1809,51 @@
     "aliases": [
       "công ty cổ phần vĩnh hoàn",
       "vĩnh hoàn"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VHM": {
+    "company": "Công ty Cổ phần Vinhomes",
+    "industry": "Bất động sản",
+    "aliases": [
+      "vinhomes",
+      "công ty vinhomes"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VIB": {
+    "company": "Ngân hàng TMCP Quốc tế Việt Nam",
+    "industry": "Ngân hàng",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VIC": {
+    "company": "Tập đoàn Vingroup",
+    "industry": "Bất động sản",
+    "aliases": [
+      "vingroup",
+      "tập đoàn vingroup",
+      "vin group"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VID": {
+    "company": "CTCP Đầu tư Phát triển Thương mại Viễn Đông",
+    "industry": "Bán buôn",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VIG": {
+    "company": "CTCP Chứng khoán Đầu tư tài chính Việt Nam",
+    "industry": "Chứng khoán",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "VIX": {
     "company": "Công ty Cổ phần Chứng khoán VIX",
@@ -466,7 +1861,9 @@
     "aliases": [
       "chứng khoán vix",
       "công ty cổ phần chứng khoán vix"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "VJC": {
     "company": "Công ty Cổ phần Hàng không Vietjet",
@@ -474,7 +1871,16 @@
     "aliases": [
       "công ty cổ phần hàng không vietjet",
       "hàng không vietjet"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VMC": {
+    "company": "CTCP Vimeco",
+    "industry": "Xây dựng",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
   },
   "VND": {
     "company": "Công ty Cổ phần Chứng khoán VNDIRECT",
@@ -482,7 +1888,85 @@
     "aliases": [
       "chứng khoán vndirect",
       "công ty cổ phần chứng khoán vndirect"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VNM": {
+    "company": "Công ty Cổ phần Sữa Việt Nam (Vinamilk)",
+    "industry": "Hàng tiêu dùng",
+    "aliases": [
+      "vinamilk",
+      "sữa việt nam",
+      "sữa vinamilk",
+      "vietnam dairy"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VNS": {
+    "company": "CTCP Ánh Dương Việt Nam",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VNT": {
+    "company": "CTCP Giao nhận Vận tải Ngoại thương",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VOS": {
+    "company": "CTCP Vận tải Biển Việt Nam",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VPB": {
+    "company": "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)",
+    "industry": "Ngân hàng",
+    "aliases": [
+      "vpbank",
+      "việt nam thịnh vượng",
+      "vp bank"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VPH": {
+    "company": "CTCP Vạn Phát Hưng",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VPS": {
+    "company": "CTCP Thuốc sát trùng Việt Nam",
+    "industry": "SX Nhựa - Hóa chất",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VRC": {
+    "company": "CTCP Bất động sản và Đầu tư VRC",
+    "industry": "Bất động sản",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VRE": {
+    "company": "Công ty Cổ phần Vincom Retail",
+    "industry": "Bất động sản",
+    "aliases": [
+      "vincom retail",
+      "vincom",
+      "trung tâm thương mại vincom"
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
   },
   "VSC": {
     "company": "Công ty Cổ phần Container Việt Nam",
@@ -490,6 +1974,36 @@
     "aliases": [
       "container việt nam",
       "công ty cổ phần container việt nam"
-    ]
+    ],
+    "tier": "curated",
+    "exchange": "HOSE"
+  },
+  "VSH": {
+    "company": "CTCP Thủy điện Vĩnh Sơn - Sông Hinh",
+    "industry": "Tiện ích",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "VTP": {
+    "company": "Tổng Công ty cổ phần Bưu chính Viettel",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "WCS": {
+    "company": "CTCP Bến xe Miền Tây",
+    "industry": "Vận tải - kho bãi",
+    "exchange": "HNX",
+    "aliases": [],
+    "tier": "expanded"
+  },
+  "YEG": {
+    "company": "CTCP Tập đoàn Yeah1",
+    "industry": "UNKNOWN",
+    "exchange": "HOSE",
+    "aliases": [],
+    "tier": "expanded"
   }
 }
