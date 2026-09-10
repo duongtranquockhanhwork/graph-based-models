@@ -34,12 +34,12 @@ function MetricCard({
 }) {
   return (
     <div
-      className="rounded-2xl p-5"
+      className="rounded-lg p-5"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div className="flex items-center justify-between mb-3">
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center"
+          className="w-9 h-9 rounded-md flex items-center justify-center"
           style={{ background: color + '18', border: `1px solid ${color}30` }}
         >
           <Icon size={16} style={{ color }} />
@@ -68,7 +68,7 @@ function OfficialEvidence({ info }: { info: ModelInfo }) {
   if (!info.available || !info.performance) {
     return (
       <div
-        className="rounded-2xl p-5 flex items-start gap-3"
+        className="rounded-lg p-5 flex items-start gap-3"
         style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.28)' }}
       >
         <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" style={{ color: '#b45309' }} />
@@ -94,7 +94,7 @@ function OfficialEvidence({ info }: { info: ModelInfo }) {
 
   return (
     <div
-      className="rounded-2xl p-5"
+      className="rounded-lg p-5"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
@@ -161,7 +161,7 @@ function OfficialEvidence({ info }: { info: ModelInfo }) {
           </div>
 
           <div
-            className="rounded-xl p-2.5 mt-1"
+            className="rounded-md p-2.5 mt-1"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
           >
             <p className="text-[11px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -207,8 +207,8 @@ export default function EvaluationPage() {
   if (loading) {
     return (
       <div className="p-4 sm:p-6 space-y-4">
-        <div className="skeleton h-48 rounded-2xl" />
-        <div className="skeleton h-64 rounded-2xl" />
+        <div className="skeleton h-48 rounded-lg" />
+        <div className="skeleton h-64 rounded-lg" />
       </div>
     )
   }
@@ -229,7 +229,7 @@ export default function EvaluationPage() {
 
         {!data || data.insufficient_data ? (
           <div
-            className="flex flex-col items-center justify-center py-14 px-6 rounded-2xl text-center"
+            className="flex flex-col items-center justify-center py-14 px-6 rounded-lg text-center"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
           >
             <Database size={28} style={{ color: 'var(--text-faint)' }} />
@@ -242,8 +242,8 @@ export default function EvaluationPage() {
             </p>
             <Link
               to="/import"
-              className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-              style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+              className="mt-4 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+              style={{ background: '#1d4ed8' }}
             >
               Nhập thêm dữ liệu
             </Link>
@@ -285,7 +285,7 @@ export default function EvaluationPage() {
 
             {data.confusion_matrix && (
               <div
-                className="rounded-2xl p-5"
+                className="rounded-lg p-5"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
               >
                 <h4 className="text-[14px] font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
@@ -334,7 +334,7 @@ export default function EvaluationPage() {
 
             {data.caveat && (
               <div
-                className="rounded-2xl p-4 flex items-start gap-3"
+                className="rounded-lg p-4 flex items-start gap-3"
                 style={{ background: 'rgba(180,83,9,0.06)', border: '1px solid rgba(180,83,9,0.2)' }}
               >
                 <AlertTriangle size={15} className="mt-0.5 flex-shrink-0" style={{ color: '#b45309' }} />

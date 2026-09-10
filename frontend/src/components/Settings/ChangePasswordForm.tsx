@@ -63,8 +63,8 @@ export default function ChangePasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
-        style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+        className="px-4 py-2 rounded-md text-[13px] font-medium text-white disabled:opacity-50"
+        style={{ background: '#1d4ed8' }}
       >
         {loading ? 'Đang lưu...' : 'Đổi mật khẩu'}
       </button>

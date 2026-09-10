@@ -140,7 +140,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { paylo
   ]
   return (
     <div
-      className="rounded-xl px-3 py-2 text-[11px]"
+      className="rounded-md px-3 py-2 text-[11px]"
       style={{
         background: 'var(--bg-card)',
         border: '1px solid var(--border-default)',

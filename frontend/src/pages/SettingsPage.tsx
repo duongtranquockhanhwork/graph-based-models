@@ -30,7 +30,7 @@ export default function SettingsPage() {
           ) : (
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold text-white flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)' }}
+              style={{ background: '#1d4ed8' }}
             >
               {initial}
             </div>

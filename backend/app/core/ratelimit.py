@@ -10,8 +10,6 @@ thực tế nhân lên theo số worker; khởi động lại thì bộ đếm v
 nhiều worker, thay ``_MemoryBackend`` bằng Redis mà giữ nguyên interface.
 """
 
-from __future__ import annotations
-
 import threading
 import time
 from collections import defaultdict, deque

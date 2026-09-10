@@ -115,7 +115,7 @@ export default function ImportPage() {
         </div>
         <button
           onClick={handleAnalyzeAll}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-[13px] font-medium transition-all"
           style={{
             background: 'rgba(16,185,129,0.12)',
             border: '1px solid rgba(16,185,129,0.25)',
@@ -135,14 +135,14 @@ export default function ImportPage() {
 
       {/* Tabs */}
       <div
-        className="flex gap-1 p-1 rounded-2xl mb-6"
+        className="flex gap-1 p-1 rounded-lg mb-6"
         style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
       >
         {TABS.map(({ key, icon: Icon, label, desc }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
-            className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-xl text-left transition-all duration-200"
+            className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-md text-left transition-all duration-200"
             style={
               activeTab === key
                 ? {
@@ -175,12 +175,12 @@ export default function ImportPage() {
       {/* CSV Tab */}
       {activeTab === 'csv' && (
         <div
-          className="rounded-2xl p-6 card-glow"
+          className="rounded-lg p-6 card-glow"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
           <div
             {...getRootProps()}
-            className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200"
+            className="border-2 border-dashed rounded-md p-10 text-center cursor-pointer transition-all duration-200"
             style={{
               borderColor: isDragActive ? '#3b82f6' : 'var(--border-default)',
               background: isDragActive ? 'rgba(37,99,235,0.06)' : 'transparent',
@@ -200,7 +200,7 @@ export default function ImportPage() {
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
+                  className="w-14 h-14 rounded-lg flex items-center justify-center mx-auto"
                   style={{ background: 'rgba(37,99,235,0.1)', border: '1px solid rgba(37,99,235,0.2)' }}
                 >
                   <Upload size={24} style={{ color: '#3b82f6' }} />
@@ -223,7 +223,7 @@ export default function ImportPage() {
 
           {uploadResult !== null && (
             <div
-              className="mt-4 flex items-center gap-2.5 p-3 rounded-xl"
+              className="mt-4 flex items-center gap-2.5 p-3 rounded-md"
               style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}
             >
               <CheckCircle2 size={16} className="text-green-400 flex-shrink-0" />
@@ -249,12 +249,12 @@ export default function ImportPage() {
       {/* URL Tab */}
       {activeTab === 'url' && (
         <div
-          className="rounded-2xl p-6 card-glow"
+          className="rounded-lg p-6 card-glow"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
           <div className="flex items-start gap-3 mb-5">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+              className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5"
               style={{ background: 'rgba(14,165,233,0.1)', border: '1px solid rgba(14,165,233,0.2)' }}
             >
               <Globe size={18} style={{ color: '#0ea5e9' }} />
@@ -287,8 +287,8 @@ export default function ImportPage() {
                 <button
                   type="submit"
                   disabled={urlLoading || !urlInput.trim()}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50 flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)', color: 'white' }}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-md text-[13px] font-medium transition-all disabled:opacity-50 flex-shrink-0"
+                  style={{ background: '#1d4ed8', color: 'white' }}
                 >
                   {urlLoading ? (
                     <><Loader2 size={14} className="animate-spin" /> Đang lấy...</>
@@ -302,7 +302,7 @@ export default function ImportPage() {
 
           {urlPreview && (
             <div
-              className="mt-4 p-4 rounded-xl"
+              className="mt-4 p-4 rounded-md"
               style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)' }}
             >
               <div className="flex items-start gap-2.5">
@@ -319,7 +319,7 @@ export default function ImportPage() {
           )}
 
           <div
-            className="mt-5 p-4 rounded-xl"
+            className="mt-5 p-4 rounded-md"
             style={{ background: 'rgba(37,99,235,0.05)', border: '1px solid rgba(37,99,235,0.12)' }}
           >
             <div className="flex items-start gap-2.5">
@@ -348,7 +348,7 @@ export default function ImportPage() {
       {/* Manual Tab */}
       {activeTab === 'manual' && (
         <div
-          className="rounded-2xl p-6 card-glow"
+          className="rounded-lg p-6 card-glow"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
           <form onSubmit={handleManualSubmit} className="space-y-4">
@@ -407,8 +407,8 @@ export default function ImportPage() {
               <button
                 type="submit"
                 disabled={submitting || !form.title.trim()}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-[13px] font-medium transition-all disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)', color: 'white' }}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-md text-[13px] font-medium transition-all disabled:opacity-50"
+                style={{ background: '#1d4ed8', color: 'white' }}
               >
                 {submitting ? (
                   <><Loader2 size={14} className="animate-spin" /> Đang lưu...</>

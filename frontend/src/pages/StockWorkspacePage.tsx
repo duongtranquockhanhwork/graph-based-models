@@ -240,10 +240,10 @@ export default function StockWorkspacePage() {
 
           {quote ? (
             <div className="text-right">
-              <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: trendColor(quote.change) }}>
+              <p className="text-3xl font-bold tabular-nums leading-none" style={{ color: trendColor(quote.change, quote.price, quote.ceiling, quote.floor) }}>
                 {fmtNumber(quote.price)}
               </p>
-              <p className="text-[13px] mt-1 tabular-nums" style={{ color: trendColor(quote.change) }}>
+              <p className="text-[13px] mt-1 tabular-nums" style={{ color: trendColor(quote.change, quote.price, quote.ceiling, quote.floor) }}>
                 {quote.change > 0 ? '+' : ''}
                 {fmtNumber(quote.change)} ({quote.percent_change > 0 ? '+' : ''}
                 {quote.percent_change.toFixed(2)}%)
@@ -316,7 +316,7 @@ export default function StockWorkspacePage() {
         }
       >
         {candlesLoading ? (
-          <div className="skeleton h-80 rounded-2xl" />
+          <div className="skeleton h-80 rounded-lg" />
         ) : (
           <PriceChart candles={candles} height={300} volumeHeight={90} />
         )}
@@ -340,7 +340,7 @@ export default function StockWorkspacePage() {
             }
           >
             {loading ? (
-              <div className="skeleton h-24 rounded-xl" />
+              <div className="skeleton h-24 rounded-md" />
             ) : scoredNews.length === 0 ? (
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
                 Chưa có bài báo nào về {sym} được hệ thống đưa ra nhận định.{' '}
@@ -394,7 +394,7 @@ export default function StockWorkspacePage() {
           }
         >
           {loading ? (
-            <div className="skeleton h-32 rounded-xl" />
+            <div className="skeleton h-32 rounded-md" />
           ) : (
             <>
               <div className="space-y-2.5 mb-3">
@@ -484,7 +484,7 @@ export default function StockWorkspacePage() {
         {loading ? (
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="skeleton h-20 rounded-xl" />
+              <div key={i} className="skeleton h-20 rounded-md" />
             ))}
           </div>
         ) : news.length === 0 ? (

@@ -101,7 +101,7 @@ export default function AdminLabelingPage() {
       </div>
 
       <div
-        className="rounded-2xl p-4 flex items-start gap-3"
+        className="rounded-lg p-4 flex items-start gap-3"
         style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)' }}
       >
         <Info size={15} className="mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
@@ -227,15 +227,15 @@ export default function AdminLabelingPage() {
 
                 <button
                   onClick={() => submit(n.id)}
-                  className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-                  style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+                  className="px-4 py-2 rounded-md text-[13px] font-medium text-white"
+                  style={{ background: '#047857' }}
                 >
                   Xác nhận
                 </button>
 
                 <button
                   onClick={() => skip(n.id)}
-                  className="px-4 py-2 rounded-xl text-[13px]"
+                  className="px-4 py-2 rounded-md text-[13px]"
                   style={{
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-subtle)',
