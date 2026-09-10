@@ -133,7 +133,7 @@ export default function AdminQualityPage() {
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px]"
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-[13px]"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Chạy lại kiểm định
@@ -146,7 +146,7 @@ export default function AdminQualityPage() {
         <>
           {/* Kết luận tổng thể, kèm việc cần làm */}
           <div
-            className="rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3"
+            className="rounded-lg p-4 flex flex-wrap items-center justify-between gap-3"
             style={{
               background: validation.overall_status === 'PASS' ? 'rgba(16,185,129,0.08)' : 'rgba(217,119,6,0.08)',
               border: `1px solid ${validation.overall_status === 'PASS' ? 'rgba(16,185,129,0.25)' : 'rgba(217,119,6,0.28)'}`,
@@ -174,8 +174,8 @@ export default function AdminQualityPage() {
             {validation.review_count > 0 && (
               <Link
                 to="/admin/labeling"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[12px] font-medium text-white flex-shrink-0"
+                style={{ background: '#047857' }}
               >
                 <PenLine size={12} /> Xử lý {validation.review_count} tin chờ gán nhãn
               </Link>
@@ -294,7 +294,7 @@ export default function AdminQualityPage() {
                   ].map((m) => (
                     <div
                       key={m.label}
-                      className="rounded-xl p-3.5"
+                      className="rounded-md p-3.5"
                       style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
                     >
                       <p className="text-2xl font-bold tabular-nums" style={{ color: m.color }}>
@@ -311,7 +311,7 @@ export default function AdminQualityPage() {
                 </div>
 
                 <div
-                  className="mt-3 rounded-xl p-3 flex items-start gap-2"
+                  className="mt-3 rounded-md p-3 flex items-start gap-2"
                   style={{ background: 'rgba(180,83,9,0.06)', border: '1px solid rgba(180,83,9,0.2)' }}
                 >
                   <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" style={{ color: '#b45309' }} />
@@ -327,7 +327,7 @@ export default function AdminQualityPage() {
           </Card>
 
           <div
-            className="rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3"
+            className="rounded-lg px-4 py-3 flex flex-wrap items-center justify-between gap-3"
             style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-subtle)' }}
           >
             <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>

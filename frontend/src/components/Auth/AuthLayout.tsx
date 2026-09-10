@@ -15,32 +15,12 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
       <div
         className="hidden lg:flex lg:w-[46%] relative overflow-hidden flex-col justify-between p-12"
         style={{
-          background: 'linear-gradient(160deg, #07111f 0%, #050c1a 60%, #0a1628 100%)',
+          background: '#050c1a',
           borderRight: '1px solid #1a2d4a',
         }}
       >
-        <div
-          className="absolute w-[420px] h-[420px] rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)',
-            top: '-120px',
-            left: '-120px',
-          }}
-        />
-        <div
-          className="absolute w-[360px] h-[360px] rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, rgba(14,165,233,0.18) 0%, transparent 70%)',
-            bottom: '-100px',
-            right: '-80px',
-          }}
-        />
-
         <div className="relative flex items-center gap-3">
-          <div
-            className="flex-shrink-0 rounded-xl"
-            style={{ boxShadow: '0 0 24px rgba(37,99,235,0.45), 0 2px 8px rgba(0,0,0,0.4)' }}
-          >
+          <div className="flex-shrink-0 rounded-md">
             <BrandMark size={44} />
           </div>
           <div>
@@ -93,10 +73,7 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
       <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-[400px] fade-in">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-            <div
-              className="flex-shrink-0 rounded-xl"
-              style={{ boxShadow: '0 0 20px rgba(37,99,235,0.45)' }}
-            >
+            <div className="flex-shrink-0 rounded-md">
               <BrandMark size={36} />
             </div>
             <h1 className="font-bold text-[15px] gradient-text">FinNexus KG</h1>

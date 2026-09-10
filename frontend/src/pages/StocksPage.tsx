@@ -206,7 +206,7 @@ export default function StocksPage() {
               onClick={refreshNow}
               disabled={refreshing}
               aria-label="Cập nhật giá ngay"
-              className="p-2 rounded-xl disabled:opacity-60"
+              className="p-2 rounded-md disabled:opacity-60"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
               <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
@@ -223,8 +223,8 @@ export default function StocksPage() {
               <button
                 type="submit"
                 disabled={adding || !symbolInput.trim()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-md text-[13px] font-medium text-white disabled:opacity-50"
+                style={{ background: '#1d4ed8' }}
               >
                 <Plus size={14} /> Thêm
               </button>
@@ -261,7 +261,7 @@ export default function StocksPage() {
       {tab === 'watchlist' ? (
         quotes.length === 0 ? (
           <div
-            className="flex flex-col items-center justify-center py-16 px-6 rounded-2xl text-center"
+            className="flex flex-col items-center justify-center py-16 px-6 rounded-lg text-center"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
           >
             <Star size={28} style={{ color: 'var(--text-faint)' }} />
@@ -274,14 +274,14 @@ export default function StocksPage() {
             </p>
             <button
               onClick={() => switchTab('all')}
-              className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-              style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+              className="mt-4 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+              style={{ background: '#1d4ed8' }}
             >
               Xem tất cả mã
             </button>
           </div>
         ) : (
-          <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="overflow-x-auto">
               <table className="w-full text-[13px]" style={{ minWidth: 720 }}>
                 <thead>
@@ -313,14 +313,14 @@ export default function StocksPage() {
                       <td className="px-3 py-2.5 max-w-[220px] truncate" style={{ color: 'var(--text-secondary)' }}>
                         {q.company_name || '—'}
                       </td>
-                      <td className="px-3 py-2.5 font-semibold whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change) }}>
+                      <td className="px-3 py-2.5 font-semibold whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change, q.price, q.ceiling, q.floor) }}>
                         {fmtNumber(q.price)}
                       </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change) }}>
+                      <td className="px-3 py-2.5 whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change, q.price, q.ceiling, q.floor) }}>
                         {q.change > 0 ? '+' : ''}
                         {fmtNumber(q.change)}
                       </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change) }}>
+                      <td className="px-3 py-2.5 whitespace-nowrap tabular-nums" style={{ color: trendColor(q.change, q.price, q.ceiling, q.floor) }}>
                         {q.percent_change > 0 ? '+' : ''}
                         {q.percent_change.toFixed(2)}%
                       </td>
@@ -370,11 +370,11 @@ export default function StocksPage() {
           {allLoading ? (
             <div className="space-y-2">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="skeleton h-14 rounded-xl" />
+                <div key={i} className="skeleton h-14 rounded-md" />
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+            <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
               <div className="overflow-x-auto">
                 <table className="w-full text-[13px]" style={{ minWidth: 640 }}>
                   <thead>
@@ -449,7 +449,7 @@ export default function StocksPage() {
 
           {!allLoading && filteredAll.length === 0 && (
             <div
-              className="flex flex-col items-center justify-center py-14 rounded-2xl text-center"
+              className="flex flex-col items-center justify-center py-14 rounded-lg text-center"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
             >
               <TrendingUp size={26} style={{ color: 'var(--text-faint)' }} />

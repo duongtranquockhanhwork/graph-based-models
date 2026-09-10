@@ -147,7 +147,7 @@ export default function AdminTuningPage() {
       </div>
 
       <div
-        className="rounded-2xl p-3.5 flex items-start gap-2.5"
+        className="rounded-lg p-3.5 flex items-start gap-2.5"
         style={{ background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.2)' }}
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
@@ -228,8 +228,8 @@ export default function AdminTuningPage() {
                       <button
                         onClick={() => saveSetting(s.key)}
                         disabled={savingKey === s.key || drafts[s.key] === s.value}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-40"
-                        style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-md text-[13px] font-medium text-white disabled:opacity-40"
+                        style={{ background: '#047857' }}
                       >
                         <Save size={13} /> Lưu
                       </button>
@@ -293,8 +293,8 @@ export default function AdminTuningPage() {
             </div>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-              style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+              style={{ background: '#047857' }}
             >
               <Plus size={13} /> Thêm
             </button>
@@ -368,7 +368,7 @@ export default function AdminTuningPage() {
           onClick={() => setPendingDelete(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl p-5"
+            className="w-full max-w-sm rounded-lg p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -382,14 +382,14 @@ export default function AdminTuningPage() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setPendingDelete(null)}
-                className="px-4 py-2 rounded-xl text-[13px]"
+                className="px-4 py-2 rounded-md text-[13px]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
                 Huỷ
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
+                className="px-4 py-2 rounded-md text-[13px] font-medium text-white"
                 style={{ background: '#dc2626' }}
               >
                 Xoá

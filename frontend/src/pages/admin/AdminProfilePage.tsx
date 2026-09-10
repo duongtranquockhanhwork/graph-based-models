@@ -30,7 +30,7 @@ export default function AdminProfilePage() {
           ) : (
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-semibold text-white flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #047857 0%, #10b981 100%)' }}
+              style={{ background: '#047857' }}
             >
               {initial}
             </div>

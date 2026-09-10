@@ -61,7 +61,7 @@ export default function AdminUsersPage() {
       {loading ? (
         <SkeletonBlock className="h-64" />
       ) : (
-        <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+        <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
           <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>

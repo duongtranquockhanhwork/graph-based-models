@@ -76,7 +76,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
 
   return (
     <div
-      className="rounded-2xl overflow-hidden transition-colors"
+      className="rounded-lg overflow-hidden transition-colors"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div
@@ -162,7 +162,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
           {/* Vì sao mô hình kết luận như vậy — hoặc vì sao nó không trả lời. */}
           {explanation && (
             <div
-              className="rounded-xl p-3"
+              className="rounded-md p-3"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
             >
               {explanation.status === 'SCORED' ? (

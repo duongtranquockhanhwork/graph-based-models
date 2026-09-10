@@ -276,7 +276,7 @@ export default function FeedPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowFilters((v) => !v)}
-            className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px]"
+            className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-md text-[12px]"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             <Filter size={13} /> Bộ lọc
@@ -289,15 +289,15 @@ export default function FeedPage() {
           <button
             onClick={load}
             aria-label="Tải lại dòng tin"
-            className="p-2 rounded-xl"
+            className="p-2 rounded-md"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
           </button>
           <Link
             to="/import"
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-            style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-md text-[13px] font-medium text-white"
+            style={{ background: '#1d4ed8' }}
           >
             <Upload size={13} />
             <span className="hidden sm:inline">Nhập dữ liệu</span>
@@ -308,7 +308,7 @@ export default function FeedPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[228px_1fr] gap-5">
         {/* Facet */}
         <aside
-          className={`${showFilters ? 'block' : 'hidden'} lg:block rounded-2xl p-3.5 h-fit lg:sticky lg:top-4`}
+          className={`${showFilters ? 'block' : 'hidden'} lg:block rounded-lg p-3.5 h-fit lg:sticky lg:top-4`}
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
           aria-label="Bộ lọc dòng tin"
         >
@@ -358,12 +358,12 @@ export default function FeedPage() {
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="skeleton h-28 rounded-2xl" />
+                <div key={i} className="skeleton h-28 rounded-lg" />
               ))}
             </div>
           ) : news.length === 0 ? (
             <div
-              className="flex flex-col items-center justify-center py-16 px-6 rounded-2xl text-center"
+              className="flex flex-col items-center justify-center py-16 px-6 rounded-lg text-center"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
             >
               <Newspaper size={28} style={{ color: 'var(--text-faint)' }} />
@@ -377,8 +377,8 @@ export default function FeedPage() {
               </p>
               <Link
                 to="/import"
-                className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+                className="mt-4 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+                style={{ background: '#1d4ed8' }}
               >
                 Nhập dữ liệu
               </Link>
@@ -430,7 +430,7 @@ export default function FeedPage() {
           onClick={() => setPendingDelete(null)}
         >
           <div
-            className="w-full max-w-md rounded-2xl p-5"
+            className="w-full max-w-md rounded-lg p-5"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -451,14 +451,14 @@ export default function FeedPage() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setPendingDelete(null)}
-                className="px-4 py-2 rounded-xl text-[13px]"
+                className="px-4 py-2 rounded-md text-[13px]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
                 Huỷ
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
+                className="px-4 py-2 rounded-md text-[13px] font-medium text-white"
                 style={{ background: '#dc2626' }}
               >
                 Xoá vĩnh viễn

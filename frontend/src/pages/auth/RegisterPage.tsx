@@ -105,8 +105,7 @@ export default function RegisterPage() {
           disabled={isSubmitting}
           className="w-full py-2.5 rounded-lg font-semibold text-sm text-white flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
           style={{
-            background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)',
-            boxShadow: '0 0 20px rgba(37,99,235,0.35)',
+            background: '#1d4ed8',
           }}
         >
           {isSubmitting && <Loader2 size={15} className="animate-spin" />}

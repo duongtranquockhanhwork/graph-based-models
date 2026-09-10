@@ -74,10 +74,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center gap-3">
-            <div
-              className="flex-shrink-0 rounded-xl"
-              style={{ boxShadow: '0 0 20px rgba(37,99,235,0.35), 0 2px 8px rgba(0,0,0,0.15)' }}
-            >
+            <div className="flex-shrink-0 rounded-md">
               <BrandMark size={36} />
             </div>
             <div className="min-w-0">
@@ -105,12 +102,11 @@ export default function Sidebar() {
                     key={to}
                     to={to}
                     onClick={closeSidebar}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative"
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-all duration-200 relative"
                     style={({ isActive }) =>
                       isActive
                         ? {
-                            background:
-                              'linear-gradient(135deg, rgba(37,99,235,0.16) 0%, rgba(14,165,233,0.08) 100%)',
+                            background: 'rgba(37,99,235,0.1)',
                             borderLeft: '3px solid #3b82f6',
                             paddingLeft: '9px',
                             color: 'var(--text-primary)',
@@ -129,7 +125,7 @@ export default function Sidebar() {
                         {isActive && (
                           <div
                             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                            style={{ background: '#3b82f6', boxShadow: '0 0 6px #3b82f6' }}
+                            style={{ background: '#3b82f6' }}
                           />
                         )}
                       </>
@@ -158,7 +154,7 @@ export default function Sidebar() {
             ) : (
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-white flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)' }}
+                style={{ background: '#1d4ed8' }}
               >
                 {initial}
               </div>

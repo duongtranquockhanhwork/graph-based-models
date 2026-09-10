@@ -310,7 +310,7 @@ export default function GraphPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <div
-            className="flex rounded-xl overflow-hidden"
+            className="flex rounded-md overflow-hidden"
             style={{ border: '1px solid var(--border-subtle)' }}
             role="group"
             aria-label="Chế độ hiển thị đồ thị"
@@ -322,7 +322,7 @@ export default function GraphPage() {
                 aria-pressed={mode === m}
                 className="px-3 py-2 text-[12px] font-medium transition-colors flex items-center gap-1.5"
                 style={{
-                  background: mode === m ? 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' : 'var(--bg-card)',
+                  background: mode === m ? '#1d4ed8' : 'var(--bg-card)',
                   color: mode === m ? 'white' : 'var(--text-secondary)',
                 }}
               >
@@ -335,7 +335,7 @@ export default function GraphPage() {
           <button
             onClick={() => graphRef.current?.zoomToFit?.(600, 60)}
             aria-label="Căn vừa khung nhìn"
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px]"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-[12px]"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             <Maximize2 size={13} />
@@ -345,7 +345,7 @@ export default function GraphPage() {
           <button
             onClick={load}
             aria-label="Tải lại đồ thị"
-            className="p-2 rounded-xl"
+            className="p-2 rounded-md"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
@@ -355,7 +355,7 @@ export default function GraphPage() {
 
       {/* Bộ lọc + mức nhãn */}
       <div
-        className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-2xl"
+        className="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-lg"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
       >
         <div className="flex items-center gap-2 flex-1 min-w-[180px]">
@@ -411,7 +411,7 @@ export default function GraphPage() {
         {(stockFilter || industryFilter) && (
           <button
             onClick={() => setParams(new URLSearchParams(), { replace: true })}
-            className="px-3 py-2 rounded-xl text-[12px]"
+            className="px-3 py-2 rounded-md text-[12px]"
             style={{ background: 'var(--bg-surface)', color: 'var(--text-secondary)' }}
           >
             Xoá lọc
@@ -422,7 +422,7 @@ export default function GraphPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
         <div
           ref={containerRef}
-          className="rounded-2xl overflow-hidden relative"
+          className="rounded-lg overflow-hidden relative"
           style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border-subtle)',
@@ -448,8 +448,8 @@ export default function GraphPage() {
               </p>
               <Link
                 to="/import"
-                className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+                className="mt-4 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+                style={{ background: '#1d4ed8' }}
               >
                 Nhập dữ liệu
               </Link>
@@ -542,7 +542,7 @@ export default function GraphPage() {
 
         {/* Bảng bên */}
         <div className="space-y-3">
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="rounded-lg p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <h3 className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--text-primary)' }}>
               Sơ đồ gồm những gì
             </h3>
@@ -554,7 +554,7 @@ export default function GraphPage() {
             )}
           </div>
 
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="rounded-lg p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <h3 className="text-[13px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
               {selected ? 'Đang chọn' : 'Chi tiết'}
             </h3>
@@ -613,8 +613,8 @@ export default function GraphPage() {
                 {selected.type === 'industry' && (
                   <button
                     onClick={() => setFilter('industry', selected.label)}
-                    className="w-full mt-1 px-3 py-2 rounded-xl text-[12px] font-medium text-white"
-                    style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+                    className="w-full mt-1 px-3 py-2 rounded-md text-[12px] font-medium text-white"
+                    style={{ background: '#1d4ed8' }}
                   >
                     Chỉ xem ngành {selected.label}
                   </button>
@@ -627,7 +627,7 @@ export default function GraphPage() {
             )}
           </div>
 
-          <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+          <div className="rounded-lg p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <div className="flex items-start gap-2">
               <Info size={13} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-faint)' }} />
               <div>

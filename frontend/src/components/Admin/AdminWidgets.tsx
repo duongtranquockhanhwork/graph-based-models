@@ -19,7 +19,7 @@ export function StatCard({
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div
-        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center flex-shrink-0"
         style={{ background: accent + '22', border: `1px solid ${accent}33` }}
       >
         <Icon size={20} style={{ color: accent }} />
@@ -38,7 +38,7 @@ export function StatCard({
 export function SectionCard({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
     <div
-      className="rounded-2xl p-5 card-glow"
+      className="rounded-lg p-5 card-glow"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -51,7 +51,7 @@ export function SectionCard({ title, action, children }: { title: string; action
 }
 
 export function SkeletonBlock({ className = 'h-20' }: { className?: string }) {
-  return <div className={`skeleton rounded-2xl ${className}`} />
+  return <div className={`skeleton rounded-lg ${className}`} />
 }
 
 const SENTIMENT_BADGE: Record<string, string> = {
