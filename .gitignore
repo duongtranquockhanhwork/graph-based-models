@@ -38,3 +38,7 @@ backend/data/price_history_cache.csv
 
 # Môi trường ảo dùng để kiểm định
 .auditvenv/
+
+# Cấu hình máy cá nhân và CSDL phát triển
+.claude/
+dev.db

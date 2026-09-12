@@ -13,7 +13,19 @@ class Settings(BaseSettings):
     # có mở /docs không, có cho phép JWT secret mặc định không.
     ENVIRONMENT: str = "development"
 
-    DATABASE_URL: str = "postgresql://finnexus:finnexus123@postgres:5432/finnexus_db"
+    # SQLite trong thư mục backend/ là mặc định, vì đó là thứ chạy được ở MỌI
+    # nơi mà không cần cài gì thêm — đúng như README hướng dẫn.
+    #
+    # Mặc định cũ là "postgresql://finnexus:finnexus123@postgres:5432/..." và
+    # nó hỏng theo hai cách: "postgres" là tên service chỉ phân giải được BÊN
+    # TRONG mạng Docker, nên ai clone về rồi làm theo README sẽ nhận
+    # "could not translate host name" ngay ở lệnh khởi động đầu tiên; và một
+    # mật khẩu thật nằm sẵn trong mã nguồn là thứ dễ bị dùng lại nguyên trạng
+    # khi triển khai.
+    #
+    # Docker Compose vẫn dùng PostgreSQL: nó truyền DATABASE_URL qua biến môi
+    # trường, và biến môi trường luôn thắng giá trị mặc định ở đây.
+    DATABASE_URL: str = "sqlite:///./dev.db"
 
     # Auth
     JWT_SECRET_KEY: str = DEV_JWT_SECRET
@@ -35,6 +47,18 @@ class Settings(BaseSettings):
     # trên /api/prediction/model-info thay vì giả vờ có mô hình.
     FINNEXUS_ROOT: str = ""
     FINNEXUS_CONFIG: str = "config/inference_article_scoring_v1.yaml"
+    # Tự tải các phiên giá còn thiếu (qua vnstock) khi một bài mới cần giá gần
+    # hơn bảng giá đang có, rồi chấm lại. Tắt đi thì bài đó bị từ chối kèm lý
+    # do rõ ràng — không bao giờ bị chấm trên giá cũ.
+    FINNEXUS_LIVE_PRICES: bool = True
+
+    # Claude giải thích bài báo (tuỳ chọn). Để trống khoá thì tính năng tự tắt;
+    # SDK cũng tự đọc ANTHROPIC_API_KEY từ biến môi trường, nhưng khai báo ở đây
+    # để khoá đặt trong file .env cũng dùng được — pydantic-settings nạp .env vào
+    # Settings chứ không vào os.environ.
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_MODEL: str = "claude-opus-5"
+    AI_ANALYSIS_TIMEOUT: float = 120.0
 
     # Giới hạn nhập liệu — chặn DoS qua upload và qua import URL.
     MAX_CSV_BYTES: int = 5 * 1024 * 1024

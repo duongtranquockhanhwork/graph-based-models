@@ -1,0 +1,498 @@
+{
+  "version": "ENTRY_LADDER_V1",
+  "generated_at": "2026-09-11T18:04:07+00:00",
+  "source": "FINNEXUS_V89_ENTRY_LADDER_V1",
+  "period": [
+    "2019-02-05",
+    "2026-08-26"
+  ],
+  "events": 12690,
+  "reference_price": "giá đóng cửa gần nhất người đọc biết được khi bài xuất hiện",
+  "sessions": 3,
+  "round_trip_cost": 0.005,
+  "levels": [
+    0.0,
+    -0.01,
+    -0.02,
+    -0.03,
+    -0.05
+  ],
+  "volatility_cuts": [
+    0.016883982253355568,
+    0.027013375299916962
+  ],
+  "band_edges": [
+    0.6,
+    0.75
+  ],
+  "cells": {
+    "ALL": {
+      "events": 12690,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005412112608960983,
+        "share_filled_orders_profitable": 0.4049645390070922
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9157604412923562,
+          "mean_net_if_filled": -0.005395879005226844,
+          "share_filled_orders_profitable": 0.40839858876172447
+        },
+        "-0.01": {
+          "fill_rate": 0.7111899133175729,
+          "mean_net_if_filled": -0.005385545032242138,
+          "share_filled_orders_profitable": 0.416398891966759
+        },
+        "-0.02": {
+          "fill_rate": 0.5308116627265563,
+          "mean_net_if_filled": -0.004340757526322068,
+          "share_filled_orders_profitable": 0.44002375296912116
+        },
+        "-0.03": {
+          "fill_rate": 0.3839243498817967,
+          "mean_net_if_filled": -0.0032033980184934347,
+          "share_filled_orders_profitable": 0.45176518883415434
+        },
+        "-0.05": {
+          "fill_rate": 0.21560283687943263,
+          "mean_net_if_filled": 0.001058536372432494,
+          "share_filled_orders_profitable": 0.4868421052631579
+        }
+      },
+      "reliable": true
+    },
+    "VOL_LOW": {
+      "events": 3830,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005064266349374982,
+        "share_filled_orders_profitable": 0.36762402088772844
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9258485639686684,
+          "mean_net_if_filled": -0.005076608350574583,
+          "share_filled_orders_profitable": 0.3668922729836435
+        },
+        "-0.01": {
+          "fill_rate": 0.6441253263707571,
+          "mean_net_if_filled": -0.0049567405707032376,
+          "share_filled_orders_profitable": 0.38710985002026754
+        },
+        "-0.02": {
+          "fill_rate": 0.40261096605744123,
+          "mean_net_if_filled": -0.003221722164450881,
+          "share_filled_orders_profitable": 0.4260700389105058
+        },
+        "-0.03": {
+          "fill_rate": 0.23394255874673628,
+          "mean_net_if_filled": -0.0019034471962532825,
+          "share_filled_orders_profitable": 0.4564732142857143
+        },
+        "-0.05": {
+          "fill_rate": 0.09634464751958224,
+          "mean_net_if_filled": 0.0037849650761728744,
+          "share_filled_orders_profitable": 0.4959349593495935
+        }
+      },
+      "reliable": true
+    },
+    "VOL_MID": {
+      "events": 4485,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005593457215210128,
+        "share_filled_orders_profitable": 0.4136008918617614
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.91438127090301,
+          "mean_net_if_filled": -0.005507019817299211,
+          "share_filled_orders_profitable": 0.41843452816386245
+        },
+        "-0.01": {
+          "fill_rate": 0.7070234113712375,
+          "mean_net_if_filled": -0.005683073483187584,
+          "share_filled_orders_profitable": 0.41248817407757804
+        },
+        "-0.02": {
+          "fill_rate": 0.517948717948718,
+          "mean_net_if_filled": -0.005585617549091196,
+          "share_filled_orders_profitable": 0.41842445114076626
+        },
+        "-0.03": {
+          "fill_rate": 0.36432552954292086,
+          "mean_net_if_filled": -0.004976834228356284,
+          "share_filled_orders_profitable": 0.4314565483476132
+        },
+        "-0.05": {
+          "fill_rate": 0.18617614269788182,
+          "mean_net_if_filled": -0.0016196014093520308,
+          "share_filled_orders_profitable": 0.47305389221556887
+        }
+      },
+      "reliable": true
+    },
+    "VOL_HIGH": {
+      "events": 4375,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005530723035289434,
+        "share_filled_orders_profitable": 0.4288
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9083428571428571,
+          "mean_net_if_filled": -0.005566071574700459,
+          "share_filled_orders_profitable": 0.4350780070457977
+        },
+        "-0.01": {
+          "fill_rate": 0.7741714285714286,
+          "mean_net_if_filled": -0.005419320612008439,
+          "share_filled_orders_profitable": 0.44139356362562737
+        },
+        "-0.02": {
+          "fill_rate": 0.6562285714285714,
+          "mean_net_if_filled": -0.003934537636079185,
+          "share_filled_orders_profitable": 0.46499477533960293
+        },
+        "-0.03": {
+          "fill_rate": 0.5353142857142857,
+          "mean_net_if_filled": -0.0024634155974051705,
+          "share_filled_orders_profitable": 0.464133219470538
+        },
+        "-0.05": {
+          "fill_rate": 0.3501714285714286,
+          "mean_net_if_filled": 0.001861534320284895,
+          "share_filled_orders_profitable": 0.49216710182767626
+        }
+      },
+      "reliable": true
+    },
+    "VOL_LOW|BAND_LOW": {
+      "events": 3194,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005232085053145631,
+        "share_filled_orders_profitable": 0.365372573575454
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.926111458985598,
+          "mean_net_if_filled": -0.0051395676130337525,
+          "share_filled_orders_profitable": 0.36578769438810005
+        },
+        "-0.01": {
+          "fill_rate": 0.6242955541640576,
+          "mean_net_if_filled": -0.005613402852822348,
+          "share_filled_orders_profitable": 0.37512537612838515
+        },
+        "-0.02": {
+          "fill_rate": 0.376017532874139,
+          "mean_net_if_filled": -0.004625646801734045,
+          "share_filled_orders_profitable": 0.4138218151540383
+        },
+        "-0.03": {
+          "fill_rate": 0.21195992485911083,
+          "mean_net_if_filled": -0.0041260509929787765,
+          "share_filled_orders_profitable": 0.43870014771048743
+        },
+        "-0.05": {
+          "fill_rate": 0.08296806512210395,
+          "mean_net_if_filled": 0.00043997374091346255,
+          "share_filled_orders_profitable": 0.43018867924528303
+        }
+      },
+      "reliable": true
+    },
+    "VOL_LOW|BAND_MEDIUM": {
+      "events": 627,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.004208871620833693,
+        "share_filled_orders_profitable": 0.379585326953748
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9266347687400319,
+          "mean_net_if_filled": -0.004457269769491006,
+          "share_filled_orders_profitable": 0.37521514629948366
+        },
+        "-0.01": {
+          "fill_rate": 0.7464114832535885,
+          "mean_net_if_filled": -0.0018222072809111704,
+          "share_filled_orders_profitable": 0.44017094017094016
+        },
+        "-0.02": {
+          "fill_rate": 0.5358851674641149,
+          "mean_net_if_filled": 0.0022190513278543796,
+          "share_filled_orders_profitable": 0.4732142857142857
+        },
+        "-0.03": {
+          "fill_rate": 0.3413078149920255,
+          "mean_net_if_filled": 0.005678743192933902,
+          "share_filled_orders_profitable": 0.5093457943925234
+        },
+        "-0.05": {
+          "fill_rate": 0.16108452950558214,
+          "mean_net_if_filled": 0.013860824022661937,
+          "share_filled_orders_profitable": 0.6633663366336634
+        }
+      },
+      "reliable": true
+    },
+    "VOL_LOW|BAND_HIGH": {
+      "events": 9,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.005099772455145366,
+        "share_filled_orders_profitable": 0.3333333333333333
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.7777777777777778,
+          "mean_net_if_filled": -0.029876925101336722,
+          "share_filled_orders_profitable": 0.14285714285714285
+        },
+        "-0.01": {
+          "fill_rate": 0.5555555555555556,
+          "mean_net_if_filled": -0.0364721383861399,
+          "share_filled_orders_profitable": 0.2
+        },
+        "-0.02": {
+          "fill_rate": 0.5555555555555556,
+          "mean_net_if_filled": -0.0316190029719484,
+          "share_filled_orders_profitable": 0.2
+        },
+        "-0.03": {
+          "fill_rate": 0.5555555555555556,
+          "mean_net_if_filled": -0.025480641776832735,
+          "share_filled_orders_profitable": 0.6
+        },
+        "-0.05": {
+          "fill_rate": 0.3333333333333333,
+          "mean_net_if_filled": -0.03996138484104431,
+          "share_filled_orders_profitable": 0.6666666666666666
+        }
+      },
+      "reliable": false
+    },
+    "VOL_MID|BAND_LOW": {
+      "events": 1466,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.0032402803537537775,
+        "share_filled_orders_profitable": 0.4297407912687585
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9085948158253752,
+          "mean_net_if_filled": -0.0029300526871114964,
+          "share_filled_orders_profitable": 0.4286786786786787
+        },
+        "-0.01": {
+          "fill_rate": 0.6384720327421555,
+          "mean_net_if_filled": -0.0037967641629974313,
+          "share_filled_orders_profitable": 0.4284188034188034
+        },
+        "-0.02": {
+          "fill_rate": 0.41678035470668484,
+          "mean_net_if_filled": -0.003624341781117113,
+          "share_filled_orders_profitable": 0.397708674304419
+        },
+        "-0.03": {
+          "fill_rate": 0.25648021828103684,
+          "mean_net_if_filled": -0.0034252333548589406,
+          "share_filled_orders_profitable": 0.3962765957446808
+        },
+        "-0.05": {
+          "fill_rate": 0.10709413369713507,
+          "mean_net_if_filled": 0.00043187898412585726,
+          "share_filled_orders_profitable": 0.4713375796178344
+        }
+      },
+      "reliable": true
+    },
+    "VOL_MID|BAND_MEDIUM": {
+      "events": 2650,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.006253970020623462,
+        "share_filled_orders_profitable": 0.41132075471698115
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9188679245283019,
+          "mean_net_if_filled": -0.006460570256052608,
+          "share_filled_orders_profitable": 0.4172484599589322
+        },
+        "-0.01": {
+          "fill_rate": 0.7320754716981132,
+          "mean_net_if_filled": -0.006356755476084223,
+          "share_filled_orders_profitable": 0.40515463917525774
+        },
+        "-0.02": {
+          "fill_rate": 0.5547169811320755,
+          "mean_net_if_filled": -0.00642812172046977,
+          "share_filled_orders_profitable": 0.4204081632653061
+        },
+        "-0.03": {
+          "fill_rate": 0.4018867924528302,
+          "mean_net_if_filled": -0.00561694529735247,
+          "share_filled_orders_profitable": 0.4394366197183099
+        },
+        "-0.05": {
+          "fill_rate": 0.21056603773584906,
+          "mean_net_if_filled": -0.002710858806709106,
+          "share_filled_orders_profitable": 0.471326164874552
+        }
+      },
+      "reliable": true
+    },
+    "VOL_MID|BAND_HIGH": {
+      "events": 369,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.010198872783095418,
+        "share_filled_orders_profitable": 0.36585365853658536
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9051490514905149,
+          "mean_net_if_filled": -0.008832244065938466,
+          "share_filled_orders_profitable": 0.38622754491017963
+        },
+        "-0.01": {
+          "fill_rate": 0.7994579945799458,
+          "mean_net_if_filled": -0.007237793678029982,
+          "share_filled_orders_profitable": 0.4101694915254237
+        },
+        "-0.02": {
+          "fill_rate": 0.6558265582655827,
+          "mean_net_if_filled": -0.005419743013164179,
+          "share_filled_orders_profitable": 0.45867768595041325
+        },
+        "-0.03": {
+          "fill_rate": 0.5230352303523035,
+          "mean_net_if_filled": -0.004467423036408407,
+          "share_filled_orders_profitable": 0.45595854922279794
+        },
+        "-0.05": {
+          "fill_rate": 0.3252032520325203,
+          "mean_net_if_filled": 0.0007707253068914631,
+          "share_filled_orders_profitable": 0.48333333333333334
+        }
+      },
+      "reliable": true
+    },
+    "VOL_HIGH|BAND_LOW": {
+      "events": 198,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.0035559368680979204,
+        "share_filled_orders_profitable": 0.4292929292929293
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9292929292929293,
+          "mean_net_if_filled": -0.002131187170834074,
+          "share_filled_orders_profitable": 0.44021739130434784
+        },
+        "-0.01": {
+          "fill_rate": 0.6818181818181818,
+          "mean_net_if_filled": -0.005314922798210053,
+          "share_filled_orders_profitable": 0.4148148148148148
+        },
+        "-0.02": {
+          "fill_rate": 0.4696969696969697,
+          "mean_net_if_filled": -0.006973148126554042,
+          "share_filled_orders_profitable": 0.40860215053763443
+        },
+        "-0.03": {
+          "fill_rate": 0.30808080808080807,
+          "mean_net_if_filled": -0.007824848256788154,
+          "share_filled_orders_profitable": 0.3770491803278688
+        },
+        "-0.05": {
+          "fill_rate": 0.16161616161616163,
+          "mean_net_if_filled": -0.0021466812288321556,
+          "share_filled_orders_profitable": 0.34375
+        }
+      },
+      "reliable": true
+    },
+    "VOL_HIGH|BAND_MEDIUM": {
+      "events": 1555,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.002098598163987049,
+        "share_filled_orders_profitable": 0.44887459807073954
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.8945337620578778,
+          "mean_net_if_filled": -0.002256928587351688,
+          "share_filled_orders_profitable": 0.45363048166786485
+        },
+        "-0.01": {
+          "fill_rate": 0.7266881028938906,
+          "mean_net_if_filled": -0.0023483793663231713,
+          "share_filled_orders_profitable": 0.4486725663716814
+        },
+        "-0.02": {
+          "fill_rate": 0.5749196141479099,
+          "mean_net_if_filled": -0.002305615267419615,
+          "share_filled_orders_profitable": 0.4742729306487696
+        },
+        "-0.03": {
+          "fill_rate": 0.42636655948553054,
+          "mean_net_if_filled": -0.0019431133652231681,
+          "share_filled_orders_profitable": 0.43891402714932126
+        },
+        "-0.05": {
+          "fill_rate": 0.24244372990353696,
+          "mean_net_if_filled": 0.003700297389313149,
+          "share_filled_orders_profitable": 0.5305039787798409
+        }
+      },
+      "reliable": true
+    },
+    "VOL_HIGH|BAND_HIGH": {
+      "events": 2622,
+      "market_at_next_open": {
+        "mean_net_if_filled": -0.007715300394549208,
+        "share_filled_orders_profitable": 0.41685736079328756
+      },
+      "levels": {
+        "0.0": {
+          "fill_rate": 0.9149504195270786,
+          "mean_net_if_filled": -0.007748246074789477,
+          "share_filled_orders_profitable": 0.42392663609837433
+        },
+        "-0.01": {
+          "fill_rate": 0.8093058733790999,
+          "mean_net_if_filled": -0.007061289185282301,
+          "share_filled_orders_profitable": 0.43920829406220546
+        },
+        "-0.02": {
+          "fill_rate": 0.7185354691075515,
+          "mean_net_if_filled": -0.0045575025097349675,
+          "share_filled_orders_profitable": 0.46337579617834396
+        },
+        "-0.03": {
+          "fill_rate": 0.6170861937452327,
+          "mean_net_if_filled": -0.002474486665213765,
+          "share_filled_orders_profitable": 0.4777503090234858
+        },
+        "-0.05": {
+          "fill_rate": 0.4282990083905416,
+          "mean_net_if_filled": 0.0013584614979768738,
+          "share_filled_orders_profitable": 0.4835262689225289
+        }
+      },
+      "reliable": true
+    }
+  },
+  "validation": {
+    "trained_until": "2025-12-31",
+    "checked_on": "2026",
+    "mean_abs_fill_rate_error": 0.032238661850090486,
+    "brier_fill": {
+      "cell": 0.1794033469779068,
+      "volatility_only": 0.18233193058233302,
+      "overall": 0.18762278101255728
+    },
+    "profitable_cells_on_2026": 2,
+    "cells_checked_for_profit": 75
+  },
+  "is_investment_advice": false
+}

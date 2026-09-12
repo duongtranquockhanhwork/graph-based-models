@@ -26,6 +26,10 @@ vnstock==4.0.4
 xgboost==2.0.3
 PyYAML==6.0.1
 
+# Claude giải thích bài báo (tuỳ chọn — không có ANTHROPIC_API_KEY thì tính năng
+# tự tắt, phần còn lại của hệ thống vẫn chạy bình thường).
+anthropic==0.101.0
+
 # Test
 pytest==8.2.0
 httpx==0.27.0

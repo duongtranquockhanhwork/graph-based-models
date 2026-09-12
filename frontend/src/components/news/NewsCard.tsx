@@ -11,6 +11,9 @@ import {
 import type { KgExplanation, NewsArticle } from '../../types'
 
 import { EventChip, SentimentBadge, SymbolChip, TrendBadge } from '../common/Chips'
+import RecommendationPanel from './RecommendationPanel'
+import EntryLadderPanel from './EntryLadderPanel'
+import AiAnalysisSection from './AiAnalysisSection'
 
 /** Nhãn cho suy đoán dự phòng. Giá trị gốc là INCREASING/DECREASING/UNCHANGED —
  *  chuỗi kỹ thuật không nên lọt ra giao diện. */
@@ -159,6 +162,10 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
             </p>
           )}
 
+          {/* Claude đọc bài và giải thích bằng lời thường — đặt trước phần số liệu
+              của hệ thống, vì đó là thứ người đọc cần hiểu trước. */}
+          {news.is_analyzed && <AiAnalysisSection newsId={news.id} initial={news.ai_analysis} />}
+
           {/* Vì sao mô hình kết luận như vậy — hoặc vì sao nó không trả lời. */}
           {explanation && (
             <div
@@ -192,6 +199,20 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                     <p className="text-[11px] mb-2" style={{ color: 'var(--text-muted)' }}>
                       {explanation.human_explanation}
                     </p>
+                  )}
+
+                  {/* Chỉ cho kết quả của mô hình đã kiểm chứng: bộ luật dự phòng
+                      không có xác suất, và số đo trong panel không mô tả nó. */}
+                  {explanation.engine === 'finnexus' && explanation.probabilities && (
+                    <>
+                      <RecommendationPanel probabilities={explanation.probabilities} />
+                      <EntryLadderPanel
+                        probabilities={explanation.probabilities}
+                        volatility={explanation.volatility_20d ?? null}
+                        referenceClose={explanation.reference_close ?? null}
+                        referenceSession={explanation.reference_session ?? null}
+                      />
+                    </>
                   )}
 
                   {kgPaths.length > 0 && (

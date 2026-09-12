@@ -1,0 +1,116 @@
+{
+  "version": "RECOMMENDATION_EVIDENCE_V2",
+  "generated_at": "2026-09-11T07:22:19+00:00",
+  "model_version": "FINNEXUS_V56_DEPLOYABLE_MODEL_V1",
+  "data": {
+    "description": "Bài 2026 mô hình chưa từng thấy, chấm bằng mô hình đã đóng băng; chỉ số theo đúng sàn niêm yết",
+    "pairs": 4740,
+    "articles": 902,
+    "date_range": [
+      "2026-01-02",
+      "2026-08-25"
+    ],
+    "used_for_model_selection": false
+  },
+  "feature_rule": {
+    "window_ends": "phiên cuối cùng TRƯỚC ngày đăng — đúng như web chấm và như bảng huấn luyện V56",
+    "scorer_parity": {
+      "rows": 200,
+      "refused_by_scorer": 0,
+      "share": 1.0
+    },
+    "agreement_with_v76_predictions": 0.7599,
+    "supersedes": "RECOMMENDATION_EVIDENCE_V1 đo trên đặc trưng có cả phiên ngày đăng"
+  },
+  "round_trip_cost": 0.005,
+  "large_move_threshold": 0.02,
+  "magnitude": {
+    "verdict": "RANKS_WELL_BUT_OVERSTATES_LEVEL",
+    "base_rate": 0.5485,
+    "band_edges": [
+      0.6,
+      0.75
+    ],
+    "bands": [
+      {
+        "band": "LOW",
+        "from": 0.0,
+        "to": 0.6,
+        "pairs": 1686,
+        "model_probability_mean": 0.5451,
+        "realised_large_move_share": 0.4395
+      },
+      {
+        "band": "MEDIUM",
+        "from": 0.6,
+        "to": 0.75,
+        "pairs": 1847,
+        "model_probability_mean": 0.6682,
+        "realised_large_move_share": 0.5544
+      },
+      {
+        "band": "HIGH",
+        "from": 0.75,
+        "to": 1.0,
+        "pairs": 1207,
+        "model_probability_mean": 0.8146,
+        "realised_large_move_share": 0.6918
+      }
+    ]
+  },
+  "direction": {
+    "verdict": "BELOW_BREAK_EVEN",
+    "large_move_pairs": 2600,
+    "hit_rate": 0.4738,
+    "hit_rate_high_band": 0.4766,
+    "high_band_large_move_pairs": 835,
+    "break_even_hit_rate": 0.5498,
+    "large_move_mean_abs": 0.0502
+  },
+  "expected_return": {
+    "verdict": "NOT_PREDICTIVE",
+    "method": "Σ P(lớp) × lợi suất vượt thị trường trung bình của lớp đó (split train) − phí",
+    "class_mean_train": {
+      "NEGATIVE": -0.04274,
+      "NEUTRAL": -0.00154,
+      "POSITIVE": 0.05729
+    },
+    "quintiles": [
+      {
+        "expected_net_mean": -0.00427,
+        "realised_net_mean": -0.00319,
+        "pairs": 948
+      },
+      {
+        "expected_net_mean": -0.00165,
+        "realised_net_mean": -0.00807,
+        "pairs": 949
+      },
+      {
+        "expected_net_mean": -0.00034,
+        "realised_net_mean": -0.00823,
+        "pairs": 947
+      },
+      {
+        "expected_net_mean": 0.00135,
+        "realised_net_mean": -0.00945,
+        "pairs": 948
+      },
+      {
+        "expected_net_mean": 0.00592,
+        "realised_net_mean": -0.00539,
+        "pairs": 948
+      }
+    ],
+    "spearman_with_realised": -0.0251,
+    "predicted_positive": {
+      "pairs": 2106,
+      "articles": 596,
+      "realised_net_mean": -0.00757,
+      "realised_net_ci95": [
+        -0.01055,
+        -0.00446
+      ]
+    }
+  }
+}

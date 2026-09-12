@@ -66,8 +66,13 @@ def _row_to_quote(row: pd.Series) -> Optional[Dict]:
 def _fetch_quotes(symbols: List[str]) -> Dict[str, Dict]:
     from vnstock import Trading
 
-    trading = Trading(source="VCI")
-    board = trading.price_board(symbols_list=symbols)
+    try:
+        trading = Trading(source="VCI")
+        board = trading.price_board(symbols_list=symbols)
+    except SystemExit as exc:
+        # vnstock gọi sys.exit khi vượt hạn mức gọi API. Trong web server, điều
+        # đó sẽ làm sập cả tiến trình; đổi thành lỗi thường của riêng request này.
+        raise RuntimeError(f"vnstock quota: {exc}") from None
 
     result: Dict[str, Dict] = {}
     if ("listing", "symbol") not in board.columns:

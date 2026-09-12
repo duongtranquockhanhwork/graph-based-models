@@ -52,6 +52,10 @@ export const newsApi = {
   },
   importUrl: (url: string) => api.post('/news/import-url', { url }),
   analyze: (id: number) => api.post(`/news/${id}/analyze`),
+  /** Claude giải thích bài báo. Có bản còn hiệu lực thì trả ngay, không gọi lại.
+   *  Timeout riêng vì một lần tạo mới có thể mất tới một phút. */
+  aiAnalysis: (id: number) => api.post(`/news/${id}/ai-analysis`, undefined, { timeout: 150_000 }),
+  aiAnalysisStatus: () => api.get<{ configured: boolean; model: string }>('/news/ai-analysis/status'),
   /** Tiến trình phân tích nền của một lô bài vừa nhập. */
   analysisStatus: (ids: number[]) =>
     api.post<{

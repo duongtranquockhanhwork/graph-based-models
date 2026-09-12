@@ -48,6 +48,50 @@ const X_AXIS_HEIGHT = 24
  *  rộng cả trăm pixel và biểu đồ mất ý nghĩa. */
 const MIN_VISIBLE = 12
 
+/** Các mốc tròn, cách đều nhau, nằm trong khoảng [lo, hi].
+ *
+ *  Bước được làm tròn lên một trong {1, 2, 5} nhân luỹ thừa của 10 — cùng quy
+ *  ước mà bảng giá và biểu đồ tài chính vẫn dùng, nên khoảng cách giữa hai
+ *  nhãn luôn là một con số nhẩm được.
+ */
+function niceTicks(lo: number, hi: number, target = 5): number[] {
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi <= lo) return []
+
+  const build = (step: number): number[] => {
+    const out: number[] = []
+    // Cộng dồn theo chỉ số thay vì `v += step`, để sai số dấu phẩy động không
+    // tích luỹ dần rồi đẩy mốc cuối ra ngoài miền.
+    const first = Math.ceil(lo / step)
+    for (let i = 0; (first + i) * step <= hi + step * 1e-9; i += 1) {
+      out.push(Number(((first + i) * step).toPrecision(12)))
+      if (out.length > 40) break
+    }
+    return out
+  }
+
+  // Không chỉ làm tròn bước lên: làm tròn lên biến khoảng 11.310 thành bước
+  // 5.000 và chỉ còn hai mốc trên cả biểu đồ. Thay vào đó thử các bước "đẹp"
+  // quanh giá trị lý tưởng rồi chọn cái cho số mốc gần `target` nhất.
+  const rough = (hi - lo) / Math.max(1, target - 1)
+  const magnitude = Math.pow(10, Math.floor(Math.log10(rough)))
+  const steps = [0.5, 1, 2, 2.5, 5, 10, 20].map((m) => m * magnitude)
+
+  let best: number[] = []
+  let bestScore = Infinity
+  for (const step of steps) {
+    const ticks = build(step)
+    if (ticks.length < 2) continue
+    // Ưu tiên số mốc gần mục tiêu; hoà thì lấy phương án nhiều mốc hơn, vì
+    // thêm một đường lưới dễ đọc hơn là thiếu một đường.
+    const score = Math.abs(ticks.length - target) + (ticks.length < target ? 0.1 : 0)
+    if (score < bestScore) {
+      bestScore = score
+      best = ticks
+    }
+  }
+  return best
+}
+
 interface ChartCandle extends Candle {
   /** Cặp [low, high]. Recharts vẽ Bar có dataKey trả mảng hai phần tử từ giá
    *  trị thứ nhất tới giá trị thứ hai, nên `y`/`height` mà shape nhận được ứng
@@ -377,6 +421,12 @@ export default function PriceChart({
 
   // Trục giá bám sát phần ĐANG XEM, không phải toàn bộ chuỗi — đó là điều làm
   // cho việc phóng to có ý nghĩa: càng phóng, biến động nhỏ càng hiện rõ.
+  //
+  // Nhưng miền hiển thị là số thô (đáy trừ đệm, đỉnh cộng đệm), nên nếu để
+  // recharts tự sinh mốc thì nó lấy luôn hai đầu miền làm mốc: đọc được
+  // "25.420 · 28.420 · 31.420 · 36.730" — ba khoảng đầu cách nhau 3.000 còn
+  // khoảng cuối 5.310. Trên biểu đồ giá, khoảng cách dọc bằng nhau phải có
+  // nghĩa là mức tăng giảm bằng nhau; mốc lệch làm mắt đọc sai biên độ.
   const [yMin, yMax] = useMemo(() => {
     if (!visible.length) return [0, 1]
     const lo = Math.min(...visible.map((c) => c.low))
@@ -384,6 +434,11 @@ export default function PriceChart({
     const pad = (hi - lo) * 0.08 || hi * 0.02
     return [Math.max(0, lo - pad), hi + pad]
   }, [visible])
+
+  // Mốc giá tròn và cách đều, nằm gọn trong miền hiển thị. Bước được chọn
+  // trong {1, 2, 5} × 10^n — quy ước quen thuộc của bảng giá, nên người đọc
+  // ước lượng nhẩm được thay vì phải trừ hai nhãn lẻ.
+  const priceTicks = useMemo(() => niceTicks(yMin, yMax), [yMin, yMax])
 
   const clampRange = useCallback(
     (s: number, e: number): [number, number] => {
@@ -599,6 +654,7 @@ export default function PriceChart({
             />
             <YAxis
               domain={[yMin, yMax]}
+              ticks={priceTicks}
               tick={{ fill: 'var(--text-faint)', fontSize: 10 }}
               width={Y_AXIS_WIDTH}
               tickFormatter={(v) => fmtNumber(Math.round(v))}
