@@ -20,8 +20,13 @@ export const authApi = {
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, newPassword: string) =>
     api.post('/auth/reset-password', { token, new_password: newPassword }),
-  updateProfile: (fullName: string, dateOfBirth?: string) =>
-    api.patch<User>('/auth/me', { full_name: fullName, date_of_birth: dateOfBirth }),
+  // avatarUrl: undefined = không đổi, '' = xoá avatar, chuỗi khác = data URI ảnh mới.
+  updateProfile: (fullName: string, dateOfBirth?: string, avatarUrl?: string) =>
+    api.patch<User>('/auth/me', {
+      full_name: fullName,
+      date_of_birth: dateOfBirth,
+      avatar_url: avatarUrl,
+    }),
   changePassword: (currentPassword: string, newPassword: string) =>
     api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
 }

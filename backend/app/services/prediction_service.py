@@ -183,7 +183,7 @@ def _macro_f1(y_true: List[str], y_pred: List[str]) -> float:
     return round(f1_score(y_true, y_pred, average="macro", zero_division=0), 4)
 
 
-def evaluate_model(db: Session) -> Dict:
+def evaluate_model(db: Session, owner_id: Optional[int] = None) -> Dict:
     """Đánh giá trên nhãn giá thật, và CHỈ trên nhãn giá thật.
 
     Bản trước cho phép lấy ground truth từ ``manual_sentiment`` khi thiếu
@@ -191,18 +191,21 @@ def evaluate_model(db: Session) -> Dict:
     cũng dùng. Đó là đo mô hình với chính nó. Nhãn cảm xúc do người gán vẫn
     hữu ích để kiểm tra chất lượng NLP (xem validation_service), nhưng không
     phải là kết quả thị trường và không được dùng làm ground truth ở đây.
+
+    ``owner_id``: None đánh giá trên toàn hệ thống (admin); khác None chỉ
+    đánh giá trên tin của chính người đó — mỗi khách hàng chỉ thấy độ chính
+    xác của mô hình trên đúng dữ liệu họ đã thêm.
     """
     from app.models.news import NewsArticle
 
-    labeled = (
-        db.query(NewsArticle)
-        .filter(
-            NewsArticle.is_analyzed == True,  # noqa: E712
-            NewsArticle.actual_trend.isnot(None),
-            NewsArticle.predicted_trend.isnot(None),
-        )
-        .all()
+    query = db.query(NewsArticle).filter(
+        NewsArticle.is_analyzed == True,  # noqa: E712
+        NewsArticle.actual_trend.isnot(None),
+        NewsArticle.predicted_trend.isnot(None),
     )
+    if owner_id is not None:
+        query = query.filter(NewsArticle.owner_id == owner_id)
+    labeled = query.all()
 
     engine = active_engine()
     base = {

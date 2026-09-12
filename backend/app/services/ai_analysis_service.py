@@ -36,7 +36,9 @@ from app.core.config import settings
 logger = logging.getLogger("finnexus.ai_analysis")
 
 # Tăng khi đổi cấu trúc bản ghi — bản cũ tự bị coi là hết hạn.
-ANALYSIS_VERSION = 1
+# v2: thêm key_points (điểm quan trọng có thể ảnh hưởng giá, tách khỏi
+# risks_to_watch vốn là caveat về độ tin cậy của bài, không phải nội dung bài).
+ANALYSIS_VERSION = 2
 
 # Không streaming nên giữ trần này để không chạm timeout HTTP của SDK.
 MAX_TOKENS = 16000
@@ -81,9 +83,10 @@ Tuyệt đối không đưa ra khuyến nghị đầu tư: không bảo nên mua
 ## Các mục cần trả về
 
 - what_happened: chuyện gì đã xảy ra, theo lời bài báo, trong 2 đến 4 câu.
+- key_points: 2 đến 4 điểm CỤ THỂ nhất trong bài có khả năng ảnh hưởng tới giá cổ phiếu — số liệu (doanh thu, lợi nhuận, tỷ lệ tăng/giảm), quyết định (cổ tức, phát hành, sáp nhập), hay sự kiện (hợp đồng, xử phạt, thay đổi lãnh đạo) mà bài có nhắc tới. Trích hoặc diễn đạt lại sát nội dung bài, không suy diễn hay đánh giá thêm. Nếu bài không có số liệu/sự kiện cụ thể nào, trả về danh sách rỗng thay vì bịa ra.
 - affected: các bên chịu ảnh hưởng. Dùng DIRECT cho mã hoặc công ty được bài nhắc tới; chỉ dùng INDIRECT cho mã có trong <do_thi_tri_thuc>, kèm lý do liên hệ. Mỗi mục một câu giải thích. Danh sách có thể chỉ có một mục.
 - model_reading: hệ thống nói gì về bài này và nên hiểu điều đó thế nào — mức biến động dự kiến, vì sao hệ thống im lặng hoặc chỉ nêu nhận định, và vì sao chiều tăng giảm không nên được tin. Nếu bài không chấm được, giải thích lý do bằng lời thường.
-- risks_to_watch: 2 đến 4 điều trong bài có thể làm bức tranh thay đổi — điều kiện chưa hoàn tất, con số chưa được kiểm toán, việc còn phụ thuộc vào bên khác. Đây là điểm cần theo dõi, không phải lời khuyên.
+- risks_to_watch: 2 đến 4 điều trong bài có thể làm bức tranh thay đổi — điều kiện chưa hoàn tất, con số chưa được kiểm toán, việc còn phụ thuộc vào bên khác. Đây là điểm cần theo dõi VỀ ĐỘ TIN CẬY của chính bài báo, khác với key_points (những gì bài nói đã xảy ra).
 - limits: một câu nêu giới hạn của chính bản giải thích này."""
 
 
@@ -93,6 +96,7 @@ OUTPUT_SCHEMA: Dict[str, Any] = {
     "type": "object",
     "properties": {
         "what_happened": {"type": "string"},
+        "key_points": {"type": "array", "items": {"type": "string"}},
         "affected": {
             "type": "array",
             "items": {
@@ -110,7 +114,7 @@ OUTPUT_SCHEMA: Dict[str, Any] = {
         "risks_to_watch": {"type": "array", "items": {"type": "string"}},
         "limits": {"type": "string"},
     },
-    "required": ["what_happened", "affected", "model_reading", "risks_to_watch", "limits"],
+    "required": ["what_happened", "key_points", "affected", "model_reading", "risks_to_watch", "limits"],
     "additionalProperties": False,
 }
 
@@ -126,6 +130,7 @@ class ArticleAnalysis(BaseModel):
     server hay một bản ghi cũ sửa tay cũng không được lọt xuống giao diện."""
 
     what_happened: str
+    key_points: List[str]
     affected: List[AffectedParty]
     model_reading: str
     risks_to_watch: List[str]

@@ -20,7 +20,7 @@ interface AuthContextValue {
   logout: () => void
   forgotPassword: (email: string) => Promise<void>
   resetPassword: (token: string, newPassword: string) => Promise<void>
-  updateProfile: (fullName: string) => Promise<User>
+  updateProfile: (fullName: string, dateOfBirth?: string, avatarUrl?: string) => Promise<User>
   completeProfile: (fullName: string, dateOfBirth: string) => Promise<User>
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
   refreshUser: () => Promise<User | null>
@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authApi.resetPassword(token, newPassword)
   }, [])
 
-  const updateProfile = useCallback(async (fullName: string) => {
-    const res = await authApi.updateProfile(fullName)
+  const updateProfile = useCallback(async (fullName: string, dateOfBirth?: string, avatarUrl?: string) => {
+    const res = await authApi.updateProfile(fullName, dateOfBirth, avatarUrl)
     setUser(res.data)
     return res.data
   }, [])

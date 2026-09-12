@@ -1,9 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
-import { Plus, Upload, RefreshCw, Trash2, Pencil, Check, X, Search, Link2, Globe, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Upload,
+  RefreshCw,
+  Trash2,
+  Pencil,
+  Check,
+  X,
+  Search,
+  Link2,
+  Globe,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+} from 'lucide-react'
 import { newsApi } from '../../services/api'
 import type { NewsArticle } from '../../types'
 import { SentimentBadge, StatusBadge } from '../../components/Admin/AdminWidgets'
+import { contentPreviewParagraphs } from '../../utils/articleContent'
 
 const SENTIMENT_OPTIONS = ['Positive', 'Negative', 'Neutral']
 
@@ -13,6 +29,45 @@ const IMPORT_TABS: { key: ImportTab; icon: React.ElementType; label: string }[] 
   { key: 'csv', icon: Upload, label: 'Upload CSV' },
   { key: 'url', icon: Link2, label: 'Từ URL' },
 ]
+
+/** Trích đoạn gốc + link đọc bài gốc — cùng tính năng đang có ở thẻ tin phía
+ *  khách hàng (NewsCard), gắn thêm vào đây vì admin cũng nhập/duyệt tin ở
+ *  trang này và cần thấy được đúng như vậy, không phải bảng dữ liệu thô.
+ *  Không có mục tóm tắt AI: tốn API Claude thật mỗi lần tạo, không kiểm soát
+ *  được chi phí khi có nhiều người dùng. */
+function NewsDetailPanel({ news }: { news: NewsArticle }) {
+  const preview = news.content ? contentPreviewParagraphs(news.content) : null
+  return (
+    <div className="space-y-3 max-w-3xl">
+      {preview && preview.paragraphs.length > 0 && (
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
+            Trích đoạn gốc
+          </p>
+          <div className="space-y-2">
+            {preview.paragraphs.map((para, i) => (
+              <p key={i} className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                {para}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {news.url && (
+        <a
+          href={news.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[11px] hover:underline"
+          style={{ color: '#2563eb' }}
+        >
+          <ExternalLink size={11} /> Đọc bài gốc
+        </a>
+      )}
+    </div>
+  )
+}
 
 export default function AdminNewsPage() {
   const [news, setNews] = useState<NewsArticle[]>([])
@@ -31,6 +86,7 @@ export default function AdminNewsPage() {
   const [urlLoading, setUrlLoading] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editForm, setEditForm] = useState({ title: '', source: '', sentiment: '' })
+  const [expandedId, setExpandedId] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const load = () => {
@@ -256,25 +312,49 @@ export default function AdminNewsPage() {
           <table className="w-full text-[12px]">
             <thead>
               <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                {['ID', 'Tiêu đề', 'Nguồn', 'Ngày đăng', 'Mã CP', 'Event', 'Sentiment', 'Impact', 'Trạng thái', 'Hành động'].map((h) => (
-                  <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
+                {['', 'ID', 'Tiêu đề', 'Nguồn', 'Ngày đăng', 'Mã CP', 'Event', 'Sentiment', 'Impact', 'Trạng thái', 'Hành động'].map((h, i) => (
+                  <th key={h || `col-${i}`} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={10} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Đang tải...</td></tr>
+                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Đang tải...</td></tr>
               ) : news.length === 0 ? (
-                <tr><td colSpan={10} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Không có tin tức nào</td></tr>
+                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Không có tin tức nào</td></tr>
               ) : (
                 news.map((n) => (
-                  <tr key={n.id} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                  <Fragment key={n.id}>
+                  <tr style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <td className="px-3 py-2.5">
+                      <button
+                        onClick={() => setExpandedId((v) => (v === n.id ? null : n.id))}
+                        className="p-1 rounded-md"
+                        style={{ color: 'var(--text-faint)' }}
+                        title={expandedId === n.id ? 'Thu gọn' : 'Xem nội dung gốc'}
+                      >
+                        {expandedId === n.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      </button>
+                    </td>
                     <td className="px-3 py-2.5" style={{ color: 'var(--text-muted)' }}>{n.id}</td>
                     <td className="px-3 py-2.5 max-w-[280px]">
                       {editingId === n.id ? (
                         <input className="field-input" value={editForm.title} onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))} />
                       ) : (
-                        <span className="line-clamp-2" style={{ color: 'var(--text-primary)' }}>{n.title}</span>
+                        <div>
+                          <span className="line-clamp-2" style={{ color: 'var(--text-primary)' }}>{n.title}</span>
+                          {n.url && (
+                            <a
+                              href={n.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[10.5px] hover:underline mt-0.5"
+                              style={{ color: '#2563eb' }}
+                            >
+                              <ExternalLink size={10} /> Đọc bài gốc
+                            </a>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>
@@ -322,6 +402,14 @@ export default function AdminNewsPage() {
                       </div>
                     </td>
                   </tr>
+                  {expandedId === n.id && (
+                    <tr style={{ borderTop: '1px dashed var(--border-subtle)' }}>
+                      <td colSpan={11} className="px-4 py-3" style={{ background: 'var(--bg-surface)' }}>
+                        <NewsDetailPanel news={n} />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))
               )}
             </tbody>

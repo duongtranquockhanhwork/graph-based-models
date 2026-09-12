@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
+import { isPasswordStrong, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
 
 export default function ChangePasswordForm() {
   const { changePassword } = useAuth()
@@ -11,8 +12,8 @@ export default function ChangePasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (next.length < 6) {
-      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự')
+    if (!isPasswordStrong(next)) {
+      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
       return
     }
     if (next !== confirm) {
@@ -47,7 +48,7 @@ export default function ChangePasswordForm() {
       <input
         type="password"
         className="field-input"
-        placeholder="Mật khẩu mới (tối thiểu 6 ký tự)"
+        placeholder="Mật khẩu mới (hoa, thường, số, ký tự đặc biệt)"
         value={next}
         onChange={(e) => setNext(e.target.value)}
         required

@@ -1,5 +1,13 @@
 import api from './api'
-import type { Candle, IntradayTrade, StockOverview, Shareholder, CompanyEvent, FinancialStatements } from '../types'
+import type {
+  Candle,
+  IntradayTrade,
+  StockOverview,
+  Shareholder,
+  CompanyEvent,
+  FinancialStatements,
+  PriceBand,
+} from '../types'
 
 export const stockDetailApi = {
   history: (symbol: string, days = 180) =>
@@ -10,6 +18,8 @@ export const stockDetailApi = {
   shareholders: (symbol: string) => api.get<Shareholder[]>(`/stock-detail/${symbol}/shareholders`),
   events: (symbol: string) => api.get<CompanyEvent[]>(`/stock-detail/${symbol}/events`),
   financials: (symbol: string) => api.get<FinancialStatements>(`/stock-detail/${symbol}/financials`),
+  /** Vùng giá thống kê từ dữ liệu thật — không phải dự đoán. 404 khi chưa đủ dữ liệu. */
+  priceBand: (symbol: string) => api.get<PriceBand>(`/stock-detail/${symbol}/price-band`),
 }
 
 export default stockDetailApi

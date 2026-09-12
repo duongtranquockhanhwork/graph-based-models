@@ -7,6 +7,10 @@ class NewsArticle(Base):
     __tablename__ = "news_articles"
 
     id = Column(Integer, primary_key=True, index=True)
+    # Người đã thêm bài này (nhập CSV/URL/thủ công) — mỗi khách hàng chỉ thấy
+    # tin của chính mình, admin thấy toàn bộ. Nullable để tương thích ngược
+    # với DB cũ; migrate.py backfill các dòng cũ về cho admin.
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     title = Column(String(500), nullable=False)
     content = Column(Text, nullable=True)
     source = Column(String(200), nullable=True)

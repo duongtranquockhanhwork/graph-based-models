@@ -1,5 +1,6 @@
 import io
 import logging
+import re
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -12,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import SessionLocal, get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user, owner_scope, require_admin
 from app.core.ratelimit import ai_analysis_limit, import_url_limit, upload_limit
 from app.core.settings_store import get_float_setting
 from app.core.url_guard import UnsafeUrl, safe_get
@@ -22,7 +23,7 @@ from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
 from app.services import ai_analysis_service, watchlist_service
 from app.services.finnexus_service import recommendation_evidence
-from app.services.graph_service import add_news_to_graph, get_graph_features
+from app.services.graph_service import get_graph_features
 from app.services.nlp_service import analyze_article
 from app.services.prediction_service import predict_for_article
 
@@ -50,6 +51,32 @@ def _extract_by_known_selectors(soup) -> Optional[str]:
             if len(text) > 100:
                 return text[:5000]
     return None
+
+
+_DATE_LINE_RE = re.compile(
+    r"^\d{1,2}[/-]\d{1,2}[/-]\d{4}(\s+\d{1,2}:\d{2}(:\d{2})?)?([+-]\d{2}:?\d{2})?$"
+)
+
+
+def _strip_leading_metadata(content: str, title: str) -> str:
+    """Nhiều trang (vd. vietstock.vn) chèn tiêu đề + ngày đăng LẶP LẠI ngay
+    trong khối chứa nội dung, trước đoạn văn thật — lỗi CSS/bố cục của họ,
+    ``get_text()`` gom hết vào một khối. Cắt các dòng đầu nếu chúng chỉ lặp
+    lại tiêu đề hoặc là một dòng ngày/giờ, dừng ngay khi gặp dòng văn bản thật.
+    """
+    lines = content.split("\n")
+    title_norm = " ".join(title.split()).strip().lower()
+    idx = 0
+    while idx < len(lines):
+        line_norm = " ".join(lines[idx].split()).strip().lower()
+        if not line_norm:
+            idx += 1
+            continue
+        if line_norm == title_norm or _DATE_LINE_RE.match(line_norm):
+            idx += 1
+            continue
+        break
+    return "\n".join(lines[idx:]).strip()
 
 
 def _extract_by_paragraph_density(soup) -> Optional[str]:
@@ -85,9 +112,13 @@ def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
 
         result = analyze_article(news.title, news.content, db=db)
 
+        # Đặc trưng đồ thị tính trên đúng "vũ trụ dữ liệu" của chủ bài này
+        # (owner_id) — một mã được nhắc nhiều trong CHÍNH các bài người này đã
+        # thêm, không phải trong toàn hệ thống. admin re-analyze bài của
+        # khách hàng vẫn dùng owner_id của bài đó, không phải của admin.
         gf = {}
         for stock in result.get("stocks", []):
-            gf.update(get_graph_features(stock))
+            gf.update(get_graph_features(db, news.owner_id, stock))
 
         prediction = predict_for_article(
             analysis=result,
@@ -127,7 +158,9 @@ def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
         confidence = news.prediction_confidence
         news.needs_manual_label = confidence is None or confidence < review_threshold
 
-        add_news_to_graph(news_id, result, title=news.title)
+        # Đồ thị không còn được mutate ở đây — nó được dựng lại từ DB mỗi lần
+        # đọc (graph_service.build_graph), lọc theo owner_id. graph_built chỉ
+        # còn là cờ "đã phân tích, đủ điều kiện xuất hiện trên đồ thị".
         news.graph_built = True
         db.commit()
 
@@ -169,6 +202,7 @@ async def upload_csv(
 
     articles = [
         NewsArticle(
+            owner_id=current_user.id,
             title=str(row.get("title", ""))[:500],
             content=cell(row, "content"),
             source=cell(row, "source"),
@@ -232,6 +266,20 @@ def import_from_url(
     # inevitably go stale as sites redesign. The density fallback covers any
     # site not in the list without needing a new selector added every time.
     content = _extract_by_known_selectors(soup) or _extract_by_paragraph_density(soup)
+    if content:
+        content = _strip_leading_metadata(content, title)
+
+    # Không trích được nội dung nghĩa là URL này không phải một trang bài báo
+    # (ví dụ trang tra cứu/dữ liệu mã chứng khoán, trang danh mục, trang chủ).
+    # Lưu bài rỗng rồi để bộ chấm điểm coi "không thấy từ khoá" => TRUNG LẬP
+    # sẽ trông như hệ thống chấm sai, trong khi thực ra không có gì để chấm.
+    if not content:
+        raise HTTPException(
+            400,
+            "Không trích xuất được nội dung bài viết từ URL này. Hãy kiểm tra "
+            "đây có đúng là link một bài báo không (không phải trang tra cứu/dữ liệu, "
+            "trang danh mục hay trang chủ).",
+        )
 
     published_date = None
     for prop in ["article:published_time", "og:updated_time"]:
@@ -243,6 +291,7 @@ def import_from_url(
     source = urlparse(final_url).netloc.replace("www.", "")
 
     news_item = NewsArticle(
+        owner_id=current_user.id,
         title=title[:500],
         content=content,
         source=source,
@@ -270,7 +319,7 @@ def create_news(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    n = NewsArticle(**news_in.model_dump())
+    n = NewsArticle(owner_id=current_user.id, **news_in.model_dump())
     db.add(n)
     db.commit()
     db.refresh(n)
@@ -290,9 +339,13 @@ def list_news(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     limit = max(1, min(limit, 200))
     query = db.query(NewsArticle)
+    scope = owner_scope(current_user)
+    if scope is not None:
+        query = query.filter(NewsArticle.owner_id == scope)
     if q:
         query = query.filter(NewsArticle.title.ilike(f"%{q}%"))
     if source:
@@ -330,7 +383,11 @@ class AnalysisStatusRequest(BaseModel):
 
 
 @router.post("/analysis-status")
-def analysis_status(payload: AnalysisStatusRequest, db: Session = Depends(get_db)):
+def analysis_status(
+    payload: AnalysisStatusRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Tiến trình phân tích của một lô bài vừa nhập.
 
     Phân tích chạy trong tác vụ nền, nên response của lệnh nhập trả về ngay khi
@@ -345,7 +402,13 @@ def analysis_status(payload: AnalysisStatusRequest, db: Session = Depends(get_db
     if not ids:
         return {"total": 0, "analyzed": 0, "pending": 0, "done": True}
 
-    rows = db.query(NewsArticle).filter(NewsArticle.id.in_(ids)).all()
+    query = db.query(NewsArticle).filter(NewsArticle.id.in_(ids))
+    scope = owner_scope(current_user)
+    if scope is not None:
+        # Id thuộc về người khác không được đếm vào — coi như không tồn tại
+        # với người gọi, không rò rỉ việc id đó có thật hay không.
+        query = query.filter(NewsArticle.owner_id == scope)
+    rows = query.all()
     analyzed = [n for n in rows if n.is_analyzed]
     scored = [n for n in analyzed if n.predicted_trend]
 
@@ -392,7 +455,7 @@ def create_ai_analysis(
     chờ Claude không chặn các request khác.
     """
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
-    if not n:
+    if not n or (owner_scope(_user) is not None and n.owner_id != _user.id):
         raise HTTPException(404, "Không tìm thấy bài báo")
     if not n.is_analyzed:
         raise HTTPException(
@@ -415,9 +478,13 @@ def create_ai_analysis(
 
 
 @router.get("/{news_id}", response_model=NewsResponse)
-def get_news(news_id: int, db: Session = Depends(get_db)):
+def get_news(
+    news_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
-    if not n:
+    if not n or (owner_scope(current_user) is not None and n.owner_id != current_user.id):
         raise HTTPException(404, "Không tìm thấy bài báo")
     return n
 
@@ -471,9 +538,9 @@ def delete_news(
     db: Session = Depends(get_db),
     _admin=Depends(require_admin),
 ):
-    """Bảng tin tức là tài nguyên dùng chung của toàn hệ thống, không thuộc về
-    một người dùng nào. Bản trước không kiểm quyền ở đây, nên bất kỳ tài khoản
-    nào cũng xoá được dữ liệu của người khác."""
+    """Chỉ admin được xoá, bất kể bài thuộc về ai — admin quản trị toàn bộ dữ
+    liệu hệ thống. Bản trước không kiểm quyền ở đây, nên bất kỳ tài khoản nào
+    cũng xoá được dữ liệu của người khác."""
     n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
     if not n:
         raise HTTPException(404, "Không tìm thấy bài báo")

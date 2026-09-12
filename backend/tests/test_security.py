@@ -32,7 +32,19 @@ class TestAuthentication:
         )
         assert r.status_code == 401
 
-    @pytest.mark.parametrize("password", ["123456", "password", "Test@123", "abcdefghij"])
+    @pytest.mark.parametrize(
+        "password",
+        [
+            "123456",  # quá ngắn, nằm trong danh sách phổ biến
+            "password",  # quá ngắn, nằm trong danh sách phổ biến
+            "abcdefghij",  # đủ dài nhưng chỉ có chữ thường
+            "alllower123!",  # thiếu chữ hoa
+            "ALLUPPER123!",  # thiếu chữ thường
+            "NoDigitsHere!",  # thiếu số
+            "NoSpecial123",  # thiếu ký tự đặc biệt
+            "Sh0rt!",  # đủ 4 loại nhưng chưa đủ 8 ký tự
+        ],
+    )
     def test_weak_passwords_rejected(self, password):
         """Đăng ký bằng email/mật khẩu trần đã bị gỡ (auth.py) — mật khẩu yếu
         giờ được chặn ở validate_password_strength, dùng chung cho mọi luồng
@@ -41,6 +53,12 @@ class TestAuthentication:
 
         with pytest.raises(WeakPassword):
             validate_password_strength(password)
+
+    def test_strong_password_with_all_four_kinds_accepted(self):
+        """Tối thiểu 8 ký tự, đủ cả 4 loại — đúng yêu cầu hiện tại."""
+        from app.core.security import validate_password_strength
+
+        validate_password_strength("Abcd123!")
 
 
 class TestAuthorization:
@@ -114,6 +132,37 @@ class TestSsrf:
         assert "Connection" not in detail
         assert "HTTPConnectionPool" not in detail
         assert "59999" not in detail
+
+
+class TestModelUnavailableDoesNotLeakServerPaths:
+    """``model_info``/``score_article`` từng nhét thẳng ``str(exc)`` của
+    ``ModelUnavailable`` vào phản hồi API — khi mô hình chưa cấu hình, người
+    dùng thấy nguyên đường dẫn file trên máy chủ (``/finnexus/config/...``),
+    lộ cấu trúc hạ tầng bên trong. Chi tiết giờ chỉ còn trong log server,
+    phản hồi ra ngoài chỉ còn câu chung chung."""
+
+    def test_model_info_reason_has_no_file_path(self, client, user_token):
+        r = client.get("/api/prediction/model-info", headers=auth(user_token))
+        assert r.status_code == 200
+        body = r.json()
+        assert body["available"] is False
+        reason = body.get("reason", "")
+        assert ".yaml" not in reason
+        assert "/" not in reason
+        assert "finnexus" not in reason.lower()
+
+    def test_score_endpoint_reason_has_no_file_path(self, client, user_token):
+        r = client.post(
+            "/api/prediction/score",
+            headers=auth(user_token),
+            json={"title": "FPT công bố kết quả kinh doanh", "content": "Nội dung thử nghiệm."},
+        )
+        assert r.status_code == 503
+        detail = r.json()["detail"]
+        for field in ("reason", "message"):
+            value = detail.get(field) or ""
+            assert ".yaml" not in value
+            assert "/finnexus" not in value
 
 
 def _create_user(email: str, password: str, full_name: str = "T") -> None:

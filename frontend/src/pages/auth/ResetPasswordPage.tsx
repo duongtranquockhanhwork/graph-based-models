@@ -4,6 +4,7 @@ import { Eye, EyeOff, Loader2, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AuthLayout from '../../components/Auth/AuthLayout'
 import { useAuth } from '../../context/AuthContext'
+import { isPasswordStrong, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
 
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth()
@@ -21,8 +22,8 @@ export default function ResetPasswordPage() {
       toast.error('Mật khẩu xác nhận không khớp')
       return
     }
-    if (password.length < 10) {
-      toast.error('Mật khẩu cần tối thiểu 10 ký tự')
+    if (!isPasswordStrong(password)) {
+      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
       return
     }
     setIsSubmitting(true)
@@ -63,10 +64,10 @@ export default function ResetPasswordPage() {
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={10}
+              minLength={PASSWORD_MIN_LENGTH}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Tối thiểu 10 ký tự, kết hợp 2 loại ký tự"
+              placeholder="Chữ hoa, chữ thường, số, ký tự đặc biệt"
               className="field-input pl-10 pr-10"
             />
             <button
@@ -91,7 +92,7 @@ export default function ResetPasswordPage() {
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={10}
+              minLength={PASSWORD_MIN_LENGTH}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Nhập lại mật khẩu mới"

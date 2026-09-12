@@ -8,7 +8,7 @@ from app.core.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 RESET_TOKEN_EXPIRE_MINUTES = 30
-MIN_PASSWORD_LENGTH = 10
+MIN_PASSWORD_LENGTH = 8
 
 # Mật khẩu bị từ chối bất kể độ dài. Danh sách ngắn cố ý: nó chặn những giá trị
 # xuất hiện trong mọi bộ từ điển tấn công, không thay thế cho việc kiểm tra
@@ -27,24 +27,25 @@ class WeakPassword(ValueError):
 def validate_password_strength(password: str) -> None:
     """Bản trước chỉ yêu cầu 6 ký tự, nên "password" và "123456" đều qua.
 
-    Yêu cầu ở đây cố tình đơn giản và giải thích được: đủ dài, không nằm trong
-    danh sách phổ biến, và có ít nhất hai loại ký tự. Quy tắc phức tạp hơn
-    thường đẩy người dùng sang mật khẩu tệ hơn nhưng dễ đoán quy luật.
+    Yêu cầu hiện tại: tối thiểu 8 ký tự, có đủ cả 4 loại — chữ hoa, chữ
+    thường, số, ký tự đặc biệt — và không nằm trong danh sách mật khẩu phổ
+    biến đã bị lộ.
     """
     if len(password) < MIN_PASSWORD_LENGTH:
         raise WeakPassword(f"Mật khẩu phải có ít nhất {MIN_PASSWORD_LENGTH} ký tự.")
     if password.lower() in COMMON_PASSWORDS:
         raise WeakPassword("Mật khẩu này nằm trong danh sách bị lộ phổ biến, hãy chọn mật khẩu khác.")
-    kinds = sum(
-        [
-            any(c.islower() for c in password),
-            any(c.isupper() for c in password),
-            any(c.isdigit() for c in password),
-            any(not c.isalnum() for c in password),
-        ]
-    )
-    if kinds < 2:
-        raise WeakPassword("Mật khẩu cần kết hợp ít nhất hai loại ký tự (chữ, số hoặc ký hiệu).")
+    missing = []
+    if not any(c.islower() for c in password):
+        missing.append("chữ thường")
+    if not any(c.isupper() for c in password):
+        missing.append("chữ hoa")
+    if not any(c.isdigit() for c in password):
+        missing.append("số")
+    if not any(not c.isalnum() for c in password):
+        missing.append("ký tự đặc biệt")
+    if missing:
+        raise WeakPassword(f"Mật khẩu còn thiếu: {', '.join(missing)}.")
 
 
 def hash_password(password: str) -> str:

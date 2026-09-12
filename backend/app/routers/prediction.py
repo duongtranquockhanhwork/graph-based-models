@@ -6,7 +6,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.deps import get_current_user, owner_scope
 from app.models.news import NewsArticle
+from app.models.user import User
 from app.services import finnexus_service, nlp_service
 from app.services.graph_service import get_graph_features
 from app.services.prediction_service import (
@@ -27,8 +29,8 @@ class ScoreRequest(BaseModel):
 
 
 @router.get("/evaluate")
-def get_model_evaluation(db: Session = Depends(get_db)):
-    return evaluate_model(db)
+def get_model_evaluation(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return evaluate_model(db, owner_scope(current_user))
 
 
 @router.get("/model-info")
@@ -75,20 +77,22 @@ def score_one_article(payload: ScoreRequest):
 
 
 @router.get("/")
-def list_predictions(db: Session = Depends(get_db), limit: int = 100):
+def list_predictions(
+    db: Session = Depends(get_db),
+    limit: int = 100,
+    current_user: User = Depends(get_current_user),
+):
     """Danh sách dự đoán gần nhất theo mã.
 
     Chỉ trả về những mã mô hình THỰC SỰ đã chấm. Bài mà mô hình từ chối không
     xuất hiện ở đây dưới dạng một nhãn trống — chúng được đếm riêng để giao
     diện nói được "còn N bài chưa chấm được, vì sao".
     """
-    news = (
-        db.query(NewsArticle)
-        .filter(NewsArticle.is_analyzed == True)  # noqa: E712
-        .order_by(NewsArticle.id.desc())
-        .limit(limit)
-        .all()
-    )
+    query = db.query(NewsArticle).filter(NewsArticle.is_analyzed == True)  # noqa: E712
+    scope = owner_scope(current_user)
+    if scope is not None:
+        query = query.filter(NewsArticle.owner_id == scope)
+    news = query.order_by(NewsArticle.id.desc()).limit(limit).all()
 
     results, seen = [], set()
     refused = 0
@@ -126,7 +130,11 @@ def list_predictions(db: Session = Depends(get_db), limit: int = 100):
 
 
 @router.get("/stock/{symbol}")
-def predict_for_stock(symbol: str, db: Session = Depends(get_db)):
+def predict_for_stock(
+    symbol: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     """Tổng hợp ở cấp mã từ các tin gần đây.
 
     Đây KHÔNG phải đầu ra của mô hình FinNexus: mô hình chấm theo cặp bài–mã
@@ -134,13 +142,11 @@ def predict_for_stock(symbol: str, db: Session = Depends(get_db)):
     quả dưới đây là tổng hợp theo luật, và được đánh dấu như vậy.
     """
     symbol = symbol.upper()
-    relevant = (
-        db.query(NewsArticle)
-        .filter(NewsArticle.is_analyzed == True)  # noqa: E712
-        .order_by(NewsArticle.id.desc())
-        .limit(500)
-        .all()
-    )
+    scope = owner_scope(current_user)
+    query = db.query(NewsArticle).filter(NewsArticle.is_analyzed == True)  # noqa: E712
+    if scope is not None:
+        query = query.filter(NewsArticle.owner_id == scope)
+    relevant = query.order_by(NewsArticle.id.desc()).limit(500).all()
     relevant = [n for n in relevant if symbol in (n.stocks_mentioned or [])]
     if not relevant:
         raise HTTPException(404, f"Chưa có tin nào đã phân tích cho mã {symbol}")
@@ -158,7 +164,7 @@ def predict_for_stock(symbol: str, db: Session = Depends(get_db)):
         "sentiment": Counter(sentiments).most_common(1)[0][0] if sentiments else "Neutral",
         "impact_score": sum(scores) / len(scores) if scores else 50.0,
     }
-    result = predict_for_symbol(symbol, combined, get_graph_features(symbol))
+    result = predict_for_symbol(symbol, combined, get_graph_features(db, scope, symbol))
     return {
         "stock_symbol": symbol,
         **result,

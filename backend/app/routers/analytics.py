@@ -3,20 +3,26 @@ from sqlalchemy.orm import Session
 from collections import Counter
 
 from app.core.database import get_db
+from app.core.deps import get_current_user, owner_scope
 from app.models.news import NewsArticle
+from app.models.user import User
 from app.services.stock_stats import compute_stock_stats
 
 router = APIRouter()
 
 
 @router.get("/stocks")
-def stocks_stats(db: Session = Depends(get_db)):
-    return compute_stock_stats(db)
+def stocks_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return compute_stock_stats(db, owner_scope(current_user))
 
 
 @router.get("/dashboard")
-def dashboard_stats(db: Session = Depends(get_db)):
-    all_news = db.query(NewsArticle).all()
+def dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    query = db.query(NewsArticle)
+    scope = owner_scope(current_user)
+    if scope is not None:
+        query = query.filter(NewsArticle.owner_id == scope)
+    all_news = query.all()
     analyzed = [n for n in all_news if n.is_analyzed]
 
     stocks, industries, sentiments, trends, dates = [], [], [], [], []

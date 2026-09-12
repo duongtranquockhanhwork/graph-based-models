@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  CalendarDays,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -13,7 +14,7 @@ import type { KgExplanation, NewsArticle } from '../../types'
 import { EventChip, SentimentBadge, SymbolChip, TrendBadge } from '../common/Chips'
 import RecommendationPanel from './RecommendationPanel'
 import EntryLadderPanel from './EntryLadderPanel'
-import AiAnalysisSection from './AiAnalysisSection'
+import { contentPreviewParagraphs } from '../../utils/articleContent'
 
 /** Nhãn cho suy đoán dự phòng. Giá trị gốc là INCREASING/DECREASING/UNCHANGED —
  *  chuỗi kỹ thuật không nên lọt ra giao diện. */
@@ -97,15 +98,33 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[14px] font-medium leading-snug" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-[15px] font-semibold leading-snug" style={{ color: 'var(--text-primary)' }}>
               {news.title}
             </p>
 
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1.5 text-[11px]" style={{ color: 'var(--text-faint)' }}>
-              {news.source && <span>{news.source}</span>}
-              {news.published_date && <span>{news.published_date}</span>}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11.5px]" style={{ color: 'var(--text-faint)' }}>
+              {news.source && <span className="font-medium">{news.source}</span>}
+              {news.published_date && (
+                <span className="inline-flex items-center gap-1">
+                  <CalendarDays size={11} /> {news.published_date}
+                </span>
+              )}
               {!news.is_analyzed && (
                 <span className="badge-amber px-2 py-0.5 rounded-full">Đang phân tích…</span>
+              )}
+              {/* Luôn hiện, không cần mở rộng thẻ trước — đây là thứ người
+                  dùng cần tìm ngay, không phải thứ chờ họ tự bấm ra mới thấy. */}
+              {news.url && (
+                <a
+                  href={news.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 hover:underline"
+                  style={{ color: '#2563eb' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink size={11} /> Đọc bài gốc
+                </a>
               )}
             </div>
 
@@ -155,16 +174,29 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-          {news.content && (
-            <p className="text-[12px] leading-relaxed pt-3" style={{ color: 'var(--text-secondary)' }}>
-              {news.content.slice(0, 600)}
-              {news.content.length > 600 && '…'}
-            </p>
-          )}
-
-          {/* Claude đọc bài và giải thích bằng lời thường — đặt trước phần số liệu
-              của hệ thống, vì đó là thứ người đọc cần hiểu trước. */}
-          {news.is_analyzed && <AiAnalysisSection newsId={news.id} initial={news.ai_analysis} />}
+          {news.content &&
+            (() => {
+              const preview = contentPreviewParagraphs(news.content)
+              return (
+                <div className="pt-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
+                    Trích đoạn gốc
+                  </p>
+                  <div className="space-y-2">
+                    {preview.paragraphs.map((para, i) => (
+                      <p key={i} className="text-[12px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                  {preview.truncated && (
+                    <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
+                      Chỉ là một đoạn trích, chưa phải toàn văn — bấm "Đọc bài gốc" bên dưới để xem đầy đủ.
+                    </p>
+                  )}
+                </div>
+              )
+            })()}
 
           {/* Vì sao mô hình kết luận như vậy — hoặc vì sao nó không trả lời. */}
           {explanation && (
@@ -241,9 +273,15 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                     <p className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>
                       Không dự đoán được bài này
                     </p>
-                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                      {explanation.message || explanation.reason || 'Chưa rõ nguyên nhân.'}
-                    </p>
+                    {/* status UNAVAILABLE luôn cùng một câu chung ("mô hình chưa
+                        cấu hình trên máy chủ") cho mọi bài — không đổi theo bài
+                        nào nên không có gì đáng nói riêng; chỉ hiện lý do cho
+                        REFUSED/ERROR, vốn khác nhau theo từng bài và có ích hơn. */}
+                    {explanation.status !== 'UNAVAILABLE' && (
+                      <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        {explanation.message || explanation.reason || 'Chưa rõ nguyên nhân.'}
+                      </p>
+                    )}
                     {explanation.fallback_trend && (
                       <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
                         Nếu chỉ nhìn vào từ ngữ trong bài thì thiên về{' '}
@@ -265,18 +303,6 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
           )}
 
           <div className="flex flex-wrap items-center gap-3 text-[11px]">
-            {news.url && (
-              <a
-                href={news.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 hover:underline"
-                style={{ color: '#2563eb' }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <ExternalLink size={11} /> Đọc bài gốc
-              </a>
-            )}
             {symbols[0] && (
               <Link
                 to={`/graph?stock=${symbols[0]}`}

@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -7,8 +7,15 @@ from app.models.news import NewsArticle
 from app.services.nlp_service import STOCK_DICT
 
 
-def compute_stock_stats(db: Session) -> List[Dict]:
-    news = db.query(NewsArticle).filter(NewsArticle.is_analyzed == True).all()  # noqa: E712
+def compute_stock_stats(db: Session, owner_id: Optional[int] = None) -> List[Dict]:
+    """Danh sách mã (STOCK_DICT) là tài liệu tham khảo dùng chung — không phải
+    dữ liệu người dùng thêm vào, nên KHÔNG lọc theo owner. Chỉ số lần được
+    nhắc/sentiment (tính từ tin tức) mới lọc: owner_id=None cho admin (toàn hệ
+    thống), khác None thì chỉ đếm tin của chính người đó."""
+    query = db.query(NewsArticle).filter(NewsArticle.is_analyzed == True)  # noqa: E712
+    if owner_id is not None:
+        query = query.filter(NewsArticle.owner_id == owner_id)
+    news = query.all()
 
     mention_counts: Counter = Counter()
     sentiment_by_stock: Dict[str, Counter] = {}

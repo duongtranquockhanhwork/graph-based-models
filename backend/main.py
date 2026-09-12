@@ -16,7 +16,6 @@ from app.models.user import User  # noqa: F401 (registers table with Base metada
 from app.models.watchlist import WatchlistItem  # noqa: F401
 from app.routers import admin as admin_routes
 from app.routers import analytics, auth, graph, news, prediction, stock_detail, watchlist
-from app.services.graph_service import rebuild_graph_from_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("finnexus")
@@ -26,7 +25,6 @@ run_migrations(engine)
 
 with SessionLocal() as _seed_db:
     seed_all(_seed_db)
-    rebuild_graph_from_db(_seed_db)
 
 # /docs và /openapi.json phơi toàn bộ bề mặt API. Hữu ích khi phát triển, không
 # có lý do để mở công khai trong production.

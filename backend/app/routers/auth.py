@@ -236,6 +236,10 @@ def update_me(
     current_user.full_name = payload.full_name
     if payload.date_of_birth is not None:
         current_user.date_of_birth = payload.date_of_birth
+    if payload.avatar_url is not None:
+        # "" xoá avatar (về lại chữ cái đầu tên); chuỗi khác thì đã được
+        # _validate_avatar_url xác nhận là data URI ảnh hợp lệ.
+        current_user.avatar_url = payload.avatar_url or None
     db.commit()
     db.refresh(current_user)
     return current_user

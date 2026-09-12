@@ -17,6 +17,10 @@ class NewsResponse(BaseModel):
     content: Optional[str]
     source: Optional[str]
     published_date: Optional[str]
+    # Chưa từng có trong response trước đây — "Đọc bài gốc" ở giao diện luôn
+    # nhận None dù cột này có giá trị trong DB, vì response model chưa bao giờ
+    # khai báo trường này.
+    url: Optional[str] = None
     stocks_mentioned: List[str] = []
     companies_mentioned: List[str] = []
     industries_mentioned: List[str] = []
