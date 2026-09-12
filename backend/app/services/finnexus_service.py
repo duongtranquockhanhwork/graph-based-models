@@ -37,7 +37,12 @@ _state: Dict[str, Any] = {"loaded": False, "resources": None, "config": None, "e
 
 
 class ModelUnavailable(RuntimeError):
-    """Không nạp được mô hình. Khác hẳn với 'mô hình từ chối trả lời'."""
+    """Không nạp được mô hình. Khác hẳn với 'mô hình từ chối trả lời'.
+
+    Thông điệp của exception này đi thẳng ra ``model_info()``/``score_article()``
+    và có thể hiển thị cho người dùng cuối, nên KHÔNG được chứa đường dẫn file,
+    giá trị biến môi trường, hay bất kỳ chi tiết hạ tầng máy chủ nào — những
+    thứ đó chỉ nên vào log (``logger.warning``/``logger.exception``)."""
 
 
 def _finnexus_root() -> Optional[Path]:
@@ -52,14 +57,16 @@ def _load() -> Dict[str, Any]:
     """Nạp config + tài nguyên mô hình. Ném ModelUnavailable kèm lý do đọc được."""
     root = _finnexus_root()
     if root is None:
-        raise ModelUnavailable(
-            "FINNEXUS_ROOT chưa được cấu hình hoặc không phải thư mục hợp lệ "
-            f"(giá trị hiện tại: {settings.FINNEXUS_ROOT!r})"
+        logger.warning(
+            "FINNEXUS_ROOT chưa được cấu hình hoặc không phải thư mục hợp lệ (giá trị hiện tại: %r)",
+            settings.FINNEXUS_ROOT,
         )
+        raise ModelUnavailable("Mô hình dự đoán chưa được cấu hình trên máy chủ này.")
 
     config_path = root / settings.FINNEXUS_CONFIG
     if not config_path.is_file():
-        raise ModelUnavailable(f"Không tìm thấy file cấu hình suy luận: {config_path}")
+        logger.warning("Không tìm thấy file cấu hình suy luận: %s", config_path)
+        raise ModelUnavailable("Không tìm thấy cấu hình mô hình dự đoán trên máy chủ.")
 
     # Repo nghiên cứu import nội bộ theo kiểu `scripts.dataset_build…`, nên gốc
     # của nó phải nằm ĐẦU sys.path — chèn vào cuối thì `scripts` sẽ phân giải
@@ -73,7 +80,8 @@ def _load() -> Dict[str, Any]:
 
         from scripts.inference.score_article_url import load_resources
     except Exception as exc:  # pragma: no cover - phụ thuộc môi trường
-        raise ModelUnavailable(f"Không import được pipeline suy luận: {exc}") from exc
+        logger.warning("Không import được pipeline suy luận: %s", exc)
+        raise ModelUnavailable("Không nạp được pipeline suy luận mô hình.") from exc
 
     config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     resources = load_resources(config)
@@ -95,8 +103,8 @@ def _ensure_loaded() -> Dict[str, Any]:
             except ModelUnavailable as exc:
                 _state["error"] = str(exc)
                 logger.warning("Mô hình FinNexus không khả dụng: %s", exc)
-            except Exception as exc:  # pragma: no cover
-                _state["error"] = f"Lỗi không mong đợi khi nạp mô hình: {exc}"
+            except Exception:  # pragma: no cover
+                _state["error"] = "Lỗi không mong đợi khi nạp mô hình dự đoán."
                 logger.exception("Nạp mô hình FinNexus thất bại")
             finally:
                 _state["loaded"] = True
@@ -386,9 +394,9 @@ def _score_once(article: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, Any
             "detail": refusal.detail,
             "message": _humanize_refusal(refusal.stage, refusal.reason, refusal.detail),
         }
-    except Exception as exc:  # pragma: no cover - lỗi thật sự bất ngờ
+    except Exception:  # pragma: no cover - lỗi thật sự bất ngờ
         logger.exception("score_article thất bại ngoài dự kiến")
-        return {"status": "ERROR", "reason": str(exc)}
+        return {"status": "ERROR", "reason": "Lỗi không mong đợi khi chấm bài báo."}
 
     # Diễn đạt lại ngay tại đây, không chỉ ở to_prediction_fields: endpoint
     # /api/prediction/score trả thẳng `result` cho giao diện, nên nếu chỉ dịch

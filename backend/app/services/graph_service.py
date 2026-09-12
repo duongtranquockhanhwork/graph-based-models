@@ -11,7 +11,17 @@ _dict_path = os.path.join(os.path.dirname(__file__), "../../data/stock_dictionar
 with open(_dict_path, "r", encoding="utf-8") as f:
     STOCK_DICT = json.load(f)
 
-G = nx.DiGraph()
+# Trước đây đây là một biến toàn cục duy nhất, được MUTATE dần qua từng lần
+# phân tích bài báo (add_news_to_graph), và mọi người dùng đọc chung một đồ
+# thị. Giờ mỗi khách hàng chỉ được thấy đồ thị dựng từ CHÍNH những bài họ đã
+# thêm — không thể làm điều đó bằng cách gắn nhãn chủ sở hữu lên từng nút,
+# vì một nút "mã cổ phiếu" hay "ngành" là khái niệm dùng chung, có thể được
+# nhiều người nhắc tới. Thay vào đó, đồ thị được DỰNG LẠI TỪ ĐẦU mỗi lần đọc,
+# trực tiếp từ NewsArticle đã lọc theo owner_id — xem build_graph() bên dưới.
+# Với vài chục tới vài trăm bài báo, việc này rẻ hơn nhiều so với cái giá
+# phải trả để gắn nhãn sở hữu đúng đắn lên một đồ thị dùng chung, và tiện thể
+# vá một lỗi có sẵn: xoá bài báo trước đây không gỡ nút/cạnh cũ khỏi đồ thị
+# chung cho tới khi server khởi động lại.
 
 # Tiền tố pháp lý lặp lại ở gần như mọi tên công ty VN. VIẾT TẮT chúng thay vì
 # xoá hẳn: xoá đi thì "Công ty Cổ phần FPT" thành "FPT", trùng y hệt nhãn của
@@ -78,9 +88,9 @@ def _news_label(news_id: int, title: Optional[str]) -> str:
     return clean if len(clean) <= 42 else clean[:41].rstrip() + "…"
 
 
-def add_news_to_graph(news_id: int, analysis: Dict, title: Optional[str] = None) -> None:
+def _add_news_to_graph(graph: nx.DiGraph, news_id: int, analysis: Dict, title: Optional[str] = None) -> None:
     news_node = f"news_{news_id}"
-    G.add_node(
+    graph.add_node(
         news_node,
         node_type="news",
         label=_news_label(news_id, title),
@@ -89,63 +99,68 @@ def add_news_to_graph(news_id: int, analysis: Dict, title: Optional[str] = None)
 
     for stock in analysis.get("stocks", []):
         info = STOCK_DICT.get(stock, {})
-        G.add_node(stock, node_type="stock", label=stock,
-                   company=info.get("company", ""),
-                   industry=info.get("industry", ""))
-        G.add_edge(news_node, stock, relation="mentions")
+        graph.add_node(stock, node_type="stock", label=stock,
+                        company=info.get("company", ""),
+                        industry=info.get("industry", ""))
+        graph.add_edge(news_node, stock, relation="mentions")
 
         company = info.get("company")
         if company:
             # Tên công ty đầy đủ ("Công ty Cổ phần Sữa Việt Nam (Vinamilk)")
             # dài gấp nhiều lần đường kính nút. Giữ tên đầy đủ trong thuộc tính
             # để bảng bên hiển thị, còn nhãn trên đồ thị dùng bản rút gọn.
-            G.add_node(
+            graph.add_node(
                 company,
                 node_type="company",
                 label=_short_company(company, stock),
                 full_name=company,
             )
-            G.add_edge(stock, company, relation="represents")
+            graph.add_edge(stock, company, relation="represents")
 
         industry = info.get("industry")
         if industry:
             ind_node = f"industry_{industry}"
-            G.add_node(ind_node, node_type="industry", label=industry)
-            G.add_edge(stock, ind_node, relation="belongs_to")
+            graph.add_node(ind_node, node_type="industry", label=industry)
+            graph.add_edge(stock, ind_node, relation="belongs_to")
 
     for event in analysis.get("events", []):
         ev_node = f"event_{event}"
         # EVENT_LABELS_VI là cùng bảng nhãn mà giao diện và bộ phân tích dùng,
         # nên một sự kiện hiện ra giống nhau ở đồ thị, dòng tin và thẻ tin.
-        G.add_node(
+        graph.add_node(
             ev_node,
             node_type="event",
             label=EVENT_LABELS_VI.get(event, event.replace("_", " ").title()),
         )
-        G.add_edge(news_node, ev_node, relation="contains_event")
+        graph.add_edge(news_node, ev_node, relation="contains_event")
         for stock in analysis.get("stocks", []):
-            G.add_edge(ev_node, stock, relation="affects")
+            graph.add_edge(ev_node, stock, relation="affects")
 
     sentiment = analysis.get("sentiment", "Neutral")
     sent_node = f"sentiment_{sentiment}"
-    G.add_node(sent_node, node_type="sentiment", label=SENTIMENT_LABELS_VI.get(sentiment, sentiment))
-    G.add_edge(news_node, sent_node, relation="has_sentiment")
+    graph.add_node(sent_node, node_type="sentiment", label=SENTIMENT_LABELS_VI.get(sentiment, sentiment))
+    graph.add_edge(news_node, sent_node, relation="has_sentiment")
 
     stocks = analysis.get("stocks", [])
     for i in range(len(stocks)):
         for j in range(i + 1, len(stocks)):
             if STOCK_DICT.get(stocks[i], {}).get("industry") == STOCK_DICT.get(stocks[j], {}).get("industry"):
-                if not G.has_edge(stocks[i], stocks[j]):
-                    G.add_edge(stocks[i], stocks[j], relation="same_industry")
+                if not graph.has_edge(stocks[i], stocks[j]):
+                    graph.add_edge(stocks[i], stocks[j], relation="same_industry")
 
 
-def rebuild_graph_from_db(db: Session) -> None:
+def build_graph(db: Session, owner_id: Optional[int] = None) -> nx.DiGraph:
+    """Dựng một đồ thị MỚI từ DB, lọc theo owner_id khi có (None = admin, lấy
+    toàn hệ thống). Xem chú thích đầu file — đây thay thế biến G toàn cục cũ."""
     from app.models.news import NewsArticle
 
-    G.clear()
-    articles = db.query(NewsArticle).filter(NewsArticle.graph_built == True).all()  # noqa: E712
-    for n in articles:
-        add_news_to_graph(
+    graph = nx.DiGraph()
+    query = db.query(NewsArticle).filter(NewsArticle.graph_built == True)  # noqa: E712
+    if owner_id is not None:
+        query = query.filter(NewsArticle.owner_id == owner_id)
+    for n in query.all():
+        _add_news_to_graph(
+            graph,
             n.id,
             {
                 "stocks": n.stocks_mentioned or [],
@@ -154,26 +169,32 @@ def rebuild_graph_from_db(db: Session) -> None:
             },
             title=n.title,
         )
+    return graph
 
 
-def get_graph_data(stock_filter: Optional[str] = None,
-                   industry_filter: Optional[str] = None,
-                   limit: int = 200) -> Dict:
-    if G.number_of_nodes() == 0:
+def get_graph_data(
+    db: Session,
+    owner_id: Optional[int],
+    stock_filter: Optional[str] = None,
+    industry_filter: Optional[str] = None,
+    limit: int = 200,
+) -> Dict:
+    graph = build_graph(db, owner_id)
+    if graph.number_of_nodes() == 0:
         return {"nodes": [], "edges": [], "metadata": {"total_nodes": 0, "total_edges": 0}}
 
-    subgraph = G
-    if stock_filter and stock_filter in G:
-        nodes = set(nx.ego_graph(G, stock_filter, radius=2).nodes())
-        subgraph = G.subgraph(nodes)
+    subgraph = graph
+    if stock_filter and stock_filter in graph:
+        nodes = set(nx.ego_graph(graph, stock_filter, radius=2).nodes())
+        subgraph = graph.subgraph(nodes)
     elif industry_filter:
         ind_node = f"industry_{industry_filter}"
-        keep = {n for n, d in G.nodes(data=True) if d.get("industry") == industry_filter}
+        keep = {n for n, d in graph.nodes(data=True) if d.get("industry") == industry_filter}
         keep.add(ind_node)
         for s in list(keep):
-            if s in G:
-                keep.update(nx.ego_graph(G, s, radius=1).nodes())
-        subgraph = G.subgraph(keep)
+            if s in graph:
+                keep.update(nx.ego_graph(graph, s, radius=1).nodes())
+        subgraph = graph.subgraph(keep)
 
     centrality = nx.degree_centrality(subgraph) if subgraph.number_of_nodes() > 0 else {}
     node_list = list(subgraph.nodes(data=True))[:limit]
@@ -210,17 +231,18 @@ def get_graph_data(stock_filter: Optional[str] = None,
     }
 
 
-def get_graph_features(stock_symbol: str) -> Dict:
-    if stock_symbol not in G:
+def get_graph_features(db: Session, owner_id: Optional[int], stock_symbol: str) -> Dict:
+    graph = build_graph(db, owner_id)
+    if stock_symbol not in graph:
         return {}
     try:
-        deg = nx.degree_centrality(G).get(stock_symbol, 0)
-        btwn = nx.betweenness_centrality(G, k=min(50, G.number_of_nodes())).get(stock_symbol, 0)
-        preds = list(G.predecessors(stock_symbol))
+        deg = nx.degree_centrality(graph).get(stock_symbol, 0)
+        btwn = nx.betweenness_centrality(graph, k=min(50, graph.number_of_nodes())).get(stock_symbol, 0)
+        preds = list(graph.predecessors(stock_symbol))
         news_nodes = [n for n in preds if str(n).startswith("news_")]
         pos, neg = 0, 0
         for nn in news_nodes:
-            for succ in G.successors(nn):
+            for succ in graph.successors(nn):
                 s = str(succ)
                 if s.startswith("sentiment_Positive"):
                     pos += 1
@@ -238,13 +260,14 @@ def get_graph_features(stock_symbol: str) -> Dict:
         return {}
 
 
-def get_graph_stats() -> Dict:
+def get_graph_stats(db: Session, owner_id: Optional[int]) -> Dict:
+    graph = build_graph(db, owner_id)
     counts = {}
-    for _, d in G.nodes(data=True):
+    for _, d in graph.nodes(data=True):
         t = d.get("node_type", "unknown")
         counts[t] = counts.get(t, 0) + 1
     return {
-        "total_nodes": G.number_of_nodes(),
-        "total_edges": G.number_of_edges(),
+        "total_nodes": graph.number_of_nodes(),
+        "total_edges": graph.number_of_edges(),
         "node_types": counts,
     }

@@ -320,6 +320,9 @@ export interface AiAnalysis {
   generated_at: string
   analysis: {
     what_happened: string
+    /** Điểm cụ thể (số liệu, quyết định, sự kiện) có khả năng ảnh hưởng đến
+     *  giá — khác risks_to_watch (caveat về độ tin cậy của chính bài báo). */
+    key_points: string[]
     affected: { name: string; relation: 'DIRECT' | 'INDIRECT'; why: string }[]
     model_reading: string
     risks_to_watch: string[]
@@ -393,6 +396,23 @@ export interface StockOverview {
   highest_price1_year?: number | null
   lowest_price1_year?: number | null
   [key: string]: unknown
+}
+
+/** /api/stock-detail/{symbol}/price-band — vùng giá tính từ giá lịch sử thật,
+ *  KHÔNG phải dự đoán (không nhãn, không huấn luyện, không kiểm định). Xem
+ *  disclaimer đi kèm mỗi phản hồi trước khi hiển thị số nào ở đây. */
+export interface PriceBand {
+  engine: 'heuristic'
+  symbol: string
+  as_of_session: string | null
+  sessions_used: number
+  current_price: number
+  range_low: number
+  range_high: number
+  daily_volatility_pct: number
+  pullback_reference_price: number
+  is_investment_advice: false
+  disclaimer: string
 }
 
 export interface Shareholder {

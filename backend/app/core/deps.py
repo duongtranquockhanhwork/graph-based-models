@@ -55,3 +55,14 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Yêu cầu quyền quản trị viên")
     return current_user
+
+
+def owner_scope(current_user: User) -> int | None:
+    """Mỗi khách hàng chỉ thấy dữ liệu (tin tức, đồ thị, thống kê, dự đoán)
+    do chính họ thêm vào; admin thấy toàn hệ thống gộp lại.
+
+    ``None`` nghĩa là "không lọc theo chủ sở hữu" (admin). Nơi gọi truyền
+    thẳng kết quả này vào tham số ``owner_id`` của các hàm ở tầng service —
+    ``NewsArticle.owner_id == owner_id`` khi có giá trị, bỏ qua khi None.
+    """
+    return None if current_user.role == "admin" else current_user.id

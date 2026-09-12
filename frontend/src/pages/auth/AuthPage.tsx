@@ -6,6 +6,7 @@ import BrandMark from '../../components/common/BrandMark'
 import EmailOtpForm from '../../components/Auth/EmailOtpForm'
 import { useAuth } from '../../context/AuthContext'
 import type { User } from '../../types'
+import { isPasswordStrong, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
 
 type Mode = 'login' | 'register'
 
@@ -14,13 +15,6 @@ const todayISO = new Date().toISOString().slice(0, 10)
 
 function errDetail(err: unknown): string | undefined {
   return (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-}
-
-// Mirror của validate_password_strength ở backend (security.py).
-function isPasswordStrong(password: string): boolean {
-  if (password.length < 10) return false
-  const kinds = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter((re) => re.test(password)).length
-  return kinds >= 2
 }
 
 interface LoginFormProps {
@@ -124,6 +118,8 @@ interface RegisterFormProps {
   setDateOfBirth: Dispatch<SetStateAction<string>>
   password: string
   setPassword: Dispatch<SetStateAction<string>>
+  confirmPassword: string
+  setConfirmPassword: Dispatch<SetStateAction<string>>
   showPassword: boolean
   setShowPassword: Dispatch<SetStateAction<boolean>>
   validateCommonFields: () => boolean
@@ -137,6 +133,8 @@ function RegisterForm({
   setDateOfBirth,
   password,
   setPassword,
+  confirmPassword,
+  setConfirmPassword,
   showPassword,
   setShowPassword,
   validateCommonFields,
@@ -187,10 +185,10 @@ function RegisterForm({
           <input
             type={showPassword ? 'text' : 'password'}
             required
-            minLength={10}
+            minLength={PASSWORD_MIN_LENGTH}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Tối thiểu 10 ký tự, kết hợp 2 loại ký tự"
+            placeholder="Chữ hoa, chữ thường, số, ký tự đặc biệt"
             className="field-input pl-10 pr-10"
           />
           <button
@@ -203,6 +201,27 @@ function RegisterForm({
           >
             {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
+        </div>
+        <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>
+          {PASSWORD_REQUIREMENTS_MESSAGE}
+        </p>
+      </div>
+
+      <div>
+        <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
+          Nhập lại mật khẩu
+        </label>
+        <div className="relative">
+          <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            required
+            minLength={PASSWORD_MIN_LENGTH}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Nhập lại mật khẩu ở trên"
+            className="field-input pl-10 pr-10"
+          />
         </div>
       </div>
 
@@ -272,6 +291,7 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [regPassword, setRegPassword] = useState('')
+  const [regConfirmPassword, setRegConfirmPassword] = useState('')
   const [showRegPassword, setShowRegPassword] = useState(false)
 
   const validateCommonFields = (): boolean => {
@@ -288,7 +308,11 @@ export default function AuthPage() {
       return false
     }
     if (!isPasswordStrong(regPassword)) {
-      toast.error('Mật khẩu cần tối thiểu 10 ký tự và kết hợp ít nhất 2 loại ký tự (chữ, số, ký hiệu)')
+      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
+      return false
+    }
+    if (regPassword !== regConfirmPassword) {
+      toast.error('Mật khẩu nhập lại không khớp')
       return false
     }
     return true
@@ -323,6 +347,8 @@ export default function AuthPage() {
       setDateOfBirth={setDateOfBirth}
       password={regPassword}
       setPassword={setRegPassword}
+      confirmPassword={regConfirmPassword}
+      setConfirmPassword={setRegConfirmPassword}
       showPassword={showRegPassword}
       setShowPassword={setShowRegPassword}
       validateCommonFields={validateCommonFields}

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, Text
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -17,7 +17,9 @@ class User(Base):
     phone = Column(String(20), unique=True, index=True, nullable=True)
     phone_verified = Column(Boolean, nullable=False, default=False)
     firebase_uid = Column(String(128), unique=True, index=True, nullable=True)
-    avatar_url = Column(String(500), nullable=True)
+    # Text, không phải String(500): avatar lưu thẳng dưới dạng data URI
+    # (base64), không phải URL trỏ ra ngoài — xem lý do ở ProfileEditForm.tsx.
+    avatar_url = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     role = Column(String(20), nullable=False, default="customer")
     # Tăng lên mỗi khi mật khẩu đổi. JWT mang theo giá trị tại lúc phát

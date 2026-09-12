@@ -45,6 +45,7 @@ _COLUMNS = [
     ("news_articles", "actual_trend_pct_change", "FLOAT"),
     ("news_articles", "prediction_decision", "VARCHAR(30)"),
     ("news_articles", "ai_analysis", "JSON"),
+    ("news_articles", "owner_id", "INTEGER"),
 ]
 
 # Các cột này được lọc thường xuyên nhưng trước đây không có index nào.
@@ -55,6 +56,7 @@ _INDEXES = [
     ("ix_news_is_analyzed", "news_articles", "is_analyzed"),
     ("ix_news_needs_manual_label", "news_articles", "needs_manual_label"),
     ("ix_news_actual_trend", "news_articles", "actual_trend"),
+    ("ix_news_owner_id", "news_articles", "owner_id"),
     ("ix_watchlist_user", "watchlist_items", "user_id"),
 ]
 
@@ -120,6 +122,49 @@ def run_migrations(engine: Engine) -> None:
                 logger.warning("Không tạo được unique index %s", name, exc_info=True)
 
         _relax_users_email(conn, inspector, existing_tables)
+        _widen_users_avatar_url(conn, existing_tables)
+        _backfill_news_owner(conn, existing_tables)
+
+
+def _backfill_news_owner(conn, existing_tables: set) -> None:
+    """Tin tức thêm TRƯỚC khi hệ thống có sở hữu riêng theo tài khoản không
+    thuộc về ai — gán hết cho admin (tài khoản id nhỏ nhất có role='admin'),
+    đúng tinh thần "add gì thấy nấy": tài khoản khách hàng có sẵn thấy feed
+    trống như một tài khoản mới, còn dữ liệu cũ không biến mất, chỉ chuyển
+    quyền sở hữu. Idempotent: chỉ đụng tới dòng còn NULL, dòng đã có chủ (kể
+    cả gán từ lần chạy trước) không bị ghi đè."""
+    if "news_articles" not in existing_tables or "users" not in existing_tables:
+        return
+    try:
+        admin_row = conn.execute(
+            text("SELECT id FROM users WHERE role = 'admin' ORDER BY id LIMIT 1")
+        ).first()
+        if admin_row is None:
+            return
+        result = conn.execute(
+            text("UPDATE news_articles SET owner_id = :admin_id WHERE owner_id IS NULL"),
+            {"admin_id": admin_row[0]},
+        )
+        conn.commit()
+        if result.rowcount:
+            logger.info("Đã gán %d bài báo cũ (chưa có chủ) cho admin id=%s", result.rowcount, admin_row[0])
+    except Exception:
+        conn.rollback()
+        logger.warning("Không backfill được owner_id cho news_articles", exc_info=True)
+
+
+def _widen_users_avatar_url(conn, existing_tables: set) -> None:
+    """avatar_url chuyển từ VARCHAR(500) sang TEXT: avatar giờ lưu thẳng dạng
+    data URI base64, dài hơn nhiều một URL. SQLite không ép kiểu dài theo khai
+    báo (type affinity), nên chỉ cần nới trên PostgreSQL."""
+    if "users" not in existing_tables or conn.engine.dialect.name != "postgresql":
+        return
+    try:
+        conn.execute(text("ALTER TABLE users ALTER COLUMN avatar_url TYPE TEXT"))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        logger.warning("Không nới được kiểu cột users.avatar_url", exc_info=True)
 
 
 def _relax_users_email(conn, inspector, existing_tables: set) -> None:

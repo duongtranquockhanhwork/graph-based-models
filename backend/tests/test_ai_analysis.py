@@ -14,6 +14,7 @@ from app.services import ai_analysis_service as svc
 
 VALID = {
     "what_happened": "FPT báo lợi nhuận quý 3 tăng 28% so với cùng kỳ.",
+    "key_points": ["Lợi nhuận trước thuế quý 3 tăng 28% so với cùng kỳ."],
     "affected": [{"name": "FPT", "relation": "DIRECT", "why": "Công ty được nêu trong bài."}],
     "model_reading": "Mức biến động dự kiến thấp; chiều tăng giảm không đáng tin. "
                      "Hệ thống không khuyến nghị mua hay bán.",

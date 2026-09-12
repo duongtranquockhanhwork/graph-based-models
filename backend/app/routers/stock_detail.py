@@ -1,6 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
-from app.services import stock_detail_service
+from app.services import price_band_service, stock_detail_service
 
 router = APIRouter()
 
@@ -33,3 +33,14 @@ def events(symbol: str):
 @router.get("/{symbol}/financials")
 def financials(symbol: str):
     return stock_detail_service.get_financials(symbol)
+
+
+@router.get("/{symbol}/price-band")
+def price_band(symbol: str):
+    """Vùng giá tham khảo tính từ giá lịch sử thật — không phải dự đoán. Xem
+    docstring price_band_service.compute_price_band. 404 khi không đủ dữ liệu
+    (thay vì trả về một vùng giá tính trên quá ít phiên, dễ gây hiểu lầm)."""
+    band = price_band_service.compute_price_band(symbol)
+    if band is None:
+        raise HTTPException(404, "Chưa đủ dữ liệu giá lịch sử để tính vùng giá cho mã này")
+    return band

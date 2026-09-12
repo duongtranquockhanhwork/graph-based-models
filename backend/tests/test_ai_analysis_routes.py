@@ -46,7 +46,7 @@ def _fresh_record(news_id):
         "input_sha256": digest,
         "model": "test",
         "generated_at": "2026-09-11T00:00:00+00:00",
-        "analysis": {"what_happened": "x", "affected": [], "model_reading": "y",
+        "analysis": {"what_happened": "x", "key_points": [], "affected": [], "model_reading": "y",
                      "risks_to_watch": [], "limits": "z"},
     }
 

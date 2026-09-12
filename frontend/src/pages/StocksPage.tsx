@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Pause, Plus, RefreshCw, Search, Star, TrendingUp, X } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { analyticsApi } from '../services/api'
 import watchlistApi from '../services/watchlistApi'
 import type { LiveQuote, StockAggregation } from '../types'
@@ -59,6 +60,12 @@ function SentimentBar({ distribution }: { distribution: Record<string, number> }
  */
 export default function StocksPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  // Trang này được gắn ở cả khu vực khách hàng (/stocks/:symbol) lẫn khu vực
+  // quản trị (/admin/stocks/:symbol) — điều hướng bằng đường dẫn tuyệt đối cũ
+  // luôn thoát ra ngoài /admin, khiến admin rơi vào route dành cho khách hàng
+  // và bị ProtectedRoute bật ngược về /admin/dashboard.
+  const stockPath = (symbol: string) => (user?.role === 'admin' ? `/admin/stocks/${symbol}` : `/stocks/${symbol}`)
   const [tab, setTab] = useState<Tab>('watchlist')
   const [quotes, setQuotes] = useState<LiveQuote[]>([])
   const [all, setAll] = useState<StockAggregation[]>([])
@@ -297,7 +304,7 @@ export default function StocksPage() {
                   {quotes.map((q) => (
                     <tr
                       key={q.symbol}
-                      onClick={() => navigate(`/stocks/${q.symbol}`)}
+                      onClick={() => navigate(stockPath(q.symbol))}
                       className="cursor-pointer transition-colors"
                       style={{ borderTop: '1px solid var(--border-subtle)' }}
                       onMouseEnter={(e) => {
@@ -390,7 +397,7 @@ export default function StocksPage() {
                     {filteredAll.map((s) => (
                       <tr
                         key={s.symbol}
-                        onClick={() => navigate(`/stocks/${s.symbol}`)}
+                        onClick={() => navigate(stockPath(s.symbol))}
                         className="cursor-pointer transition-colors"
                         style={{ borderTop: '1px solid var(--border-subtle)' }}
                         onMouseEnter={(e) => {

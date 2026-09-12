@@ -19,6 +19,7 @@ import type {
   GraphData,
   LiveQuote,
   NewsArticle,
+  PriceBand,
   StockAggregation,
   StockOverview,
   StockPrediction,
@@ -26,6 +27,7 @@ import type {
 import PriceChart from '../components/Charts/PriceChart'
 import NewsCard from '../components/news/NewsCard'
 import CompanyTabs from '../components/stock/CompanyTabs'
+import PriceBandPanel from '../components/stock/PriceBandPanel'
 import { SENTIMENT_COLORS, SENTIMENT_LABELS, SymbolChip } from '../components/common/Chips'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { fmtNumber, trendColor, COLOR_CEILING, COLOR_FLOOR, COLOR_REFERENCE } from '../utils/stockColors'
@@ -107,6 +109,9 @@ export default function StockWorkspacePage() {
   const [days, setDays] = useState(180)
   const [candlesLoading, setCandlesLoading] = useState(true)
 
+  const [priceBand, setPriceBand] = useState<PriceBand | null>(null)
+  const [priceBandLoading, setPriceBandLoading] = useState(true)
+
   const [quote, setQuote] = useState<LiveQuote | null>(null)
   const [watching, setWatching] = useState(false)
 
@@ -126,6 +131,15 @@ export default function StockWorkspacePage() {
         .then((r) => setNeighbourhood(r.data))
         .catch(() => setNeighbourhood(null)),
     ]).finally(() => setLoading(false))
+  }, [sym])
+
+  useEffect(() => {
+    setPriceBandLoading(true)
+    stockDetailApi
+      .priceBand(sym)
+      .then((r) => setPriceBand(r.data))
+      .catch(() => setPriceBand(null))
+      .finally(() => setPriceBandLoading(false))
   }, [sym])
 
   const loadCandles = useCallback(async () => {
@@ -345,6 +359,8 @@ export default function StockWorkspacePage() {
           </p>
         )}
       </Section>
+
+      <PriceBandPanel band={priceBand} loading={priceBandLoading} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Kết luận mô hình */}
