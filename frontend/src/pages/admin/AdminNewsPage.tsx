@@ -141,8 +141,8 @@ export default function AdminNewsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowImport((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
-            style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-md text-[13px] font-medium text-white"
+            style={{ background: '#047857' }}
           >
             <Plus size={14} /> Thêm / Import tin tức
           </button>
@@ -151,7 +151,7 @@ export default function AdminNewsPage() {
 
       {showImport && (
         <div className="section-card space-y-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
+          <div className="flex gap-1 p-1 rounded-md" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}>
             {IMPORT_TABS.map(({ key, icon: Icon, label }) => (
               <button
                 key={key}
@@ -177,7 +177,7 @@ export default function AdminNewsPage() {
                 <input className="field-input" placeholder="Nguồn" value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
                 <input type="date" className="field-input" value={form.published_date} onChange={(e) => setForm((f) => ({ ...f, published_date: e.target.value }))} />
               </div>
-              <button type="submit" className="px-5 py-2 rounded-xl text-[13px] font-medium text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>
+              <button type="submit" className="px-5 py-2 rounded-md text-[13px] font-medium text-white" style={{ background: '#047857' }}>
                 Lưu tin tức
               </button>
             </form>
@@ -191,7 +191,7 @@ export default function AdminNewsPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-[13px] font-medium"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}
               >
                 <Upload size={14} /> Chọn file CSV
@@ -217,8 +217,8 @@ export default function AdminNewsPage() {
                 <button
                   type="submit"
                   disabled={urlLoading || !urlInput.trim()}
-                  className="flex items-center gap-2 px-5 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
+                  className="flex items-center gap-2 px-5 py-2 rounded-md text-[13px] font-medium text-white disabled:opacity-50 flex-shrink-0"
+                  style={{ background: '#047857' }}
                 >
                   {urlLoading ? (
                     <><Loader2 size={14} className="animate-spin" /> Đang lấy...</>
@@ -246,12 +246,12 @@ export default function AdminNewsPage() {
         </select>
         <input type="date" className="field-input w-auto" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         <input type="date" className="field-input w-auto" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
-        <button type="submit" className="px-4 py-2 rounded-xl text-[13px]" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
+        <button type="submit" className="px-4 py-2 rounded-md text-[13px]" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
           Lọc
         </button>
       </form>
 
-      <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
+      <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
         <div className="overflow-x-auto">
           <table className="w-full text-[12px]">
             <thead>

@@ -80,10 +80,7 @@ export default function AdminSidebar() {
       {/* Logo */}
       <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <div className="flex items-center gap-3">
-          <div
-            className="flex-shrink-0 rounded-xl"
-            style={{ boxShadow: '0 0 20px rgba(16,185,129,0.4), 0 2px 8px rgba(0,0,0,0.15)' }}
-          >
+          <div className="flex-shrink-0 rounded-md">
             <BrandMark size={36} tone="admin" />
           </div>
           <div className="min-w-0">
@@ -113,11 +110,11 @@ export default function AdminSidebar() {
                   key={to}
                   to={to}
                   onClick={closeSidebar}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-all duration-200 relative"
                   style={({ isActive }) =>
                     isActive
                       ? {
-                          background: 'linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(5,150,105,0.08) 100%)',
+                          background: 'rgba(16,185,129,0.1)',
                           borderLeft: '3px solid #10b981',
                           paddingLeft: '9px',
                           color: 'var(--text-primary)',
@@ -136,7 +133,7 @@ export default function AdminSidebar() {
                       {isActive && (
                         <div
                           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                          style={{ background: '#10b981', boxShadow: '0 0 6px #10b981' }}
+                          style={{ background: '#10b981' }}
                         />
                       )}
                     </>
@@ -161,7 +158,7 @@ export default function AdminSidebar() {
           ) : (
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold text-white flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #047857 0%, #10b981 100%)' }}
+              style={{ background: '#047857' }}
             >
               {initial}
             </div>

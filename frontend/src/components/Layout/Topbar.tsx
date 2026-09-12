@@ -54,7 +54,7 @@ export default function Topbar() {
         <button
           onClick={toggleSidebar}
           aria-label="Mở menu điều hướng"
-          className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0"
+          className="lg:hidden flex items-center justify-center w-9 h-9 rounded-md flex-shrink-0"
           style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
         >
           <Menu size={16} />
@@ -98,7 +98,7 @@ export default function Topbar() {
             ) : (
               <div
                 className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)' }}
+                style={{ background: '#1d4ed8' }}
               >
                 {initial}
               </div>
@@ -111,7 +111,7 @@ export default function Topbar() {
 
           {menuOpen && (
             <div
-              className="absolute right-0 mt-2 w-44 rounded-xl overflow-hidden z-50"
+              className="absolute right-0 mt-2 w-44 rounded-md overflow-hidden z-50"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}
             >
               <div className="px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>

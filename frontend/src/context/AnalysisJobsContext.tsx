@@ -84,7 +84,7 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
       toast.custom(
         (t) => (
           <div
-            className="rounded-xl px-4 py-3 max-w-sm"
+            className="rounded-md px-4 py-3 max-w-sm"
             style={{
               background: 'var(--bg-card)',
               border: '1px solid var(--border-default)',
@@ -114,7 +114,7 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
                   navigate(target)
                 }}
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium text-white"
-                style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+                style={{ background: '#1d4ed8' }}
               >
                 Xem kết quả
               </button>

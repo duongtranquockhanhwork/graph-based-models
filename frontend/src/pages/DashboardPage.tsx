@@ -61,7 +61,7 @@ function StatTile({
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <div
-        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center flex-shrink-0"
         style={{ background: accent + '22', border: `1px solid ${accent}33` }}
       >
         <Icon size={20} style={{ color: accent }} />
@@ -112,12 +112,12 @@ function EmptyState() {
   return (
     <div className="p-4 sm:p-6 fade-in">
       <div
-        className="rounded-2xl px-6 py-12 flex flex-col items-center text-center"
+        className="rounded-lg px-6 py-12 flex flex-col items-center text-center"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
       >
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
-          style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+          className="w-14 h-14 rounded-lg flex items-center justify-center mb-4"
+          style={{ background: '#1d4ed8' }}
         >
           <Newspaper size={24} className="text-white" />
         </div>
@@ -133,7 +133,7 @@ function EmptyState() {
           {steps.map((s) => (
             <div
               key={s.n}
-              className="rounded-xl p-3.5"
+              className="rounded-md p-3.5"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)' }}
             >
               <span
@@ -155,14 +155,14 @@ function EmptyState() {
         <div className="flex flex-wrap gap-2 justify-center mt-6">
           <Link
             to="/import"
-            className="px-5 py-2.5 rounded-xl text-[13px] font-medium text-white"
-            style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+            className="px-5 py-2.5 rounded-md text-[13px] font-medium text-white"
+            style={{ background: '#1d4ed8' }}
           >
             Nhập dữ liệu ngay
           </Link>
           <Link
             to="/stocks"
-            className="px-5 py-2.5 rounded-xl text-[13px] font-medium"
+            className="px-5 py-2.5 rounded-md text-[13px] font-medium"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             Xem bảng giá thị trường
@@ -192,12 +192,12 @@ export default function DashboardPage() {
       <div className="p-4 sm:p-6 space-y-5">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="skeleton h-24 rounded-2xl" />
+            <div key={i} className="skeleton h-24 rounded-lg" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="skeleton h-56 rounded-2xl" />
+            <div key={i} className="skeleton h-56 rounded-lg" />
           ))}
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function DashboardPage() {
       {model?.available && model.performance && (
         <Link
           to="/reports"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 transition-colors"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3 transition-colors"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -469,7 +469,7 @@ export default function DashboardPage() {
       </div>
 
       <div
-        className="flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3"
+        className="flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3"
         style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-subtle)' }}
       >
         <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
@@ -480,7 +480,7 @@ export default function DashboardPage() {
           <Link
             to="/import"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-white"
-            style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
+            style={{ background: '#1d4ed8' }}
           >
             <Upload size={12} /> Nhập thêm dữ liệu
           </Link>
