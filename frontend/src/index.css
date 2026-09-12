@@ -3,18 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --bg-base: #f8fafc;
-  --bg-surface: #f1f5f9;
-  --bg-card: #ffffff;
-  --border-subtle: #e2e8f0;
-  --border-default: #cbd5e1;
+  /* Nền ấm kiểu giấy báo thay vì xám-xanh SaaS mặc định, mực chữ gần đen
+     tuyệt đối thay vì xanh navy — phù hợp giao diện báo chí tài chính hơn. */
+  --bg-base: #faf8f4;
+  --bg-surface: #efece4;
+  --bg-card: #fffefb;
+  --border-subtle: #e6e1d5;
+  --border-default: #d6cfbe;
   --accent-blue: #2563eb;
   --accent-cyan: #0ea5e9;
   --accent-glow: rgba(37, 99, 235, 0.1);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
-  --text-faint: #94a3b8;
+  --text-primary: #191712;
+  --text-secondary: #453f36;
+  --text-muted: #6b6255;
+  --text-faint: #9c9384;
 }
 
 :root[data-theme='dark'] {
@@ -32,11 +34,46 @@
   --text-faint: #3d5a7a;
 }
 
+/* Trang đăng nhập/đăng ký (AuthLayout) luôn tối, đồng bộ với dashboard —
+   không đi theo light/dark toggle của người dùng. Ghi đè cùng bộ biến ngay
+   trên .auth-shell nên mọi component con dùng var(--text-*)/var(--bg-*) sẵn
+   có (label, input, link…) tự động đổi màu mà không cần sửa từng trang. */
+.auth-shell {
+  --bg-base: #050c1a;
+  --bg-surface: #16294a;
+  --bg-card: #0d1f35;
+  --border-subtle: #1e3654;
+  --border-default: #33517a;
+  --text-primary: #eef2f8;
+  --text-secondary: #9db0c9;
+  --text-muted: #7d94ad;
+  --text-faint: #5b7290;
+}
+
+/* Tiêu đề trong khu vực xác thực dùng sans, không theo quy tắc serif chung
+   của trang — kiểu chữ báo chí lạc quẻ trên nền tối nhiều gradient/nút bo
+   tròn của màn đăng nhập. */
+.auth-shell h1,
+.auth-shell h2 {
+  font-family: theme('fontFamily.sans');
+  letter-spacing: normal;
+}
+
 body {
   @apply font-sans antialiased;
   background-color: var(--bg-base);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
+  /* Chữ số canh đều độ rộng — giá và % không bị nhảy layout khi cập nhật. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tiêu đề trang và tên thương hiệu dùng serif để có cảm giác báo chí tài
+   chính (kiểu WSJ/FT) thay vì một dashboard SaaS chung chung. Topbar/AdminTopbar
+   tự thoát khỏi quy tắc này bằng class font-sans (chữ nhỏ, cần rõ hơn là "sang"). */
+h1, h2 {
+  font-family: theme('fontFamily.serif');
+  letter-spacing: -0.01em;
 }
 
 /* Scrollbar */
@@ -157,6 +194,32 @@ body {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   .field-input::placeholder { color: var(--text-faint); }
+}
+
+/* Ô nhập và nút chính trong khu vực xác thực — đặt ở đây (ngoài @layer) để
+   chắc chắn thắng các class Tailwind như rounded-lg trên nút submit mà không
+   phải sửa từng trang. Bo góc vừa phải (không pill tròn hết cỡ — trông "rẻ
+   tiền" hơn trên nền tối nhiều gradient) và ô nhập cao/rõ hơn field-input mặc
+   định để dễ đọc trên nền tối. */
+.auth-shell .field-input,
+.auth-shell button[type='submit'] {
+  border-radius: 14px;
+}
+.auth-shell .field-input {
+  padding-top: 13px;
+  padding-bottom: 13px;
+  font-size: 14.5px;
+  background: var(--bg-surface);
+  border-color: var(--border-default);
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+.auth-shell .field-input:focus {
+  background: #1c3357;
+  border-color: #4a90ff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 255, 0.22);
+}
+.auth-shell button[type='submit'] {
+  letter-spacing: 0.01em;
 }
 
 /* Confidence bar */

@@ -10,8 +10,6 @@ thực tế nhân lên theo số worker; khởi động lại thì bộ đếm v
 nhiều worker, thay ``_MemoryBackend`` bằng Redis mà giữ nguyên interface.
 """
 
-from __future__ import annotations
-
 import threading
 import time
 from collections import defaultdict, deque
@@ -84,8 +82,12 @@ class RateLimit:
 
 # Các hạn mức dùng chung, đặt tên theo việc chúng bảo vệ.
 login_limit = RateLimit("login", limit=10, window_seconds=300)
-register_limit = RateLimit("register", limit=5, window_seconds=3600)
 forgot_password_limit = RateLimit("forgot_password", limit=5, window_seconds=3600)
+# Gửi/xác thực OTP qua Firebase — giới hạn riêng vì mỗi lần gửi có thể tốn phí.
+phone_verify_limit = RateLimit("phone_verify", limit=10, window_seconds=600)
+# Gửi mã OTP qua email — giới hạn chặt hơn login vì mỗi lần gửi là một email thật.
+email_otp_request_limit = RateLimit("email_otp_request", limit=5, window_seconds=3600)
+email_otp_verify_limit = RateLimit("email_otp_verify", limit=10, window_seconds=600)
 import_url_limit = RateLimit("import_url", limit=20, window_seconds=3600)
 upload_limit = RateLimit("upload", limit=10, window_seconds=3600)
 # Mỗi lần tạo bản giải thích là một lần gọi API tính tiền theo token.

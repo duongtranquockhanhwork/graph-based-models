@@ -33,5 +33,9 @@ export default function ProtectedRoute({
     return <Navigate to={HOME_BY_ROLE[user.role]} replace />
   }
 
+  if (!user.profile_complete) {
+    return <Navigate to="/complete-profile" replace />
+  }
+
   return <>{children}</>
 }

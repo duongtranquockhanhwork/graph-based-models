@@ -55,7 +55,7 @@ export default function AdminUsersPage() {
 
       <form onSubmit={handleSearch} className="relative max-w-sm">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
-        <input className="field-input pl-9" placeholder="Tìm theo email hoặc tên..." value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="field-input pl-9" placeholder="Tìm theo email, SĐT hoặc tên..." value={q} onChange={(e) => setQ(e.target.value)} />
       </form>
 
       {loading ? (
@@ -66,7 +66,7 @@ export default function AdminUsersPage() {
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                  {['ID', 'Email', 'Họ tên', 'Vai trò', 'Trạng thái', 'Ngày tạo'].map((h) => (
+                  {['ID', 'Email / SĐT', 'Họ tên', 'Vai trò', 'Trạng thái', 'Ngày tạo'].map((h) => (
                     <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -75,7 +75,7 @@ export default function AdminUsersPage() {
                 {users.map((u) => (
                   <tr key={u.id} style={{ borderTop: '1px solid var(--border-subtle)' }}>
                     <td className="px-3 py-2.5" style={{ color: 'var(--text-muted)' }}>{u.id}</td>
-                    <td className="px-3 py-2.5" style={{ color: 'var(--text-primary)' }}>{u.email}</td>
+                    <td className="px-3 py-2.5" style={{ color: 'var(--text-primary)' }}>{u.email || u.phone || '—'}</td>
                     <td className="px-3 py-2.5" style={{ color: 'var(--text-secondary)' }}>{u.full_name || '—'}</td>
                     <td className="px-3 py-2.5">
                       <select

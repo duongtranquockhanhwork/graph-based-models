@@ -38,7 +38,12 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-finnexus}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-finnexus_db}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY phải được đặt trong .env}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
+      # Đặt FIREBASE_CREDENTIALS_JSON trong .env thành đường dẫn TRÊN MÁY HOST
+      # tới file service-account JSON. Compose mount nó vào container (dưới)
+      # và trỏ biến này sang đường dẫn trong container — để trống thì dùng
+      # Application Default Credentials.
+      FIREBASE_CREDENTIALS_JSON: ${FIREBASE_CREDENTIALS_JSON:+/run/secrets/firebase.json}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
@@ -54,6 +59,10 @@ services:
       # lên image. Bản trước mount ./backend:/app, khiến image đã build trở
       # nên vô nghĩa và biến container production thành môi trường dev.
       - ${FINNEXUS_ROOT:-../FinNexus KG}:/finnexus:ro
+      # /dev/null khi FIREBASE_CREDENTIALS_JSON để trống — mount vô hại, ứng
+      # dụng vẫn tự rơi về Application Default Credentials nhờ biến môi
+      # trường tương ứng ở trên rỗng trong trường hợp đó.
+      - ${FIREBASE_CREDENTIALS_JSON:-/dev/null}:/run/secrets/firebase.json:ro
     ports:
       - "8000:8000"
     depends_on:
@@ -71,8 +80,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
     container_name: finnexus-frontend
     restart: unless-stopped
     ports:

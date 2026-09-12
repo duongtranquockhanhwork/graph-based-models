@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { TrendingUp, Network, ShieldCheck } from 'lucide-react'
 import BrandMark from '../common/BrandMark'
 import type { ReactNode } from 'react'
@@ -6,17 +7,28 @@ interface AuthLayoutProps {
   title: string
   subtitle: string
   children: ReactNode
+  // Nút chuyển đổi Đăng nhập/Đăng ký hiện trong khối màu bên trái (giống mẫu
+  // tham khảo) — chỉ hiện ở màn hình lg+; bản mobile dùng link thường ở cuối
+  // form (mỗi trang tự đặt link đó bên trong children).
+  footerAction?: { question: string; linkText: string; to: string }
 }
 
-export default function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
+// Panel bên phải cố định một tông tối riêng (không đi theo biến --bg-* vốn
+// đổi theo light/dark toggle) — trang đăng nhập/đăng ký luôn tối, đồng bộ với
+// giao diện dashboard, thay vì chuyển sang nền trắng khi người dùng đang ở
+// chế độ sáng.
+const PANEL_RIGHT_BG = '#0a1628'
+
+export default function AuthLayout({ title, subtitle, children, footerAction }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex" style={{ background: 'var(--bg-base)' }}>
-      {/* Brand panel */}
+    <div className="min-h-screen flex auth-shell" style={{ background: PANEL_RIGHT_BG }}>
+      {/* Brand panel — mép phải bo cong lớn kiểu "giọt nước" lồi sang panel
+          form, thay cho đường viền thẳng (theo mẫu tham khảo người dùng gửi). */}
       <div
-        className="hidden lg:flex lg:w-[46%] relative overflow-hidden flex-col justify-between p-12"
+        className="hidden lg:flex lg:w-[44%] relative overflow-hidden flex-col justify-between p-12"
         style={{
           background: 'linear-gradient(160deg, #07111f 0%, #050c1a 60%, #0a1628 100%)',
-          borderRight: '1px solid #1a2d4a',
+          borderRadius: '0 30% 30% 0 / 0 50% 50% 0',
         }}
       >
         <div
@@ -78,10 +90,26 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
             </div>
           </div>
 
-          <p className="mt-8 text-[11px] leading-relaxed" style={{ color: '#5b7290' }}>
-            Công cụ tham khảo, không phải lời khuyên mua bán. Hệ thống không đưa ra tín hiệu
-            giao dịch, và im lặng khi không đủ chắc chắn.
-          </p>
+          {footerAction && (
+            <div className="mt-8 flex items-center gap-3">
+              <span className="text-sm" style={{ color: '#94a3b8' }}>
+                {footerAction.question}
+              </span>
+              <Link
+                to={footerAction.to}
+                className="px-5 py-2 rounded-full text-[13px] font-semibold text-white transition-colors"
+                style={{ border: '1.5px solid rgba(255,255,255,0.5)' }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLAnchorElement).style.borderColor = '#fff'
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.5)'
+                }}
+              >
+                {footerAction.linkText}
+              </Link>
+            </div>
+          )}
         </div>
 
         <p className="relative text-[11px]" style={{ color: '#2a3f58' }}>
@@ -89,8 +117,8 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
         </p>
       </div>
 
-      {/* Form panel */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
+      {/* Form panel — luôn tối, không đổi theo light/dark toggle */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-10" style={{ background: PANEL_RIGHT_BG }}>
         <div className="w-full max-w-[400px] fade-in">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div
@@ -102,13 +130,14 @@ export default function AuthLayout({ title, subtitle, children }: AuthLayoutProp
             <h1 className="font-bold text-[15px] gradient-text">FinNexus KG</h1>
           </div>
 
-          <div className="section-card">
-            <h2 className="text-xl font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>{title}</h2>
-            <p className="text-[13px] mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {subtitle}
-            </p>
-            {children}
-          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-2" style={{ color: '#3d82f6' }}>
+            Chào mừng
+          </p>
+          <h2 className="text-2xl font-bold mb-1.5 text-white">{title}</h2>
+          <p className="text-[13px] mb-7" style={{ color: '#7d94ad' }}>
+            {subtitle}
+          </p>
+          {children}
         </div>
       </div>
     </div>

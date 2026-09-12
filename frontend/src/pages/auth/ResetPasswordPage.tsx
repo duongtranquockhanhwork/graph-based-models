@@ -21,8 +21,8 @@ export default function ResetPasswordPage() {
       toast.error('Mật khẩu xác nhận không khớp')
       return
     }
-    if (password.length < 6) {
-      toast.error('Mật khẩu cần tối thiểu 6 ký tự')
+    if (password.length < 10) {
+      toast.error('Mật khẩu cần tối thiểu 10 ký tự')
       return
     }
     setIsSubmitting(true)
@@ -63,10 +63,10 @@ export default function ResetPasswordPage() {
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={10}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Tối thiểu 6 ký tự"
+              placeholder="Tối thiểu 10 ký tự, kết hợp 2 loại ký tự"
               className="field-input pl-10 pr-10"
             />
             <button
@@ -91,7 +91,7 @@ export default function ResetPasswordPage() {
             <input
               type={showPassword ? 'text' : 'password'}
               required
-              minLength={6}
+              minLength={10}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Nhập lại mật khẩu mới"

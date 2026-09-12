@@ -31,7 +31,13 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = DEV_JWT_SECRET
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
-    GOOGLE_CLIENT_ID: str = ""
+
+    # Xác thực số điện thoại qua Firebase (tuỳ chọn). Để trống FIREBASE_PROJECT_ID
+    # thì tính năng tự tắt — /auth/firebase-phone và /auth/link-phone trả 503.
+    # FIREBASE_CREDENTIALS_JSON là đường dẫn tới file service-account JSON; để
+    # trống thì dùng Application Default Credentials (phù hợp khi chạy trên GCP).
+    FIREBASE_PROJECT_ID: str = ""
+    FIREBASE_CREDENTIALS_JSON: str = ""
 
     # Email (password reset)
     SMTP_HOST: str = ""

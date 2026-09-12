@@ -8,7 +8,7 @@ def log_activity(db: Session, actor: User, action: str, detail: str = "", status
     db.add(
         AdminActivityLog(
             actor_user_id=actor.id,
-            actor_name=actor.full_name or actor.email,
+            actor_name=actor.full_name or actor.email or actor.phone or f"user#{actor.id}",
             action=action,
             detail=detail,
             status=status,

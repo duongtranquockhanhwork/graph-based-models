@@ -1,7 +1,12 @@
 export interface User {
   id: number
-  email: string
+  email?: string
+  email_verified?: boolean
   full_name?: string
+  date_of_birth?: string
+  phone?: string
+  phone_verified?: boolean
+  profile_complete?: boolean
   avatar_url?: string
   role: 'customer' | 'admin'
   is_active?: boolean
@@ -522,7 +527,8 @@ export interface SystemSetting {
 
 export interface AdminUser {
   id: number
-  email: string
+  email?: string
+  phone?: string
   full_name?: string
   role: 'customer' | 'admin'
   is_active: boolean

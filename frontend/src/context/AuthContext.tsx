@@ -8,13 +8,22 @@ interface AuthContextValue {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<User>
-  register: (email: string, password: string, fullName?: string) => Promise<User>
-  loginWithGoogle: (idToken: string) => Promise<User>
+  // fullName/dob/password chỉ áp dụng khi email này đang tạo tài khoản mới.
+  registerWithEmail: (
+    email: string,
+    code: string,
+    fullName?: string,
+    dateOfBirth?: string,
+    password?: string
+  ) => Promise<User>
+  linkEmail: (email: string, code: string) => Promise<User>
   logout: () => void
   forgotPassword: (email: string) => Promise<void>
   resetPassword: (token: string, newPassword: string) => Promise<void>
   updateProfile: (fullName: string) => Promise<User>
+  completeProfile: (fullName: string, dateOfBirth: string) => Promise<User>
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  refreshUser: () => Promise<User | null>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -47,14 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return applyAuth(res.data.access_token, res.data.user)
   }, [])
 
-  const register = useCallback(async (email: string, password: string, fullName?: string) => {
-    const res = await authApi.register(email, password, fullName)
-    return applyAuth(res.data.access_token, res.data.user)
-  }, [])
+  const registerWithEmail = useCallback(
+    async (email: string, code: string, fullName?: string, dateOfBirth?: string, password?: string) => {
+      const res = await authApi.emailOtpVerify(email, code, fullName, dateOfBirth, password)
+      return applyAuth(res.data.access_token, res.data.user)
+    },
+    []
+  )
 
-  const loginWithGoogle = useCallback(async (idToken: string) => {
-    const res = await authApi.googleLogin(idToken)
-    return applyAuth(res.data.access_token, res.data.user)
+  const linkEmail = useCallback(async (email: string, code: string) => {
+    const res = await authApi.linkEmail(email, code)
+    setUser(res.data)
+    return res.data
   }, [])
 
   const logout = useCallback(() => {
@@ -76,8 +89,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.data
   }, [])
 
+  const completeProfile = useCallback(async (fullName: string, dateOfBirth: string) => {
+    const res = await authApi.updateProfile(fullName, dateOfBirth)
+    setUser(res.data)
+    return res.data
+  }, [])
+
   const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
     await authApi.changePassword(currentPassword, newPassword)
+  }, [])
+
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await authApi.me()
+      setUser(res.data)
+      return res.data
+    } catch {
+      return null
+    }
   }, [])
 
   return (
@@ -87,13 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
-        register,
-        loginWithGoogle,
+        registerWithEmail,
+        linkEmail,
         logout,
         forgotPassword,
         resetPassword,
         updateProfile,
+        completeProfile,
         changePassword,
+        refreshUser,
       }}
     >
       {children}

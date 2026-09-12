@@ -60,7 +60,7 @@ export default function Topbar() {
           <Menu size={16} />
         </button>
         <div className="min-w-0">
-          <h2 className="font-semibold text-[14px] leading-tight" style={{ color: 'var(--text-primary)' }}>{info.title}</h2>
+          <h2 className="font-sans font-semibold text-[14px] leading-tight" style={{ color: 'var(--text-primary)' }}>{info.title}</h2>
           <p className="text-[11px] leading-tight mt-0.5" style={{ color: 'var(--text-faint)' }}>
             {info.breadcrumb}
           </p>
@@ -117,7 +117,7 @@ export default function Topbar() {
               <div className="px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                 <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{user?.full_name || 'Người dùng'}</p>
                 <p className="text-[11px] truncate" style={{ color: 'var(--text-faint)' }}>
-                  {user?.email}
+                  {user?.email || user?.phone}
                 </p>
               </div>
               <button

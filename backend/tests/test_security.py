@@ -33,12 +33,14 @@ class TestAuthentication:
         assert r.status_code == 401
 
     @pytest.mark.parametrize("password", ["123456", "password", "Test@123", "abcdefghij"])
-    def test_weak_passwords_rejected(self, client, password):
-        r = client.post(
-            "/api/auth/register",
-            json={"email": f"weak-{password}@example.com", "password": password},
-        )
-        assert r.status_code in (400, 422), r.text
+    def test_weak_passwords_rejected(self, password):
+        """Đăng ký bằng email/mật khẩu trần đã bị gỡ (auth.py) — mật khẩu yếu
+        giờ được chặn ở validate_password_strength, dùng chung cho mọi luồng
+        có đặt mật khẩu (đổi mật khẩu, reset, đăng ký qua SĐT có password)."""
+        from app.core.security import WeakPassword, validate_password_strength
+
+        with pytest.raises(WeakPassword):
+            validate_password_strength(password)
 
 
 class TestAuthorization:
@@ -114,15 +116,25 @@ class TestSsrf:
         assert "59999" not in detail
 
 
+def _create_user(email: str, password: str, full_name: str = "T") -> None:
+    """Tạo user trực tiếp qua DB, thay cho endpoint /register đã bị gỡ (đăng
+    ký giờ bắt buộc xác thực OTP qua SĐT hoặc email — xem auth.py)."""
+    from app.core.database import SessionLocal
+    from app.core.security import hash_password
+    from app.models.user import User
+
+    with SessionLocal() as db:
+        db.add(User(email=email, hashed_password=hash_password(password), full_name=full_name))
+        db.commit()
+
+
 class TestSessionLifecycle:
-    def test_changing_password_revokes_old_tokens(self, client):
+    def test_changing_password_revokes_old_tokens(self, client, app_module):
         email = "session-test@example.com"
-        reg = client.post(
-            "/api/auth/register",
-            json={"email": email, "password": "Str0ng!Pass1", "full_name": "S"},
-        )
-        assert reg.status_code == 200
-        old_token = reg.json()["access_token"]
+        _create_user(email, "Str0ng!Pass1", "S")
+        logged_in = client.post("/api/auth/login", json={"email": email, "password": "Str0ng!Pass1"})
+        assert logged_in.status_code == 200
+        old_token = logged_in.json()["access_token"]
         assert client.get("/api/auth/me", headers=auth(old_token)).status_code == 200
 
         changed = client.post(
@@ -144,9 +156,7 @@ class TestSessionLifecycle:
         from app.models.user import User
 
         email = "reset-test@example.com"
-        client.post(
-            "/api/auth/register", json={"email": email, "password": "Str0ng!Pass1"}
-        )
+        _create_user(email, "Str0ng!Pass1")
         with SessionLocal() as db:
             user = db.query(User).filter(User.email == email).first()
             token = create_reset_token(user.email, user.token_version or 0)
