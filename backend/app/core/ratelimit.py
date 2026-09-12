@@ -88,3 +88,5 @@ register_limit = RateLimit("register", limit=5, window_seconds=3600)
 forgot_password_limit = RateLimit("forgot_password", limit=5, window_seconds=3600)
 import_url_limit = RateLimit("import_url", limit=20, window_seconds=3600)
 upload_limit = RateLimit("upload", limit=10, window_seconds=3600)
+# Mỗi lần tạo bản giải thích là một lần gọi API tính tiền theo token.
+ai_analysis_limit = RateLimit("ai_analysis", limit=30, window_seconds=3600)

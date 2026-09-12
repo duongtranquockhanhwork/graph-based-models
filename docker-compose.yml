@@ -46,6 +46,9 @@ services:
       SMTP_FROM: ${SMTP_FROM:-no-reply@finnexus.local}
       # Mô hình dự đoán nằm trong repo nghiên cứu, mount read-only ở dưới.
       FINNEXUS_ROOT: /finnexus
+      # Claude giải thích bài báo — để trống thì tính năng tự tắt.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5}
     volumes:
       # Chỉ mount repo nghiên cứu (read-only), KHÔNG mount mã nguồn backend đè
       # lên image. Bản trước mount ./backend:/app, khiến image đã build trở

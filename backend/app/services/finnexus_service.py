@@ -18,9 +18,11 @@ Hai thứ module này KHÔNG làm, và đó là điều quan trọng nhất:
 
 from __future__ import annotations
 
+import json
 import logging
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -107,6 +109,7 @@ def reset() -> None:
     """Buộc lần gọi sau nạp lại — dùng sau khi đổi cấu hình, và trong test."""
     with _lock:
         _state.update({"loaded": False, "resources": None, "config": None, "error": None})
+    _last_refresh.clear()
 
 
 def is_available() -> bool:
@@ -120,6 +123,42 @@ def is_available() -> bool:
 # --------------------------------------------------------------------------
 # Thông tin mô hình
 # --------------------------------------------------------------------------
+
+# Bằng chứng cho lớp khuyến nghị minh bạch, sinh bởi
+# tools/measure_recommendation_evidence.py bằng cách chấm chính mô hình đang chạy
+# trên bài 2026 nó chưa từng thấy. Đọc lại ở mỗi lần gọi: chạy lại công cụ là có
+# hiệu lực ngay, không cần khởi động lại, và file chỉ vài KB.
+_EVIDENCE_PATH = Path(__file__).resolve().parents[2] / "data" / "recommendation_evidence.json"
+
+
+_LADDER_PATH = Path(__file__).resolve().parents[2] / "data" / "entry_ladder.json"
+
+
+def entry_ladder() -> Optional[Dict[str, Any]]:
+    """Thống kê "đặt mua ở giá nào thì được gì", hoặc None nếu chưa từng dựng.
+
+    Sinh bởi scripts/modeling/build_v89_entry_ladder.py ở repo nghiên cứu: với
+    mỗi mức giá đặt mua thấp hơn giá tham chiếu, lệnh khớp bao nhiêu phần trăm số
+    lần trong 3 phiên và lãi/lỗ sau phí khi khớp — ước lượng trên 2019–2025, kiểm
+    lại trên 2026. Là số liệu mô tả, không phải dự đoán hay lời khuyên.
+    """
+    try:
+        return json.loads(_LADDER_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def recommendation_evidence() -> Optional[Dict[str, Any]]:
+    """Bằng chứng đã đo, hoặc None nếu chưa từng đo.
+
+    None nghĩa là giao diện KHÔNG hiện lớp khuyến nghị. Không có số đo thì không
+    có gì để nói — và tuyệt đối không được thay bằng một con số tự đặt.
+    """
+    try:
+        return json.loads(_EVIDENCE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
 
 def model_info() -> Dict[str, Any]:
     """Mọi con số hiển thị cho người dùng đều lấy từ đây, và mỗi con số đi kèm
@@ -174,6 +213,9 @@ def model_info() -> Dict[str, Any]:
         },
         "policy_gates": gates,
         "buy_reachable": all(gates.values()),
+        "recommendation_evidence": recommendation_evidence(),
+        "entry_ladder": entry_ladder(),
+        "price_data": price_freshness(resources),
         "is_investment_advice": False,
         "tradeable": False,
         "disclaimer": (
@@ -207,9 +249,18 @@ _REFUSAL_MESSAGES = {
         "Chưa có đủ lịch sử giá quanh ngày đăng bài để so sánh. "
         "Thường gặp với mã mới lên sàn, hoặc bài quá cũ."
     ),
-    "price_panel_too_stale": (
+    "price_history_too_stale_for_this_article": (
         "Dữ liệu giá gần nhất cách ngày đăng bài quá xa, nên đối chiếu sẽ không "
         "còn đúng với thời điểm bài viết ra."
+    ),
+    "price_panel_behind_publication": (
+        "Dữ liệu giá chưa có những phiên giao dịch ngay trước ngày đăng bài. Chấm "
+        "lúc này nghĩa là dựa trên giá cũ, nên hệ thống dừng lại. Hệ thống đã thử "
+        "tải giá mới nhưng chưa được — thử lại sau ít phút."
+    ),
+    "price_history_behind_publication": (
+        "Giá của mã này chưa được cập nhật tới phiên ngay trước ngày đăng bài, nên "
+        "hệ thống không chấm để tránh dựa trên giá cũ. Thử lại sau ít phút."
     ),
     "unsupported_publisher": (
         "Hệ thống chưa đọc được trang báo này. Hiện hỗ trợ CafeF, VnExpress, "
@@ -218,11 +269,17 @@ _REFUSAL_MESSAGES = {
 }
 
 
-def _humanize_refusal(stage: str, reason: str) -> str:
-    return _REFUSAL_MESSAGES.get(
+def _humanize_refusal(stage: str, reason: str, detail: Any = None) -> str:
+    message = _REFUSAL_MESSAGES.get(
         reason,
         "Hệ thống dừng lại giữa chừng khi xử lý bài này nên chưa đưa ra được kết luận.",
     )
+    if reason == "price_panel_behind_publication" and isinstance(detail, dict):
+        newest = detail.get("newest_price_session")
+        missing = detail.get("missing_sessions") or []
+        if newest:
+            message += f" (Giá mới có tới phiên {newest}, còn thiếu {len(missing)} phiên.)"
+    return message
 
 
 # Repo nghiên cứu viết phần giải thích quyết định cho người đọc báo cáo khoa
@@ -298,8 +355,6 @@ def score_article(
     except ModelUnavailable as exc:
         return {"status": "UNAVAILABLE", "reason": str(exc)}
 
-    from scripts.inference.score_article_url import Refusal, score_article as _score
-
     article = {
         "title": title or "",
         "content": _with_link_hints(content, linked_symbols),
@@ -307,6 +362,20 @@ def score_article(
         "url": url or "",
         "source": source or "",
     }
+    result = _score_once(article, state)
+    # Thiếu phiên giá gần nhất thì tải về rồi chấm lại, đúng một lần. Chấm ngay
+    # trên giá cũ là điều không được phép: kết quả vẫn trông bình thường nhưng
+    # mô tả một thị trường khác với lúc bài được viết ra.
+    lagging = _lagging_symbols(result)
+    if lagging and _refresh_prices(state, lagging):
+        result = _score_once(article, state)
+        result["prices_refreshed_for"] = lagging
+    return result
+
+
+def _score_once(article: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, Any]:
+    from scripts.inference.score_article_url import Refusal, score_article as _score
+
     try:
         result = _score(article, state["config"], state["resources"])
     except Refusal as refusal:
@@ -315,7 +384,7 @@ def score_article(
             "stage": refusal.stage,
             "reason": refusal.reason,
             "detail": refusal.detail,
-            "message": _humanize_refusal(refusal.stage, refusal.reason),
+            "message": _humanize_refusal(refusal.stage, refusal.reason, refusal.detail),
         }
     except Exception as exc:  # pragma: no cover - lỗi thật sự bất ngờ
         logger.exception("score_article thất bại ngoài dự kiến")
@@ -330,6 +399,94 @@ def score_article(
             row["explanation"] = plain
 
     return result
+
+
+# --------------------------------------------------------------------------
+# Giá của phiên gần nhất
+# --------------------------------------------------------------------------
+
+# Hai lý do từ chối mà tải thêm giá là sửa được. Mọi lý do khác (không nhận ra
+# mã, mã mới lên sàn...) thì tải lại cũng vô ích.
+_LAGGING_REASONS = {"price_panel_behind_publication", "price_history_behind_publication"}
+# Mỗi mã chỉ được tải lại một lần trong khoảng này, để việc nhập một file CSV
+# nhiều bài về một mã đã huỷ niêm yết không biến thành một tràng gọi API.
+_REFRESH_COOLDOWN_SECONDS = 1800
+_refresh_lock = threading.Lock()
+_last_refresh: Dict[str, float] = {}
+
+
+def _lagging_symbols(result: Dict[str, Any]) -> List[str]:
+    """Các mã bị bỏ qua chỉ vì thiếu phiên giá gần nhất."""
+    if result.get("status") == "REFUSED" and result.get("reason") in _LAGGING_REASONS:
+        detail = result.get("detail")
+        if not isinstance(detail, dict):
+            return []
+        names = detail.get("newest_session_by_symbol") or detail.get("symbols") or []
+        return sorted(set(names))
+    if result.get("status") == "SCORED":
+        return sorted({r["symbol"] for r in result.get("refused", [])
+                       if r.get("reason") == "price_history_behind_publication"})
+    return []
+
+
+def _refresh_prices(state: Dict[str, Any], symbols: List[str]) -> bool:
+    """Tải các phiên còn thiếu cho những mã này rồi gắn vào mô hình đang chạy.
+
+    Trả về True khi có giá mới để chấm lại. Mọi thất bại — mất mạng, sắp chạm
+    hạn mức API, bản mô hình cũ chưa có lớp giá live — đều trả về False: bài vẫn
+    bị từ chối kèm lý do rõ ràng, và không bao giờ bị chấm trên giá cũ.
+    """
+    if not settings.FINNEXUS_LIVE_PRICES or not symbols:
+        return False
+    live_settings = (state["config"].get("features") or {}).get("live") or {}
+    if not live_settings.get("enabled", False):
+        return False
+    try:
+        from scripts.inference.live_prices import BUDGET, refresh
+        from scripts.inference.score_article_url import ROOT as model_root, attach_live
+    except Exception:  # pragma: no cover - bản mô hình cũ
+        return False
+
+    now = time.monotonic()
+
+    def due(name: str) -> bool:
+        return now - _last_refresh.get(name, float("-inf")) >= _REFRESH_COOLDOWN_SECONDS
+
+    wanted = [s for s in symbols if due(s)]
+    indices = [i for i in ("VNINDEX", "HNXINDEX") if due(i)]
+    if not wanted:
+        return False
+    # Nhà cung cấp kết thúc cả tiến trình khi bị gọi quá hạn mức, nên thà bỏ
+    # qua lần tải này còn hơn làm sập máy chủ.
+    if BUDGET.available() < len(wanted) + len(indices):
+        logger.warning("Bỏ qua cập nhật giá cho %s: sắp chạm hạn mức gọi API", wanted)
+        return False
+    with _refresh_lock:
+        try:
+            report = refresh(wanted, indices, live_settings, model_root)
+            attach_live(state["resources"], state["config"])
+        except Exception:
+            logger.exception("Cập nhật giá live thất bại")
+            return False
+        for name in wanted + indices:
+            _last_refresh[name] = now
+    updated = [s for s, v in report["symbols"].items() if v.get("status") == "OK"]
+    logger.info("Đã cập nhật giá live cho %s, tới phiên %s", updated, report.get("through"))
+    return bool(updated)
+
+
+def price_freshness(resources: Dict[str, Any]) -> Dict[str, Any]:
+    """Giá có tới phiên nào — để người dùng biết kết quả dựa trên dữ liệu tới đâu."""
+    info: Dict[str, Any] = {
+        "frozen_newest_session": str(resources["indices"]["date"].max().date()),
+        "live_newest_session": None,
+        "live_refreshed_at": None,
+    }
+    live = resources.get("live")
+    if live:
+        info["live_newest_session"] = live.get("newest_session")
+        info["live_refreshed_at"] = ((live.get("manifest") or {}).get("last_refresh") or {}).get("at")
+    return info
 
 
 # --------------------------------------------------------------------------
@@ -409,6 +566,10 @@ def to_prediction_fields(result: Dict[str, Any]) -> Dict[str, Any]:
             "focus_reason": row.get("focus_reason"),
             "predicted_label": row["predicted_label"],
             "probabilities": row.get("probabilities"),
+            "volatility_20d": row.get("volatility_20d"),
+            "reference_close": row.get("reference_close"),
+            "reference_session": row.get("reference_session"),
+            "last_price_session": row.get("last_price_session"),
             "one_variable_baseline_label": row.get("one_variable_baseline_label"),
             "decision": row.get("decision"),
             "decision_reason": row.get("reason"),

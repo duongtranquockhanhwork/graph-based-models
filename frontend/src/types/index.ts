@@ -31,6 +31,8 @@ export interface NewsArticle {
   prediction_confidence?: number
   prediction_decision?: string
   prediction_explanation?: PredictionExplanation
+  /** Bản giải thích của Claude nếu đã từng tạo cho bài này. */
+  ai_analysis?: AiAnalysis | null
   is_analyzed: boolean
   needs_manual_label?: boolean
   manual_sentiment?: string
@@ -103,6 +105,13 @@ export interface PredictionExplanation {
   focus_reason?: string
   predicted_label?: string
   probabilities?: Record<string, number>
+  /** Độ biến động 20 phiên trước tin — thứ bảng giá vào lệnh được chia nhóm theo. */
+  volatility_20d?: number | null
+  /** Giá đóng cửa mới nhất người đọc thấy được, và phiên của nó. */
+  reference_close?: number | null
+  reference_session?: string | null
+  /** Phiên cuối cùng trong cửa sổ giá mô hình đã đọc. */
+  last_price_session?: string | null
   one_variable_baseline_label?: string
   decision?: string
   decision_reason?: string
@@ -196,9 +205,122 @@ export interface ModelInfo {
   }
   policy_gates?: Record<string, boolean>
   buy_reachable?: boolean
+  /** null khi chưa từng đo — khi đó giao diện không hiện lớp khuyến nghị. */
+  recommendation_evidence?: RecommendationEvidence | null
+  entry_ladder?: EntryLadder | null
+  price_data?: {
+    frozen_newest_session: string
+    live_newest_session: string | null
+    live_refreshed_at: string | null
+  }
   is_investment_advice: boolean
   tradeable: boolean
   disclaimer?: string
+}
+
+/** Số đo cho lớp khuyến nghị minh bạch. Sinh bởi
+ *  backend/tools/measure_recommendation_evidence.py: chấm mô hình đang chạy trên
+ *  bài 2026 nó chưa từng thấy, rồi đối chiếu với giá thật. */
+export interface EntryLadderLevel {
+  fill_rate?: number | null
+  mean_net_if_filled?: number | null
+  share_filled_orders_profitable?: number | null
+}
+
+export interface EntryLadderCell {
+  events: number
+  reliable: boolean
+  market_at_next_open: { mean_net_if_filled?: number | null; share_filled_orders_profitable?: number | null }
+  /** Khoá là mức giá so với giá tham chiếu, dạng chuỗi số: "0.0", "-0.01"… */
+  levels: Record<string, EntryLadderLevel>
+}
+
+/** Thống kê "đặt mua ở giá nào thì được gì", sinh bởi
+ *  scripts/modeling/build_v89_entry_ladder.py ở repo nghiên cứu: ước lượng trên
+ *  2019–2025, kiểm lại trên 2026. Số liệu mô tả, không phải lời khuyên. */
+export interface EntryLadder {
+  version: string
+  generated_at: string
+  period: [string, string]
+  events: number
+  reference_price: string
+  sessions: number
+  round_trip_cost: number
+  levels: number[]
+  volatility_cuts: [number, number]
+  band_edges: [number, number]
+  cells: Record<string, EntryLadderCell>
+  validation: {
+    trained_until: string
+    checked_on: string
+    mean_abs_fill_rate_error: number | null
+    profitable_cells_on_2026: number
+    cells_checked_for_profit: number
+  }
+  is_investment_advice: boolean
+}
+
+export interface RecommendationEvidence {
+  version: string
+  generated_at: string
+  model_version?: string
+  data: {
+    description: string
+    pairs: number
+    articles: number
+    date_range: [string, string]
+    used_for_model_selection: boolean
+  }
+  round_trip_cost: number
+  large_move_threshold: number
+  magnitude: {
+    verdict: string
+    base_rate: number
+    band_edges: [number, number]
+    bands: {
+      band: 'LOW' | 'MEDIUM' | 'HIGH'
+      from: number
+      to: number
+      pairs: number
+      model_probability_mean: number | null
+      realised_large_move_share: number | null
+    }[]
+  }
+  direction: {
+    verdict: 'BELOW_BREAK_EVEN' | 'AT_OR_ABOVE_BREAK_EVEN' | string
+    large_move_pairs: number
+    hit_rate: number
+    hit_rate_high_band: number | null
+    high_band_large_move_pairs: number
+    break_even_hit_rate: number
+    large_move_mean_abs: number
+  }
+  expected_return: {
+    verdict: 'NOT_PREDICTIVE' | 'PREDICTIVE_ON_2026' | string
+    spearman_with_realised: number
+    predicted_positive: {
+      pairs: number
+      articles: number
+      realised_net_mean: number
+      realised_net_ci95: [number | null, number | null]
+    }
+  }
+}
+
+/** Bản giải thích do Claude viết cho một bài, lưu trong NewsArticle.ai_analysis. */
+export interface AiAnalysis {
+  version: number
+  input_sha256: string
+  model: string
+  generated_at: string
+  analysis: {
+    what_happened: string
+    affected: { name: string; relation: 'DIRECT' | 'INDIRECT'; why: string }[]
+    model_reading: string
+    risks_to_watch: string[]
+    limits: string
+  }
+  usage?: Record<string, number | null>
 }
 
 export interface LiveQuote {

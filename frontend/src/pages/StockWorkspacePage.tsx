@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
@@ -153,6 +153,25 @@ export default function StockWorkspacePage() {
   const refreshAll = useCallback(async () => {
     await Promise.all([loadCandles(), loadQuote()])
   }, [loadCandles, loadQuote])
+
+  // Đổi khung thời gian phải thấy kết quả NGAY.
+  //
+  // useAutoRefresh giữ hàm nạp trong một ref và chỉ gọi lại theo nhịp hẹn giờ,
+  // nên khi `days` đổi thì hàm mới đã sẵn sàng nhưng không ai gọi nó. Người
+  // dùng bấm "1T", nút sáng lên, và biểu đồ đứng yên cho tới nhịp kế tiếp —
+  // ngoài giờ giao dịch nhịp đó là 180 giây, đủ lâu để ai cũng kết luận là
+  // nút bị hỏng.
+  //
+  // Bỏ qua lần chạy đầu: lúc mount, useAutoRefresh đã tự nạp một lần rồi.
+  const skipFirstCandleLoad = useRef(true)
+  useEffect(() => {
+    if (skipFirstCandleLoad.current) {
+      skipFirstCandleLoad.current = false
+      return
+    }
+    setCandlesLoading(true)
+    void loadCandles()
+  }, [loadCandles])
 
   const { lastUpdated, secondsLeft, paused, marketOpen, refreshing, refreshNow } = useAutoRefresh(
     refreshAll,

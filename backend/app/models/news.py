@@ -30,6 +30,11 @@ class NewsArticle(Base):
     # nên nó được lưu chứ không bị nuốt.
     prediction_decision = Column(String(30), nullable=True)
 
+    # Bản giải thích do Claude viết, lưu lại để mỗi bài chỉ gọi API một lần. Bản
+    # ghi mang dấu vân tay đầu vào: bài được phân tích lại thì dấu đổi và bản cũ
+    # không còn được dùng (xem ai_analysis_service.fingerprint).
+    ai_analysis = Column(JSON, nullable=True)
+
     is_analyzed = Column(Boolean, default=False)
 
     # Ground truth xu hướng lấy từ biến động giá thật (xem

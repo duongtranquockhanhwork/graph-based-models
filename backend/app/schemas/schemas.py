@@ -30,6 +30,9 @@ class NewsResponse(BaseModel):
     # ngang" với "mô hình không trả lời được" — hai điều hoàn toàn khác nhau.
     prediction_decision: Optional[str] = None
     prediction_explanation: Optional[Dict[str, Any]]
+    # Bản giải thích của Claude nếu đã từng tạo — trả kèm để thẻ tin hiện ngay
+    # mà không phải gọi thêm một request cho mỗi bài.
+    ai_analysis: Optional[Dict[str, Any]] = None
     is_analyzed: bool
     needs_manual_label: bool = False
     manual_sentiment: Optional[str] = None
