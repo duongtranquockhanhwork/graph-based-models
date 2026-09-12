@@ -12,10 +12,10 @@ import { AnalysisJobsProvider } from './context/AnalysisJobsContext'
 
 // Các trang xác thực nằm trong bundle chính: chúng là thứ đầu tiên mọi khách
 // truy cập nhìn thấy, nên không nên phải chờ tải thêm chunk.
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
+import AuthPage from './pages/auth/AuthPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage'
+import CompleteProfilePage from './pages/auth/CompleteProfilePage'
 
 // Phần còn lại tách thành chunk riêng. Trước đây toàn bộ ứng dụng — kể cả 10
 // trang quản trị và thư viện biểu đồ — nằm trong một file 919 kB mà trang
@@ -151,7 +151,7 @@ export default function App() {
           path="/login"
           element={
             <GuestRoute>
-              <LoginPage />
+              <AuthPage />
             </GuestRoute>
           }
         />
@@ -159,12 +159,13 @@ export default function App() {
           path="/register"
           element={
             <GuestRoute>
-              <RegisterPage />
+              <AuthPage />
             </GuestRoute>
           }
         />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/complete-profile" element={<CompleteProfilePage />} />
         <Route path="/admin/*" element={<AdminLayout />} />
         <Route path="/*" element={<AppLayout />} />
       </Routes>

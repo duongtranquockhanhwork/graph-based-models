@@ -248,6 +248,34 @@ Trong production, tạo quản trị viên đầu tiên bằng tay. Không có t
 định nào được seed, và `ENVIRONMENT=production` với `JWT_SECRET_KEY` mặc định sẽ
 làm ứng dụng **từ chối khởi động**.
 
+### Đăng ký / đăng nhập
+
+**Chỉ một kênh: OTP 6 số qua email.** Không OAuth bên thứ ba (đã gỡ Google
+Sign-In), không đăng ký bằng SĐT (đã gỡ khỏi giao diện — xem ghi chú cuối
+mục này), không có endpoint tạo tài khoản chỉ bằng email + mật khẩu trần
+(`POST /api/auth/register` đã bị gỡ hoàn toàn).
+
+Đăng ký bắt buộc: họ tên, ngày sinh (không được vượt quá ngày hiện tại —
+kiểm tra cả ở frontend lẫn backend), **mật khẩu đặt ngay từ đầu** (tối thiểu
+10 ký tự, ≥2 loại ký tự — xem [Bảo mật](#bảo-mật)), và xác thực mã OTP 6 số
+gửi tới email (`POST /api/auth/email-otp/request` rồi `/email-otp/verify`).
+Sau khi có tài khoản, đăng nhập lại bằng `POST /api/auth/login` (email +
+mật khẩu) — không còn tuỳ chọn "đăng nhập bằng OTP" trên giao diện, chỉ còn
+đường khôi phục mật khẩu cổ điển qua `/forgot-password` (link, không phải OTP).
+
+**Thiết lập gửi OTP qua email (SMTP)** — để trống `SMTP_HOST` thì mã OTP chỉ
+được ghi ra log backend, không gửi thật:
+
+- Dùng Gmail: bật xác minh 2 bước cho tài khoản Gmail rồi tạo "Mật khẩu ứng
+  dụng" tại <https://myaccount.google.com/apppasswords> — dùng mật khẩu đó cho
+  `SMTP_PASSWORD` (không phải mật khẩu Gmail thường). `SMTP_HOST=smtp.gmail.com`,
+  `SMTP_PORT=587`, `SMTP_USER=<địa chỉ gmail>`.
+
+**Ghi chú:** backend vẫn còn nguyên khả năng xác thực qua SĐT (Firebase) —
+`POST /api/auth/firebase-phone`, `/login-phone`, `/link-phone` — nhưng không
+còn nút/form nào trên giao diện gọi tới các endpoint này nữa (đã gỡ theo yêu
+cầu đơn giản hoá). Xem `.env.example` mục Firebase nếu muốn bật lại UI sau này.
+
 ### Dữ liệu mẫu
 
 Đăng nhập → **Nhập dữ liệu** → tải `frontend/public/sample_news.csv`.
@@ -322,7 +350,10 @@ Toàn bộ `/api/*` (trừ `/api/auth/*`) yêu cầu `Authorization: Bearer <tok
 
 | Method | Endpoint | Ghi chú |
 |---|---|---|
-| `POST` | `/api/auth/register` · `/login` · `/google` | có rate limit |
+| `POST` | `/api/auth/login` | email + mật khẩu, có rate limit; không có endpoint đăng ký bằng email/mật khẩu trần |
+| `POST` | `/api/auth/email-otp/request` · `/email-otp/verify` | gửi/xác thực mã OTP 6 số qua email — dùng để đăng ký hoặc đăng nhập lại; giao diện dùng để đăng ký |
+| `POST` | `/api/auth/link-email` | gắn email đã xác thực OTP vào tài khoản đang đăng nhập (dùng ở `/complete-profile`) |
+| `POST` | `/api/auth/login-phone` · `/firebase-phone` · `/link-phone` | vẫn hoạt động nhưng **không có UI gọi tới** — xem mục Đăng ký/đăng nhập |
 | `POST` | `/api/auth/change-password` | thu hồi mọi token cũ, trả token mới |
 | `POST` | `/api/auth/forgot-password` · `/reset-password` | link reset dùng **một lần** |
 | `GET` | `/api/news/` | lọc `q`, `source`, `sentiment`, `event_type`, `stock`, `date_from`, `date_to` |
@@ -355,7 +386,7 @@ Từ chối là **kết quả**, không phải sự cố. Nó trả về `200`, 
 ## Test
 
 ```bash
-cd backend && pytest          # 42 test
+cd backend && pytest          # 117 test
 cd frontend && npx tsc --noEmit && npm run build
 ```
 
@@ -381,6 +412,7 @@ riêng rằng cấu hình `production` từ chối JWT secret mặc định.
 
 | Hạng mục | Cách xử lý |
 |---|---|
+| Đăng ký | bắt buộc xác thực OTP qua email (SMTP) + họ tên + ngày sinh hợp lệ + mật khẩu đặt ngay từ đầu — không có endpoint tạo tài khoản không xác thực |
 | Mật khẩu | bcrypt; tối thiểu 10 ký tự, ≥2 loại ký tự, chặn danh sách phổ biến |
 | Phiên | JWT + `token_version`; đổi/đặt lại mật khẩu thu hồi mọi phiên cũ |
 | Reset mật khẩu | token dùng một lần, hết hạn 30 phút |
@@ -412,6 +444,12 @@ Ghi ra để không ai phải tự phát hiện.
 - **Chỉ số gán nhãn có sai lệch chọn mẫu.** Hàng chờ gán nhãn chỉ nhận bài mô
   hình kém chắc chắn, nên độ chính xác đo trên đó không đại diện cho toàn bộ dữ
   liệu. API trả về kèm ghi chú này.
+- **Quên mật khẩu chỉ hoạt động qua email.** Không phải vấn đề nữa cho tài
+  khoản tạo qua giao diện (chỉ còn đăng ký bằng email) — chỉ ảnh hưởng tài
+  khoản chỉ-SĐT tạo trực tiếp qua `/api/auth/firebase-phone` (không qua UI).
+- **Nới `users.email` thành nullable chỉ chạy trên PostgreSQL.** SQLite không
+  hỗ trợ `ALTER COLUMN ... DROP NOT NULL`; chỉ còn ý nghĩa cho tài khoản
+  chỉ-SĐT tạo qua API trực tiếp, vì giao diện không còn đường đăng ký bằng SĐT.
 
 ---
 

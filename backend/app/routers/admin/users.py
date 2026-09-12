@@ -16,12 +16,15 @@ router = APIRouter()
 def list_users(q: Optional[str] = None, db: Session = Depends(get_db)):
     query = db.query(User)
     if q:
-        query = query.filter(User.email.ilike(f"%{q}%") | User.full_name.ilike(f"%{q}%"))
+        query = query.filter(
+            User.email.ilike(f"%{q}%") | User.full_name.ilike(f"%{q}%") | User.phone.ilike(f"%{q}%")
+        )
     users = query.order_by(User.id.asc()).all()
     return [
         {
             "id": u.id,
             "email": u.email,
+            "phone": u.phone,
             "full_name": u.full_name,
             "role": u.role,
             "is_active": u.is_active,
@@ -65,7 +68,7 @@ def update_user(
         db,
         current_user,
         "Cập nhật người dùng",
-        f"{user.email}: role={user.role}, is_active={user.is_active}",
+        f"{user.email or user.phone or f'user#{user.id}'}: role={user.role}, is_active={user.is_active}",
     )
 
     return {

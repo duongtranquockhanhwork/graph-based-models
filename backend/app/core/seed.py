@@ -12,6 +12,7 @@ khởi động ở mọi môi trường, và ghi cặp thông tin đó trong REA
 """
 
 import logging
+from datetime import date
 
 from sqlalchemy.orm import Session
 
@@ -50,6 +51,9 @@ def seed_dev_accounts(db: Session) -> None:
         logger.info("ENVIRONMENT=production: bỏ qua seed tài khoản test.")
         return
 
+    # Tài khoản dev cần "profile_complete" ngay để không bị chặn ở
+    # /complete-profile — date_of_birth giả + phone_verified giả (không có
+    # SĐT thật đứng sau) chỉ để né gate, KHÔNG dùng cách này ngoài dev.
     for email, full_name, role in DEV_ACCOUNTS:
         user = db.query(User).filter(User.email == email).first()
         if user is None:
@@ -59,10 +63,19 @@ def seed_dev_accounts(db: Session) -> None:
                     full_name=full_name,
                     hashed_password=hash_password(DEV_PASSWORD),
                     role=role,
+                    date_of_birth=date(1990, 1, 1),
+                    phone_verified=True,
                 )
             )
-        elif user.role != role:
-            user.role = role
+        else:
+            if user.role != role:
+                user.role = role
+            # Tài khoản seed từ trước khi có gate hồ sơ — backfill để không
+            # đột nhiên bị chặn sau khi nâng cấp lên bản có yêu cầu mới.
+            if not user.date_of_birth:
+                user.date_of_birth = date(1990, 1, 1)
+            if not user.phone_verified:
+                user.phone_verified = True
     db.commit()
     logger.warning(
         "Đã seed %d tài khoản phát triển với mật khẩu mặc định. "

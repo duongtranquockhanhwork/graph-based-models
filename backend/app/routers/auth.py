@@ -1,13 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
-from google.auth.transport import requests as google_requests
-from google.oauth2 import id_token as google_id_token
+from firebase_admin import auth as firebase_auth
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.core.email import send_reset_email
-from app.core.ratelimit import forgot_password_limit, login_limit, register_limit
+from app.core.email import send_otp_email, send_reset_email
+from app.core.email_otp import issue_code as issue_email_otp
+from app.core.email_otp import verify_code as verify_email_otp
+from app.core.firebase import get_firebase_app
+from app.core.ratelimit import (
+    email_otp_request_limit,
+    email_otp_verify_limit,
+    forgot_password_limit,
+    login_limit,
+    phone_verify_limit,
+)
 from app.core.security import (
     WeakPassword,
     create_access_token,
@@ -20,12 +28,14 @@ from app.core.security import (
 from app.models.user import User
 from app.schemas.auth import (
     ChangePasswordRequest,
+    EmailOtpRequest,
+    EmailOtpVerifyRequest,
     ForgotPasswordRequest,
-    GoogleLoginRequest,
+    PhoneLoginRequest,
+    PhoneVerifyRequest,
     ResetPasswordRequest,
     TokenResponse,
     UpdateProfileRequest,
-    UserCreate,
     UserLogin,
     UserOut,
 )
@@ -47,23 +57,24 @@ def _check_password(password: str) -> None:
         raise HTTPException(400, str(exc))
 
 
-@router.post("/register", response_model=TokenResponse, dependencies=[Depends(register_limit)])
-def register(payload: UserCreate, db: Session = Depends(get_db)):
-    _check_password(payload.password)
+def _require_registration_fields(full_name: str | None, date_of_birth, password: str | None) -> None:
+    # Đăng ký bắt buộc họ tên + ngày sinh + mật khẩu ngay từ đầu — không được
+    # tạo tài khoản chỉ bằng SĐT/email trần rồi để trống phần còn lại.
+    if not full_name or not date_of_birth:
+        raise HTTPException(400, "Cần nhập họ tên và ngày sinh để tạo tài khoản mới")
+    if not password:
+        raise HTTPException(400, "Cần đặt mật khẩu để tạo tài khoản mới")
+    _check_password(password)
 
-    existing = db.query(User).filter(User.email == payload.email).first()
-    if existing:
-        raise HTTPException(400, "Email đã được sử dụng")
 
-    user = User(
-        email=payload.email,
-        full_name=payload.full_name,
-        hashed_password=hash_password(payload.password),
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return _token_response(user)
+def _verify_firebase_token(id_token: str) -> dict:
+    app = get_firebase_app()
+    if app is None:
+        raise HTTPException(503, "Đăng nhập bằng số điện thoại chưa được cấu hình trên máy chủ này")
+    try:
+        return firebase_auth.verify_id_token(id_token, app=app)
+    except Exception:
+        raise HTTPException(401, "Mã OTP không hợp lệ hoặc đã hết hạn")
 
 
 @router.post("/login", response_model=TokenResponse, dependencies=[Depends(login_limit)])
@@ -76,43 +87,139 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     return _token_response(user)
 
 
-@router.post("/google", response_model=TokenResponse, dependencies=[Depends(login_limit)])
-def google_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)):
-    if not settings.GOOGLE_CLIENT_ID:
-        raise HTTPException(503, "Đăng nhập Google chưa được cấu hình trên máy chủ này")
+@router.post("/login-phone", response_model=TokenResponse, dependencies=[Depends(login_limit)])
+def login_phone(payload: PhoneLoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.phone == payload.phone).first()
+    if not user or not user.hashed_password or not verify_password(payload.password, user.hashed_password):
+        raise HTTPException(401, "Số điện thoại hoặc mật khẩu không đúng")
+    if not user.is_active:
+        raise HTTPException(403, "Tài khoản đã bị khoá")
+    return _token_response(user)
 
-    try:
-        idinfo = google_id_token.verify_oauth2_token(
-            payload.id_token, google_requests.Request(), settings.GOOGLE_CLIENT_ID
-        )
-    except ValueError:
-        raise HTTPException(401, "Google token không hợp lệ")
 
-    email = idinfo.get("email")
-    google_id = idinfo.get("sub")
-    if not email or not google_id:
-        raise HTTPException(401, "Google token thiếu thông tin cần thiết")
+@router.post("/firebase-phone", response_model=TokenResponse, dependencies=[Depends(phone_verify_limit)])
+def firebase_phone_login(payload: PhoneVerifyRequest, db: Session = Depends(get_db)):
+    decoded = _verify_firebase_token(payload.id_token)
 
-    user = db.query(User).filter(User.email == email).first()
+    phone = decoded.get("phone_number")
+    firebase_uid = decoded.get("uid")
+    if not phone or not firebase_uid:
+        raise HTTPException(401, "Token thiếu số điện thoại")
+
+    user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
     if not user:
+        user = db.query(User).filter(User.phone == phone).first()
+
+    if not user:
+        # Số điện thoại này chưa gắn tài khoản nào -> coi đây là đăng ký mới.
+        _require_registration_fields(payload.full_name, payload.date_of_birth, payload.password)
         user = User(
-            email=email,
-            full_name=idinfo.get("name"),
-            google_id=google_id,
-            avatar_url=idinfo.get("picture"),
+            phone=phone,
+            firebase_uid=firebase_uid,
+            phone_verified=True,
+            full_name=payload.full_name,
+            date_of_birth=payload.date_of_birth,
+            hashed_password=hash_password(payload.password),
         )
         db.add(user)
     else:
         if not user.is_active:
             raise HTTPException(403, "Tài khoản đã bị khoá")
-        if not user.google_id:
-            user.google_id = google_id
-        if not user.avatar_url and idinfo.get("picture"):
-            user.avatar_url = idinfo.get("picture")
+        if not user.firebase_uid:
+            user.firebase_uid = firebase_uid
+        user.phone_verified = True
 
     db.commit()
     db.refresh(user)
     return _token_response(user)
+
+
+@router.post("/link-phone", response_model=UserOut, dependencies=[Depends(phone_verify_limit)])
+def link_phone(
+    payload: PhoneVerifyRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Gắn SĐT đã xác thực OTP vào tài khoản ĐANG đăng nhập.
+
+    Dùng cho tài khoản cũ (thiếu xác thực) hoàn tất bước bắt buộc ở
+    /complete-profile — khác /firebase-phone ở chỗ nó không bao giờ tạo user
+    mới, chỉ gắn thêm vào current_user.
+    """
+    decoded = _verify_firebase_token(payload.id_token)
+    phone = decoded.get("phone_number")
+    firebase_uid = decoded.get("uid")
+    if not phone or not firebase_uid:
+        raise HTTPException(401, "Token thiếu số điện thoại")
+
+    existing = db.query(User).filter(User.phone == phone, User.id != current_user.id).first()
+    if existing:
+        raise HTTPException(400, "Số điện thoại này đã được liên kết với một tài khoản khác")
+
+    current_user.phone = phone
+    current_user.firebase_uid = firebase_uid
+    current_user.phone_verified = True
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post("/email-otp/request", dependencies=[Depends(email_otp_request_limit)])
+def request_email_otp(payload: EmailOtpRequest):
+    code = issue_email_otp(payload.email)
+    send_otp_email(payload.email, code)
+    # Thông điệp không tiết lộ email có tồn tại tài khoản hay không — hành vi
+    # giống nhau dù đây là đăng ký mới hay đăng nhập lại.
+    return {"message": "Mã xác thực đã được gửi tới email của bạn"}
+
+
+@router.post("/email-otp/verify", response_model=TokenResponse, dependencies=[Depends(email_otp_verify_limit)])
+def verify_email_otp_route(payload: EmailOtpVerifyRequest, db: Session = Depends(get_db)):
+    if not verify_email_otp(payload.email, payload.code):
+        raise HTTPException(401, "Mã OTP không đúng hoặc đã hết hạn")
+
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user:
+        # Email này chưa gắn tài khoản nào -> coi đây là đăng ký mới.
+        _require_registration_fields(payload.full_name, payload.date_of_birth, payload.password)
+        user = User(
+            email=payload.email,
+            email_verified=True,
+            full_name=payload.full_name,
+            date_of_birth=payload.date_of_birth,
+            hashed_password=hash_password(payload.password),
+        )
+        db.add(user)
+    else:
+        if not user.is_active:
+            raise HTTPException(403, "Tài khoản đã bị khoá")
+        user.email_verified = True
+
+    db.commit()
+    db.refresh(user)
+    return _token_response(user)
+
+
+@router.post("/link-email", response_model=UserOut, dependencies=[Depends(email_otp_verify_limit)])
+def link_email(
+    payload: EmailOtpVerifyRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Gắn email đã xác thực OTP vào tài khoản ĐANG đăng nhập — mirror của
+    /link-phone, dùng ở /complete-profile cho tài khoản cũ thiếu xác thực."""
+    if not verify_email_otp(payload.email, payload.code):
+        raise HTTPException(401, "Mã OTP không đúng hoặc đã hết hạn")
+
+    existing = db.query(User).filter(User.email == payload.email, User.id != current_user.id).first()
+    if existing:
+        raise HTTPException(400, "Email này đã được liên kết với một tài khoản khác")
+
+    current_user.email = payload.email
+    current_user.email_verified = True
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 
 @router.get("/me", response_model=UserOut)
@@ -127,6 +234,8 @@ def update_me(
     db: Session = Depends(get_db),
 ):
     current_user.full_name = payload.full_name
+    if payload.date_of_birth is not None:
+        current_user.date_of_birth = payload.date_of_birth
     db.commit()
     db.refresh(current_user)
     return current_user
@@ -141,7 +250,7 @@ def change_password(
     if not current_user.hashed_password:
         raise HTTPException(
             400,
-            "Tài khoản đăng nhập bằng Google chưa có mật khẩu. Dùng Quên mật khẩu để đặt mật khẩu mới.",
+            "Tài khoản này chưa có mật khẩu. Dùng Quên mật khẩu để đặt mật khẩu mới.",
         )
     if not verify_password(payload.current_password, current_user.hashed_password):
         raise HTTPException(400, "Mật khẩu hiện tại không đúng")

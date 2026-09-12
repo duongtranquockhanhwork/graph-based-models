@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { KeyRound, Mail, Palette, User as UserIcon } from 'lucide-react'
+import { KeyRound, Mail, Palette, Phone, User as UserIcon } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import ThemeToggle from '../../components/ThemeToggle'
@@ -38,8 +38,8 @@ export default function AdminProfilePage() {
           <div className="min-w-0">
             <p className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>{user?.full_name || 'Quản trị viên'}</p>
             <div className="flex items-center gap-1.5 mt-1" style={{ color: 'var(--text-muted)' }}>
-              <Mail size={12} />
-              <span className="text-[12px]">{user?.email}</span>
+              {user?.email ? <Mail size={12} /> : <Phone size={12} />}
+              <span className="text-[12px]">{user?.email || user?.phone}</span>
             </div>
             <span
               className="inline-block mt-2 text-[11px] px-2 py-0.5 rounded-full"
