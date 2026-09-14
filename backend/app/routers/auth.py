@@ -191,6 +191,11 @@ def verify_email_otp_route(payload: EmailOtpVerifyRequest, db: Session = Depends
         )
         db.add(user)
     else:
+        if payload.full_name or payload.date_of_birth or payload.password:
+            # Có gửi kèm thông tin đăng ký nghĩa là người dùng đang cố tạo
+            # tài khoản mới bằng email này, nhưng email đã gắn tài khoản khác
+            # rồi -> báo lỗi rõ ràng thay vì âm thầm đăng nhập vào tài khoản cũ.
+            raise HTTPException(409, "Email này đã có tài khoản")
         if not user.is_active:
             raise HTTPException(403, "Tài khoản đã bị khoá")
         user.email_verified = True

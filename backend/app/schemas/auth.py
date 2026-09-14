@@ -41,9 +41,9 @@ class EmailOtpRequest(BaseModel):
 class EmailOtpVerifyRequest(BaseModel):
     email: EmailStr
     code: str = Field(min_length=6, max_length=6)
-    # Bắt buộc (và chỉ được dùng) khi mã này tạo tài khoản MỚI — nếu email đã
-    # gắn với một user, ba trường này bị bỏ qua (chỉ dùng để đăng nhập lại
-    # qua OTP).
+    # Bắt buộc khi mã này tạo tài khoản MỚI. Nếu email đã gắn với một user:
+    # gửi kèm ba trường này -> lỗi 409 "Email này đã có tài khoản" (người
+    # dùng đang cố đăng ký trùng); để trống cả ba -> đăng nhập lại qua OTP.
     full_name: Optional[str] = None
     date_of_birth: Optional[date] = None
     password: Optional[str] = None
