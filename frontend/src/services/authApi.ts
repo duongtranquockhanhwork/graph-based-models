@@ -6,7 +6,8 @@ export const authApi = {
     api.post<AuthResponse>('/auth/login', { email, password }),
   emailOtpRequest: (email: string) => api.post('/auth/email-otp/request', { email }),
   // fullName/dob/password chỉ có tác dụng khi email này CHƯA gắn tài khoản
-  // nào (tức đang tạo mới) — backend bỏ qua nếu tài khoản đã tồn tại.
+  // nào (tức đang tạo mới) — nếu tài khoản đã tồn tại, backend trả lỗi 409
+  // "Email này đã có tài khoản" thay vì âm thầm đăng nhập vào tài khoản cũ.
   emailOtpVerify: (email: string, code: string, fullName?: string, dateOfBirth?: string, password?: string) =>
     api.post<AuthResponse>('/auth/email-otp/verify', {
       email,

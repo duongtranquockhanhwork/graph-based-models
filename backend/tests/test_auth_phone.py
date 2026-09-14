@@ -272,6 +272,36 @@ class TestEmailOtp:
         assert second.status_code == 200, second.text
         assert second.json()["user"]["id"] == first_id
 
+    def test_existing_email_with_registration_fields_rejected(self, client):
+        from app.core.email_otp import issue_code
+
+        first_code = issue_code("otp-dup@example.com")
+        first = client.post(
+            "/api/auth/email-otp/verify",
+            json={
+                "email": "otp-dup@example.com",
+                "code": first_code,
+                "full_name": "G",
+                "date_of_birth": "1988-08-08",
+                "password": STRONG_PASSWORD,
+            },
+        )
+        assert first.status_code == 200
+
+        second_code = issue_code("otp-dup@example.com")
+        second = client.post(
+            "/api/auth/email-otp/verify",
+            json={
+                "email": "otp-dup@example.com",
+                "code": second_code,
+                "full_name": "G again",
+                "date_of_birth": "1990-01-01",
+                "password": STRONG_PASSWORD,
+            },
+        )
+        assert second.status_code == 409, second.text
+        assert "đã có tài khoản" in second.json()["detail"]
+
 
 class TestLinkEmail:
     def test_requires_authentication(self, client):
