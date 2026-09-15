@@ -193,6 +193,20 @@ trong tài liệu này mà không có nguồn.
   hoặc dùng thẳng kho demo [FinNexusKG_Demo](https://github.com/weamon17/FinNexusKG_Demo)
   đã kèm sẵn mô hình (xem ghi chú ở mục [Kiến trúc](#kiến-trúc))
 
+### File không có trong bản nộp
+
+Bản nộp chỉ chứa mã nguồn đã track trong git — các thứ sau bị loại vì tự sinh
+lại được (và một phần chứa bí mật không nên phát tán) và **không ảnh hưởng gì
+đến việc chấm mã nguồn**:
+
+| Thiếu | Sinh lại bằng |
+|---|---|
+| `frontend/node_modules/` | `cd frontend && npm install` |
+| `frontend/dist/` | `cd frontend && npm run build` (không cần nếu chạy `npm run dev` hoặc Docker) |
+| `backend/.env`, `frontend/.env` | `cp .env.example .env` rồi điền giá trị — xem hướng dẫn bên dưới |
+| `backend/dev.db` | tự tạo khi backend chạy lần đầu với `DATABASE_URL=sqlite:///./dev.db` |
+| `backend/__pycache__/`, `.pytest_cache/` | cache, tự sinh khi chạy Python/pytest |
+
 ### Docker (khuyến nghị)
 
 ```bash
@@ -472,5 +486,5 @@ Ghi ra để không ai phải tự phát hiện.
 
 ## Giấy phép
 
-Xem [LICENSE](LICENSE). Dữ liệu và mô hình từ repo nghiên cứu FinNexus KG tuân
-theo giấy phép riêng của repo đó.
+Dự án phục vụ mục đích học thuật (đồ án tốt nghiệp). Dữ liệu và mô hình từ repo
+nghiên cứu FinNexus KG tuân theo giấy phép riêng của repo đó.
