@@ -4,10 +4,12 @@ import { Eye, EyeOff, Loader2, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AuthLayout from '../../components/Auth/AuthLayout'
 import { useAuth } from '../../context/AuthContext'
-import { isPasswordStrong, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
+import { useLanguage } from '../../context/LanguageContext'
+import { getPasswordRequirementsMessage, isPasswordStrong, PASSWORD_MIN_LENGTH } from '../../utils/passwordStrength'
 
 export default function ResetPasswordPage() {
   const { resetPassword } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
@@ -19,20 +21,20 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (password !== confirmPassword) {
-      toast.error('Mật khẩu xác nhận không khớp')
+      toast.error(t('resetPassword.passwordMismatchToast'))
       return
     }
     if (!isPasswordStrong(password)) {
-      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
+      toast.error(getPasswordRequirementsMessage(t))
       return
     }
     setIsSubmitting(true)
     try {
       await resetPassword(token, password)
-      toast.success('Đặt lại mật khẩu thành công, vui lòng đăng nhập lại')
+      toast.success(t('resetPassword.resetSuccessToast'))
       navigate('/login', { replace: true })
     } catch {
-      toast.error('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn')
+      toast.error(t('resetPassword.resetErrorToast'))
     } finally {
       setIsSubmitting(false)
     }
@@ -40,11 +42,11 @@ export default function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <AuthLayout title="Đặt lại mật khẩu" subtitle="Link không hợp lệ">
+      <AuthLayout title={t('resetPassword.title')} subtitle={t('resetPassword.invalidLinkSubtitle')}>
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Link đặt lại mật khẩu bị thiếu hoặc không hợp lệ. Vui lòng yêu cầu lại từ trang{' '}
+          {t('resetPassword.invalidLinkMessagePrefix')}{' '}
           <Link to="/forgot-password" className="text-blue-400 hover:text-blue-300 font-medium">
-            Quên mật khẩu
+            {t('resetPassword.forgotPasswordPageLink')}
           </Link>
           .
         </p>
@@ -53,11 +55,11 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout title="Đặt lại mật khẩu" subtitle="Nhập mật khẩu mới cho tài khoản của bạn">
+    <AuthLayout title={t('resetPassword.title')} subtitle={t('resetPassword.subtitle')}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Mật khẩu mới
+            {t('resetPassword.newPasswordLabel')}
           </label>
           <div className="relative">
             <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -67,7 +69,7 @@ export default function ResetPasswordPage() {
               minLength={PASSWORD_MIN_LENGTH}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Chữ hoa, chữ thường, số, ký tự đặc biệt"
+              placeholder={t('resetPassword.passwordHintPlaceholder')}
               className="field-input pl-10 pr-10"
             />
             <button
@@ -76,7 +78,7 @@ export default function ResetPasswordPage() {
               className="absolute right-3.5 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--text-muted)' }}
               tabIndex={-1}
-              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              aria-label={showPassword ? t('resetPassword.hidePasswordAria') : t('resetPassword.showPasswordAria')}
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -85,7 +87,7 @@ export default function ResetPasswordPage() {
 
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Xác nhận mật khẩu
+            {t('resetPassword.confirmPasswordLabel')}
           </label>
           <div className="relative">
             <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -95,7 +97,7 @@ export default function ResetPasswordPage() {
               minLength={PASSWORD_MIN_LENGTH}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Nhập lại mật khẩu mới"
+              placeholder={t('resetPassword.confirmPasswordPlaceholder')}
               className="field-input pl-10 pr-10"
             />
             <button
@@ -104,7 +106,7 @@ export default function ResetPasswordPage() {
               className="absolute right-3.5 top-1/2 -translate-y-1/2"
               style={{ color: 'var(--text-muted)' }}
               tabIndex={-1}
-              aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              aria-label={showPassword ? t('resetPassword.hidePasswordAria') : t('resetPassword.showPasswordAria')}
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -121,7 +123,7 @@ export default function ResetPasswordPage() {
           }}
         >
           {isSubmitting && <Loader2 size={15} className="animate-spin" />}
-          Đặt lại mật khẩu
+          {t('resetPassword.submitButton')}
         </button>
       </form>
     </AuthLayout>

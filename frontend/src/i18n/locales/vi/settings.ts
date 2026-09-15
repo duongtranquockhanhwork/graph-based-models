@@ -1,0 +1,18 @@
+export default {
+  title: 'Cài đặt',
+  subtitle: 'Thông tin tài khoản và tuỳ chỉnh giao diện',
+  profile: 'Hồ sơ cá nhân',
+  roleAdmin: 'Quản trị viên',
+  roleCustomer: 'Nhà đầu tư',
+  appearance: 'Giao diện',
+  appearanceDesc: 'Chọn giao diện sáng hoặc tối cho toàn bộ ứng dụng',
+  themeDark: 'Đang dùng giao diện Tối',
+  themeLight: 'Đang dùng giao diện Sáng',
+  language: 'Ngôn ngữ',
+  languageDesc: 'Chọn ngôn ngữ hiển thị cho toàn bộ ứng dụng. Lựa chọn được lưu cho tài khoản của bạn.',
+  languageEnLabel: 'Currently using English',
+  languageViLabel: 'Đang dùng tiếng Việt',
+  security: 'Bảo mật',
+  securityDesc: 'Đổi mật khẩu tài khoản của bạn',
+  forgotCurrentPassword: 'Quên mật khẩu hiện tại?',
+}

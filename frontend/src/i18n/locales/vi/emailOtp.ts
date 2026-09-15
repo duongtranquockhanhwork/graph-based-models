@@ -1,0 +1,15 @@
+export default {
+  emailPlaceholder: 'ban@example.com',
+  emailExistsError: 'Email này đã có tài khoản',
+  sendOtpButton: 'Gửi mã xác thực',
+  verifyButton: 'Xác thực',
+  otpPlaceholder: 'Mã xác thực 6 số',
+  changeEmailButton: 'Đổi địa chỉ email',
+  resendButton: 'Gửi lại mã',
+  resendButtonCooldown: 'Gửi lại mã ({{seconds}}s)',
+  otpSentToast: 'Đã gửi mã xác thực tới email',
+  otpSendErrorToast: 'Không gửi được mã, kiểm tra lại địa chỉ email',
+  otpResentToast: 'Đã gửi lại mã xác thực',
+  otpResendErrorToast: 'Không gửi lại được mã, thử lại sau ít phút',
+  otpInvalidToast: 'Mã xác thực không đúng hoặc đã hết hạn',
+}

@@ -1,0 +1,17 @@
+export default {
+  title: 'Hồ sơ cá nhân',
+  subtitle: 'Thông tin tài khoản quản trị và tuỳ chỉnh giao diện',
+  accountSection: 'Tài khoản',
+  roleAdmin: 'Quản trị viên',
+  appearanceSection: 'Giao diện',
+  appearanceDesc: 'Chọn giao diện sáng hoặc tối cho toàn bộ ứng dụng',
+  themeDark: 'Đang dùng giao diện Tối',
+  themeLight: 'Đang dùng giao diện Sáng',
+  languageSection: 'Ngôn ngữ',
+  languageDesc: 'Chọn ngôn ngữ hiển thị cho toàn bộ ứng dụng. Lựa chọn được lưu cho tài khoản của bạn.',
+  languageEnLabel: 'Currently using English',
+  languageViLabel: 'Đang dùng tiếng Việt',
+  securitySection: 'Bảo mật',
+  securityDesc: 'Đổi mật khẩu tài khoản của bạn',
+  forgotPassword: 'Quên mật khẩu hiện tại?',
+}

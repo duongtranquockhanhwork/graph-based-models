@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
 import { Ban, Minus, TrendingDown, TrendingUp } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
 
 /** Từ vựng dùng chung cho toàn ứng dụng.
  *
  * Trước đây mỗi trang tự định nghĩa nhãn sự kiện và màu cảm xúc của riêng nó,
  * nên cùng một sự kiện hiện ra ba cách khác nhau ở ba trang. Gom về một nơi để
  * người dùng học một lần rồi đọc được ở mọi chỗ.
+ *
+ * Các map dưới đây chỉ còn dùng làm KHOÁ ổn định (key tiếng Anh không đổi
+ * theo ngôn ngữ) và cho màu/icon — nơi nào hiển thị nhãn ra UI đều tra cứu
+ * qua t('chips.events.<key>') / t('chips.sentiment.<key>') / t('chips.trend.<key>')
+ * thay vì đọc thẳng value tiếng Việt trong map.
  */
 export const EVENT_LABELS: Record<string, string> = {
   profit_growth: 'Lợi nhuận tăng',
@@ -25,16 +31,16 @@ export const SENTIMENT_LABELS: Record<string, string> = {
   Neutral: 'Tin trung tính',
 }
 
-export const SENTIMENT_COLORS: Record<string, string> = {
-  Positive: '#0b7d5a',
-  Negative: '#c0392e',
-  Neutral: '#64748b',
-}
-
 export const TREND_LABELS: Record<string, string> = {
   INCREASING: 'Có thể tăng',
   DECREASING: 'Có thể giảm',
   UNCHANGED: 'Ít biến động',
+}
+
+export const SENTIMENT_COLORS: Record<string, string> = {
+  Positive: '#0b7d5a',
+  Negative: '#c0392e',
+  Neutral: '#64748b',
 }
 
 export const TREND_COLORS: Record<string, string> = {
@@ -64,6 +70,7 @@ export function SymbolChip({
   size?: 'sm' | 'md'
   muted?: boolean
 }) {
+  const { t } = useLanguage()
   return (
     <Link
       to={`/stocks/${symbol}`}
@@ -76,7 +83,7 @@ export function SymbolChip({
         color: muted ? 'var(--text-muted)' : '#2563eb',
         border: `1px solid ${muted ? 'var(--border-subtle)' : 'rgba(37,99,235,0.20)'}`,
       }}
-      title={`Xem thông tin cổ phiếu ${symbol}`}
+      title={t('chips.viewStock', { symbol })}
     >
       {symbol}
     </Link>
@@ -85,7 +92,10 @@ export function SymbolChip({
 
 /** Sự kiện — dẫn về dòng tin đã lọc theo đúng sự kiện đó. */
 export function EventChip({ event, asLink = true }: { event: string; asLink?: boolean }) {
-  const label = EVENT_LABELS[event] || event.replace(/_/g, ' ')
+  const { t } = useLanguage()
+  const eventKey = `chips.events.${event}`
+  const translatedEvent = t(eventKey)
+  const label = translatedEvent === eventKey ? event.replace(/_/g, ' ') : translatedEvent
   const content = (
     <span
       className="inline-flex items-center text-[10px] px-2 py-0.5 rounded"
@@ -100,21 +110,25 @@ export function EventChip({ event, asLink = true }: { event: string; asLink?: bo
   )
   if (!asLink) return content
   return (
-    <Link to={`/feed?event=${event}`} onClick={(e) => e.stopPropagation()} title={`Lọc tin có ${label}`}>
+    <Link to={`/feed?event=${event}`} onClick={(e) => e.stopPropagation()} title={t('chips.filterByEvent', { label })}>
       {content}
     </Link>
   )
 }
 
 export function SentimentBadge({ sentiment, asLink = true }: { sentiment: string; asLink?: boolean }) {
+  const { t } = useLanguage()
   const color = SENTIMENT_COLORS[sentiment] || '#64748b'
+  const sentimentKey = `chips.sentiment.${sentiment}`
+  const translatedSentiment = t(sentimentKey)
+  const label = translatedSentiment === sentimentKey ? sentiment : translatedSentiment
   const content = (
     <span
       className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
       style={{ background: `${color}18`, color }}
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      {SENTIMENT_LABELS[sentiment] || sentiment}
+      {label}
     </span>
   )
   if (!asLink) return content
@@ -143,15 +157,16 @@ export function TrendBadge({
   confidence?: number | null
   decision?: string | null
 }) {
+  const { t } = useLanguage()
   if (!trend) {
     return (
       <span
         className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
         style={{ background: 'rgba(100,116,139,0.12)', color: '#64748b' }}
-        title="Mở bài để xem vì sao chưa dự đoán được"
+        title={t('chips.notPredictedTitle')}
       >
         <Ban size={9} />
-        Chưa dự đoán được
+        {t('chips.notPredicted')}
       </span>
     )
   }
@@ -160,19 +175,18 @@ export function TrendBadge({
   const color = abstained ? '#64748b' : TREND_COLORS[trend] || '#64748b'
   const Icon = TREND_ICONS[trend as keyof typeof TREND_ICONS] || Minus
   const pct = confidence != null ? Math.round(confidence * 100) : null
+  const trendKey = `chips.trend.${trend}`
+  const translatedTrend = t(trendKey)
+  const trendLabel = translatedTrend === trendKey ? trend : translatedTrend
 
   return (
     <span
       className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
       style={{ background: `${color}18`, color }}
-      title={
-        abstained
-          ? 'Hệ thống không đủ chắc chắn nên không đưa ra dự đoán cho bài này'
-          : `Mức chắc chắn của hệ thống: ${pct}%`
-      }
+      title={abstained ? t('chips.abstainedTitle') : t('chips.confidenceTitle', { pct: pct ?? 0 })}
     >
       {abstained ? <Ban size={9} /> : <Icon size={9} />}
-      {abstained ? 'Chưa đủ chắc chắn' : TREND_LABELS[trend] || trend}
+      {abstained ? t('chips.abstained') : trendLabel}
       {pct != null && !abstained && <span className="tabular-nums opacity-75">{pct}%</span>}
     </span>
   )

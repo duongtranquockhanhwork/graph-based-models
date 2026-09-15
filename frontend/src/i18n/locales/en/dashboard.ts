@@ -1,0 +1,67 @@
+export default {
+  loadError: 'Could not load overview data',
+  stats: {
+    news: 'Articles',
+    newsSub: '{{count}} analyzed',
+    stocks: 'Stocks',
+    stocksSub: 'Found in articles',
+    companies: 'Companies',
+    companiesSub: 'In the knowledge graph',
+    industries: 'Industries',
+    industriesSub: 'In the knowledge graph',
+  },
+  modelBanner: {
+    intro: 'The prediction engine has been tested on thousands of past articles and',
+    highlight: 'beats the simple baseline by {{delta}} points',
+    outro: '. The result is still modest — read it as a hint, not investment advice.',
+    viewDetails: 'View details',
+  },
+  sentimentSection: {
+    title: 'Good news or bad news',
+    openFeed: 'Open feed',
+    filterTitle: 'Filter {{label}} news',
+  },
+  modelSection: {
+    title: 'How the system predicts',
+    viewDetails: 'View details',
+    empty: 'No articles have been predicted yet.',
+    tickIncreasing: 'May rise',
+    tickDecreasing: 'May fall',
+    tickStable: 'Little change',
+  },
+  industrySection: {
+    title: 'Most mentioned industries',
+    viewGraph: 'View graph',
+  },
+  newsSection: {
+    title: 'Latest news',
+    viewAll: 'View all',
+    empty: 'No articles yet.',
+    importData: 'Import data',
+  },
+  stockSection: {
+    title: 'Most mentioned stocks',
+    allStocks: 'All stocks',
+    empty: 'No stocks identified yet.',
+  },
+  newsByDate: {
+    title: 'News over time',
+  },
+  footerBanner: {
+    prefix: 'There are',
+    suffix: 'event types to filter in the Feed, and the knowledge graph shows how stocks indirectly affect each other.',
+    importMore: 'Import more data',
+  },
+  emptyState: {
+    title: 'Get started by importing news',
+    desc: 'The system reads Vietnamese financial articles, figures out which stock and what happened, then estimates how prices typically react to that kind of news.',
+    step1Title: 'Import data',
+    step1Desc: 'Upload a CSV, paste an article link, or enter it manually',
+    step2Title: 'The system reads it',
+    step2Desc: 'Finds the stock, what happened, and whether it is good or bad news',
+    step3Title: 'See the results',
+    step3Desc: 'The feed, per-stock info, and the knowledge graph',
+    importNow: 'Import data now',
+    viewMarket: 'View the market prices',
+  },
+}

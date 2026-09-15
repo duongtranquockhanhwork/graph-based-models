@@ -1,0 +1,16 @@
+export default {
+  console: 'Admin Console',
+  nav: 'Admin navigation',
+  adminRole: 'Administrator',
+  groupOps: 'Operations',
+  groupQuality: 'Quality',
+  groupSystem: 'System',
+  dashboard: 'Overview',
+  news: 'News data',
+  labeling: 'Review & confirm',
+  quality: 'Data quality',
+  tuning: 'Reading tuning',
+  users: 'Users',
+  stocks: 'Stocks',
+  profile: 'My profile',
+}

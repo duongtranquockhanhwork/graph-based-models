@@ -5,9 +5,11 @@ import adminApi from '../../services/adminApi'
 import type { AdminUser } from '../../types'
 import { SkeletonBlock } from '../../components/Admin/AdminWidgets'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth()
+  const { t, language } = useLanguage()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [q, setQ] = useState('')
@@ -27,10 +29,10 @@ export default function AdminUsersPage() {
   const updateRole = async (u: AdminUser, role: string) => {
     try {
       await adminApi.users.update(u.id, { role })
-      toast.success('Đã cập nhật vai trò')
+      toast.success(t('adminUsers.toastRoleUpdated'))
       load(q || undefined)
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Không thể cập nhật'
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t('adminUsers.toastUpdateFailed')
       toast.error(msg)
     }
   }
@@ -38,10 +40,10 @@ export default function AdminUsersPage() {
   const toggleActive = async (u: AdminUser) => {
     try {
       await adminApi.users.update(u.id, { is_active: !u.is_active })
-      toast.success('Đã cập nhật trạng thái')
+      toast.success(t('adminUsers.toastStatusUpdated'))
       load(q || undefined)
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Không thể cập nhật'
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t('adminUsers.toastUpdateFailed')
       toast.error(msg)
     }
   }
@@ -49,13 +51,13 @@ export default function AdminUsersPage() {
   return (
     <div className="p-6 space-y-4 fade-in">
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Quản lý người dùng</h2>
-        <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{users.length} tài khoản</p>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('adminUsers.title')}</h2>
+        <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('adminUsers.accountCount', { count: users.length })}</p>
       </div>
 
       <form onSubmit={handleSearch} className="relative max-w-sm">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
-        <input className="field-input pl-9" placeholder="Tìm theo email, SĐT hoặc tên..." value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="field-input pl-9" placeholder={t('adminUsers.searchPlaceholder')} value={q} onChange={(e) => setQ(e.target.value)} />
       </form>
 
       {loading ? (
@@ -66,7 +68,14 @@ export default function AdminUsersPage() {
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                  {['ID', 'Email / SĐT', 'Họ tên', 'Vai trò', 'Trạng thái', 'Ngày tạo'].map((h) => (
+                  {[
+                    t('adminUsers.columns.id'),
+                    t('adminUsers.columns.emailPhone'),
+                    t('adminUsers.columns.fullName'),
+                    t('adminUsers.columns.role'),
+                    t('adminUsers.columns.status'),
+                    t('adminUsers.columns.createdAt'),
+                  ].map((h) => (
                     <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -99,11 +108,11 @@ export default function AdminUsersPage() {
                             : { background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.25)' }
                         }
                       >
-                        {u.is_active ? 'Hoạt động' : 'Đã khoá'}
+                        {u.is_active ? t('adminUsers.statusActive') : t('adminUsers.statusLocked')}
                       </button>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN') : '—'}
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US') : '—'}
                     </td>
                   </tr>
                 ))}

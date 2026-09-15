@@ -3,16 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, ChevronDown, LogOut, Menu, ShieldHalf } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLayout } from '../../context/LayoutContext'
+import { useLanguage } from '../../context/LanguageContext'
 
-const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
-  '/admin/dashboard': { title: 'Tổng quan quản trị', breadcrumb: 'Cảnh báo · số liệu · nhật ký hoạt động' },
-  '/admin/news': { title: 'Dữ liệu tin tức', breadcrumb: 'Thêm, sửa, xoá và đọc lại' },
-  '/admin/labeling': { title: 'Tự đọc và xác nhận', breadcrumb: 'Những bài hệ thống không chắc chắn' },
-  '/admin/quality': { title: 'Chất lượng dữ liệu', breadcrumb: 'Dữ liệu có sạch không, máy đọc có giống người không' },
-  '/admin/tuning': { title: 'Cách đọc hiểu bài', breadcrumb: 'Mức nhạy và từ ngữ nhận diện' },
-  '/admin/users': { title: 'Người dùng', breadcrumb: 'Phân quyền và khoá tài khoản' },
-  '/admin/live': { title: 'Cổ phiếu', breadcrumb: 'Bảng giá và danh mục mã' },
-  '/admin/profile': { title: 'Hồ sơ của tôi', breadcrumb: 'Thông tin cá nhân và mật khẩu' },
+const PAGE_INFO_KEYS: Record<string, { title: string; breadcrumb: string }> = {
+  '/admin/dashboard': { title: 'adminTopbar.page.dashboardTitle', breadcrumb: 'adminTopbar.page.dashboardBreadcrumb' },
+  '/admin/news': { title: 'adminTopbar.page.newsTitle', breadcrumb: 'adminTopbar.page.newsBreadcrumb' },
+  '/admin/labeling': { title: 'adminTopbar.page.labelingTitle', breadcrumb: 'adminTopbar.page.labelingBreadcrumb' },
+  '/admin/quality': { title: 'adminTopbar.page.qualityTitle', breadcrumb: 'adminTopbar.page.qualityBreadcrumb' },
+  '/admin/tuning': { title: 'adminTopbar.page.tuningTitle', breadcrumb: 'adminTopbar.page.tuningBreadcrumb' },
+  '/admin/users': { title: 'adminTopbar.page.usersTitle', breadcrumb: 'adminTopbar.page.usersBreadcrumb' },
+  '/admin/live': { title: 'adminTopbar.page.liveTitle', breadcrumb: 'adminTopbar.page.liveBreadcrumb' },
+  '/admin/profile': { title: 'adminTopbar.page.profileTitle', breadcrumb: 'adminTopbar.page.profileBreadcrumb' },
 }
 
 export default function AdminTopbar() {
@@ -20,8 +21,12 @@ export default function AdminTopbar() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { toggleSidebar } = useLayout()
+  const { t, language } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
-  const info = PAGE_INFO[pathname] || { title: 'FinNexus KG Admin', breadcrumb: '' }
+  const infoKeys = PAGE_INFO_KEYS[pathname]
+  const info = infoKeys
+    ? { title: t(infoKeys.title), breadcrumb: t(infoKeys.breadcrumb) }
+    : { title: t('adminTopbar.defaultTitle'), breadcrumb: '' }
 
   const handleLogout = () => {
     logout()
@@ -31,7 +36,7 @@ export default function AdminTopbar() {
   const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
 
   const now = new Date()
-  const dateStr = now.toLocaleDateString('vi-VN', {
+  const dateStr = now.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -50,7 +55,7 @@ export default function AdminTopbar() {
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={toggleSidebar}
-          aria-label="Mở menu điều hướng"
+          aria-label={t('adminTopbar.openMenu')}
           className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0"
           style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
         >
@@ -78,7 +83,7 @@ export default function AdminTopbar() {
           }}
         >
           <ShieldHalf size={11} className="text-emerald-500" />
-          <span className="text-[11px] text-emerald-600 font-medium">Admin</span>
+          <span className="text-[11px] text-emerald-600 font-medium">{t('adminTopbar.admin')}</span>
         </div>
 
         <div className="relative">
@@ -110,7 +115,7 @@ export default function AdminTopbar() {
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}
             >
               <div className="px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{user?.full_name || 'Quản trị viên'}</p>
+                <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{user?.full_name || t('adminTopbar.adminRole')}</p>
                 <p className="text-[11px] truncate" style={{ color: 'var(--text-faint)' }}>
                   {user?.email || user?.phone}
                 </p>
@@ -120,7 +125,7 @@ export default function AdminTopbar() {
                 className="w-full flex items-center gap-2 px-3.5 py-2.5 text-[13px] hover:bg-black/5 transition-colors"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Hồ sơ cá nhân
+                {t('adminTopbar.profile')}
               </button>
               <button
                 onClick={handleLogout}
@@ -128,7 +133,7 @@ export default function AdminTopbar() {
                 style={{ color: '#dc2626' }}
               >
                 <LogOut size={14} />
-                Đăng xuất
+                {t('adminTopbar.logout')}
               </button>
             </div>
           )}

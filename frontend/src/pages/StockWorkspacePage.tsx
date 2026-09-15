@@ -12,6 +12,7 @@ import {
   Star,
 } from 'lucide-react'
 import { analyticsApi, graphApi, newsApi, predictionApi } from '../services/api'
+import { useLanguage } from '../context/LanguageContext'
 import stockDetailApi from '../services/stockDetailApi'
 import watchlistApi from '../services/watchlistApi'
 import type {
@@ -28,16 +29,16 @@ import PriceChart from '../components/Charts/PriceChart'
 import NewsCard from '../components/news/NewsCard'
 import CompanyTabs from '../components/stock/CompanyTabs'
 import PriceBandPanel from '../components/stock/PriceBandPanel'
-import { SENTIMENT_COLORS, SENTIMENT_LABELS, SymbolChip } from '../components/common/Chips'
+import { SENTIMENT_COLORS, SymbolChip } from '../components/common/Chips'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { fmtNumber, trendColor, COLOR_CEILING, COLOR_FLOOR, COLOR_REFERENCE } from '../utils/stockColors'
 
 const RANGES = [
-  { label: '1T', days: 30 },
-  { label: '3T', days: 90 },
-  { label: '6T', days: 180 },
-  { label: '1N', days: 365 },
-  { label: '5N', days: 1825 },
+  { key: 'm1', days: 30 },
+  { key: 'm3', days: 90 },
+  { key: 'm6', days: 180 },
+  { key: 'y1', days: 365 },
+  { key: 'y5', days: 1825 },
 ] as const
 
 interface GraphFeatures {
@@ -96,6 +97,7 @@ function Row({ label, value, accent }: { label: string; value: React.ReactNode; 
 export default function StockWorkspacePage() {
   const { symbol = '' } = useParams()
   const sym = symbol.toUpperCase()
+  const { t } = useLanguage()
 
   const [info, setInfo] = useState<StockAggregation | null>(null)
   const [overview, setOverview] = useState<StockOverview | null>(null)
@@ -197,15 +199,15 @@ export default function StockWorkspacePage() {
       if (watching) {
         await watchlistApi.remove(sym)
         setWatching(false)
-        toast.success(`Đã bỏ theo dõi ${sym}`)
+        toast.success(t('stocks.toast.removeSuccess', { symbol: sym }))
       } else {
         await watchlistApi.add(sym)
         setWatching(true)
-        toast.success(`Đã theo dõi ${sym}`)
+        toast.success(t('stocks.toast.quickAddSuccess', { symbol: sym }))
         refreshNow()
       }
     } catch {
-      toast.error('Không cập nhật được danh mục theo dõi')
+      toast.error(t('stockWorkspace.watchToggleError'))
     }
   }
 
@@ -231,7 +233,7 @@ export default function StockWorkspacePage() {
         className="inline-flex items-center gap-1.5 text-[12px]"
         style={{ color: 'var(--text-muted)' }}
       >
-        <ArrowLeft size={14} /> Quay lại danh sách cổ phiếu
+        <ArrowLeft size={14} /> {t('stockWorkspace.backToStocks')}
       </Link>
 
       {/* Đầu trang: danh tính + giá */}
@@ -260,11 +262,11 @@ export default function StockWorkspacePage() {
                 }
               >
                 <Star size={11} fill={watching ? 'currentColor' : 'none'} />
-                {watching ? 'Đang theo dõi' : 'Theo dõi'}
+                {watching ? t('stockWorkspace.watching') : t('stockWorkspace.watch')}
               </button>
             </div>
             <p className="text-[13px] mt-1" style={{ color: 'var(--text-secondary)' }}>
-              {info?.company || overview?.organ_name || quote?.company_name || 'Không rõ công ty'}
+              {info?.company || overview?.organ_name || quote?.company_name || t('stockWorkspace.unknownCompany')}
             </p>
             <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-faint)' }}>
               {info?.industry || overview?.sector || '—'}
@@ -291,16 +293,16 @@ export default function StockWorkspacePage() {
               <div className="flex items-center justify-end gap-2 mt-1.5 text-[10px]" style={{ color: 'var(--text-faint)' }}>
                 <span className="inline-flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: marketOpen ? '#10b981' : '#94a3b8' }} />
-                  {marketOpen ? 'Trong phiên' : 'Ngoài phiên'}
+                  {marketOpen ? t('stockWorkspace.inSession') : t('stockWorkspace.outOfSession')}
                 </span>
                 {paused ? (
                   <span className="inline-flex items-center gap-0.5">
-                    <Pause size={9} /> tạm dừng
+                    <Pause size={9} /> {t('stockWorkspace.paused')}
                   </span>
                 ) : (
                   secondsLeft !== null && <span>{secondsLeft}s</span>
                 )}
-                <button onClick={refreshNow} aria-label="Cập nhật giá" disabled={refreshing}>
+                <button onClick={refreshNow} aria-label={t('stockWorkspace.refreshPriceAriaLabel')} disabled={refreshing}>
                   <RefreshCw size={10} className={refreshing ? 'animate-spin' : ''} />
                 </button>
               </div>
@@ -308,14 +310,14 @@ export default function StockWorkspacePage() {
           ) : (
             <div className="text-right">
               <p className="text-[12px]" style={{ color: 'var(--text-faint)' }}>
-                Chưa hiện giá cho mã này
+                {t('stockWorkspace.noQuoteYet')}
               </p>
               <button
                 onClick={toggleWatch}
                 className="mt-1 text-[12px] hover:underline"
                 style={{ color: '#2563eb' }}
               >
-                Bấm theo dõi để xem giá
+                {t('stockWorkspace.watchToSeePrice')}
               </button>
             </div>
           )}
@@ -324,13 +326,13 @@ export default function StockWorkspacePage() {
 
       {/* Biểu đồ */}
       <Section
-        title="Biểu đồ giá"
+        title={t('stockWorkspace.priceChartTitle')}
         icon={LineChartIcon}
         action={
           <div className="flex items-center gap-1">
             {RANGES.map((r) => (
               <button
-                key={r.label}
+                key={r.key}
                 onClick={() => {
                   setCandlesLoading(true)
                   setDays(r.days)
@@ -342,7 +344,7 @@ export default function StockWorkspacePage() {
                     : { color: 'var(--text-muted)', border: '1px solid transparent' }
                 }
               >
-                {r.label}
+                {t(`stockWorkspace.ranges.${r.key}`)}
               </button>
             ))}
           </div>
@@ -355,7 +357,7 @@ export default function StockWorkspacePage() {
         )}
         {lastUpdated && (
           <p className="text-[11px] mt-2" style={{ color: 'var(--text-faint)' }}>
-            Cập nhật {lastUpdated.toLocaleTimeString('vi-VN')}
+            {t('stockWorkspace.updatedAt', { time: lastUpdated.toLocaleTimeString('vi-VN') })}
           </p>
         )}
       </Section>
@@ -366,11 +368,11 @@ export default function StockWorkspacePage() {
         {/* Kết luận mô hình */}
         <div className="lg:col-span-2">
           <Section
-            title="Hệ thống nhận định gì về mã này"
+            title={t('stockWorkspace.modelVerdict.title')}
             icon={Activity}
             action={
               <Link to="/reports" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-                Hệ thống chính xác đến đâu?
+                {t('stockWorkspace.modelVerdict.accuracyLink')}
               </Link>
             }
           >
@@ -378,17 +380,16 @@ export default function StockWorkspacePage() {
               <div className="skeleton h-24 rounded-xl" />
             ) : scoredNews.length === 0 ? (
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                Chưa có bài báo nào về {sym} được hệ thống đưa ra nhận định.{' '}
+                {t('stockWorkspace.modelVerdict.noNewsPre')} {sym} {t('stockWorkspace.modelVerdict.noNewsMid')}{' '}
                 <Link to="/import" className="hover:underline" style={{ color: '#2563eb' }}>
-                  Nhập tin về mã này
+                  {t('stockWorkspace.modelVerdict.importLink')}
                 </Link>{' '}
-                để hệ thống đánh giá.
+                {t('stockWorkspace.modelVerdict.importSuffix')}
               </p>
             ) : (
               <>
                 <p className="text-[12px] mb-3" style={{ color: 'var(--text-muted)' }}>
-                  Hệ thống nhận định theo từng bài báo một, chứ không đưa ra “xu hướng chung” cho
-                  cả mã. Dưới đây là {scoredNews.length} bài gần nhất về {sym} có nhận định.
+                  {t('stockWorkspace.modelVerdict.summary', { count: scoredNews.length, symbol: sym })}
                 </p>
                 <div className="space-y-2.5">
                   {scoredNews.slice(0, 3).map((n) => (
@@ -403,16 +404,16 @@ export default function StockWorkspacePage() {
                 className="text-[11px] mt-3 px-2.5 py-2 rounded-lg"
                 style={{ background: 'rgba(180,83,9,0.08)', color: '#b45309' }}
               >
-                Nếu gộp các tin gần đây lại và chỉ nhìn vào từ ngữ, xu hướng thiên về{' '}
+                {t('stockWorkspace.modelVerdict.heuristicPre')}{' '}
                 <strong>
                   {prediction.trend === 'INCREASING'
-                    ? 'giá tăng'
+                    ? t('stockWorkspace.modelVerdict.trendIncreasing')
                     : prediction.trend === 'DECREASING'
-                      ? 'giá giảm'
-                      : 'giá ít đổi'}
+                      ? t('stockWorkspace.modelVerdict.trendDecreasing')
+                      : t('stockWorkspace.modelVerdict.trendFlat')}
                 </strong>
-                . Đây chỉ là cách đọc câu chữ, <strong>chưa</strong> đối chiếu với diễn biến giá
-                thực tế — hãy xem như một gợi ý.
+                {t('stockWorkspace.modelVerdict.heuristicMid')} <strong>{t('stockWorkspace.modelVerdict.heuristicNot')}</strong>{' '}
+                {t('stockWorkspace.modelVerdict.heuristicPost')}
               </p>
             )}
           </Section>
@@ -420,11 +421,11 @@ export default function StockWorkspacePage() {
 
         {/* Lân cận đồ thị */}
         <Section
-          title="Liên quan tới những gì"
+          title={t('stockWorkspace.related.title')}
           icon={Network}
           action={
             <Link to={`/graph?stock=${sym}`} className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-              Xem sơ đồ liên kết
+              {t('stockWorkspace.related.graphLink')}
             </Link>
           }
         >
@@ -433,18 +434,18 @@ export default function StockWorkspacePage() {
           ) : (
             <>
               <div className="space-y-2.5 mb-3">
-                <Row label="Số lần được nhắc" value={info?.mention_count ?? features.mention_frequency ?? 0} />
+                <Row label={t('stockWorkspace.related.mentionCount')} value={info?.mention_count ?? features.mention_frequency ?? 0} />
                 <Row
-                  label="Mức độ liên kết"
+                  label={t('stockWorkspace.related.linkLevel')}
                   value={features.degree_centrality != null ? `${Math.round(features.degree_centrality * 100)}%` : '—'}
                 />
                 <Row
-                  label="Tin tốt"
+                  label={t('stockWorkspace.related.positiveNews')}
                   value={features.positive_news_count ?? 0}
                   accent={SENTIMENT_COLORS.Positive}
                 />
                 <Row
-                  label="Tin xấu"
+                  label={t('stockWorkspace.related.negativeNews')}
                   value={features.negative_news_count ?? 0}
                   accent={SENTIMENT_COLORS.Negative}
                 />
@@ -453,7 +454,7 @@ export default function StockWorkspacePage() {
               {peers.length > 0 && (
                 <div className="pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                   <p className="text-[11px] mb-1.5" style={{ color: 'var(--text-faint)' }}>
-                    Mã thường xuất hiện cùng
+                    {t('stockWorkspace.related.frequentPeers')}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {peers.map((p) => (
@@ -466,7 +467,7 @@ export default function StockWorkspacePage() {
               {sentimentTotal > 0 && info && (
                 <div className="pt-3 mt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
                   <p className="text-[11px] mb-1.5" style={{ color: 'var(--text-faint)' }}>
-                    Tin tốt / xấu ({sentimentTotal} bài)
+                    {t('stockWorkspace.related.goodBadNews', { count: sentimentTotal })}
                   </p>
                   <div className="flex h-2 rounded-full overflow-hidden mb-1.5" style={{ background: 'var(--bg-surface)' }}>
                     {(['Positive', 'Neutral', 'Negative'] as const).map((k) =>
@@ -490,7 +491,7 @@ export default function StockWorkspacePage() {
                           className="text-[10px] hover:underline"
                           style={{ color: SENTIMENT_COLORS[k] }}
                         >
-                          {SENTIMENT_LABELS[k]}: {info.sentiment_distribution[k]}
+                          {t(`chips.sentiment.${k}`)}: {info.sentiment_distribution[k]}
                         </Link>
                       ) : null,
                     )}
@@ -508,11 +509,11 @@ export default function StockWorkspacePage() {
 
       {/* Tin liên quan */}
       <Section
-        title={`Tin về ${sym}`}
+        title={t('stockWorkspace.news.title', { symbol: sym })}
         icon={Newspaper}
         action={
           <Link to={`/feed?stock=${sym}`} className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-            Xem tất cả tin
+            {t('stockWorkspace.news.viewAll')}
           </Link>
         }
       >
@@ -524,11 +525,11 @@ export default function StockWorkspacePage() {
           </div>
         ) : news.length === 0 ? (
           <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-            Chưa có bài báo nào nhắc tới {sym}.{' '}
+            {t('stockWorkspace.news.noneYetPre')} {sym}.{' '}
             <Link to="/import" className="hover:underline" style={{ color: '#2563eb' }}>
-              Nhập dữ liệu
+              {t('stockWorkspace.news.importLink')}
             </Link>{' '}
-            để bắt đầu.
+            {t('stockWorkspace.news.importSuffix')}
           </p>
         ) : (
           <div className="space-y-2.5">

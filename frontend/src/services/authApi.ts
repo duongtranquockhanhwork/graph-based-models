@@ -5,6 +5,7 @@ export const authApi = {
   login: (email: string, password: string) =>
     api.post<AuthResponse>('/auth/login', { email, password }),
   emailOtpRequest: (email: string) => api.post('/auth/email-otp/request', { email }),
+  emailExists: (email: string) => api.get<{ exists: boolean }>('/auth/email-exists', { params: { email } }),
   // fullName/dob/password chỉ có tác dụng khi email này CHƯA gắn tài khoản
   // nào (tức đang tạo mới) — nếu tài khoản đã tồn tại, backend trả lỗi 409
   // "Email này đã có tài khoản" thay vì âm thầm đăng nhập vào tài khoản cũ.
@@ -30,6 +31,7 @@ export const authApi = {
     }),
   changePassword: (currentPassword: string, newPassword: string) =>
     api.post('/auth/change-password', { current_password: currentPassword, new_password: newPassword }),
+  updateLanguage: (language: 'en' | 'vi') => api.patch<User>('/auth/language', { language }),
 }
 
 export default authApi

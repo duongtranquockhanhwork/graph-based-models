@@ -1,0 +1,17 @@
+export default {
+  title: 'Reset password',
+  subtitle: 'Enter a new password for your account',
+  invalidLinkSubtitle: 'Invalid link',
+  invalidLinkMessagePrefix: 'The password reset link is missing or invalid. Please request a new one from the',
+  forgotPasswordPageLink: 'Forgot password',
+  newPasswordLabel: 'New password',
+  passwordHintPlaceholder: 'Uppercase, lowercase, number, special character',
+  hidePasswordAria: 'Hide password',
+  showPasswordAria: 'Show password',
+  confirmPasswordLabel: 'Confirm password',
+  confirmPasswordPlaceholder: 'Re-enter the new password',
+  submitButton: 'Reset password',
+  passwordMismatchToast: 'Passwords do not match',
+  resetSuccessToast: 'Password reset successfully, please sign in again',
+  resetErrorToast: 'The password reset link is invalid or has expired',
+}

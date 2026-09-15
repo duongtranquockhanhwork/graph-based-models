@@ -20,15 +20,11 @@ import { newsApi } from '../../services/api'
 import type { NewsArticle } from '../../types'
 import { SentimentBadge, StatusBadge } from '../../components/Admin/AdminWidgets'
 import { contentPreviewParagraphs } from '../../utils/articleContent'
+import { useLanguage } from '../../context/LanguageContext'
 
 const SENTIMENT_OPTIONS = ['Positive', 'Negative', 'Neutral']
 
 type ImportTab = 'manual' | 'csv' | 'url'
-const IMPORT_TABS: { key: ImportTab; icon: React.ElementType; label: string }[] = [
-  { key: 'manual', icon: Plus, label: 'Thủ công' },
-  { key: 'csv', icon: Upload, label: 'Upload CSV' },
-  { key: 'url', icon: Link2, label: 'Từ URL' },
-]
 
 /** Trích đoạn gốc + link đọc bài gốc — cùng tính năng đang có ở thẻ tin phía
  *  khách hàng (NewsCard), gắn thêm vào đây vì admin cũng nhập/duyệt tin ở
@@ -36,13 +32,14 @@ const IMPORT_TABS: { key: ImportTab; icon: React.ElementType; label: string }[] 
  *  Không có mục tóm tắt AI: tốn API Claude thật mỗi lần tạo, không kiểm soát
  *  được chi phí khi có nhiều người dùng. */
 function NewsDetailPanel({ news }: { news: NewsArticle }) {
+  const { t } = useLanguage()
   const preview = news.content ? contentPreviewParagraphs(news.content) : null
   return (
     <div className="space-y-3 max-w-3xl">
       {preview && preview.paragraphs.length > 0 && (
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
-            Trích đoạn gốc
+            {t('adminNews.excerptTitle')}
           </p>
           <div className="space-y-2">
             {preview.paragraphs.map((para, i) => (
@@ -62,7 +59,7 @@ function NewsDetailPanel({ news }: { news: NewsArticle }) {
           className="inline-flex items-center gap-1 text-[11px] hover:underline"
           style={{ color: '#2563eb' }}
         >
-          <ExternalLink size={11} /> Đọc bài gốc
+          <ExternalLink size={11} /> {t('adminNews.readOriginal')}
         </a>
       )}
     </div>
@@ -70,6 +67,12 @@ function NewsDetailPanel({ news }: { news: NewsArticle }) {
 }
 
 export default function AdminNewsPage() {
+  const { t } = useLanguage()
+  const IMPORT_TABS: { key: ImportTab; icon: React.ElementType; label: string }[] = [
+    { key: 'manual', icon: Plus, label: t('adminNews.tabManual') },
+    { key: 'csv', icon: Upload, label: t('adminNews.tabCsv') },
+    { key: 'url', icon: Link2, label: t('adminNews.tabUrl') },
+  ]
   const [news, setNews] = useState<NewsArticle[]>([])
   const [loading, setLoading] = useState(true)
   const [q, setQ] = useState('')
@@ -117,12 +120,12 @@ export default function AdminNewsPage() {
     if (!form.title.trim()) return
     try {
       await newsApi.create(form)
-      toast.success('Đã thêm tin tức')
+      toast.success(t('adminNews.toastCreateSuccess'))
       setForm({ title: '', content: '', source: '', published_date: '' })
       setShowImport(false)
       load()
     } catch {
-      toast.error('Lỗi khi thêm tin tức')
+      toast.error(t('adminNews.toastCreateError'))
     }
   }
 
@@ -131,10 +134,10 @@ export default function AdminNewsPage() {
     if (!file) return
     try {
       const res = await newsApi.uploadCsv(file)
-      toast.success(`Đã import ${res.data.ids.length} bài báo`)
+      toast.success(t('adminNews.toastCsvSuccess', { count: res.data.ids.length }))
       load()
     } catch {
-      toast.error('Lỗi khi upload CSV')
+      toast.error(t('adminNews.toastCsvError'))
     } finally {
       e.target.value = ''
     }
@@ -146,13 +149,13 @@ export default function AdminNewsPage() {
     setUrlLoading(true)
     try {
       await newsApi.importUrl(urlInput.trim())
-      toast.success('Đã import bài báo từ URL')
+      toast.success(t('adminNews.toastUrlSuccess'))
       setUrlInput('')
       load()
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        'Không thể import URL này'
+        t('adminNews.toastUrlError')
       toast.error(msg)
     } finally {
       setUrlLoading(false)
@@ -161,13 +164,13 @@ export default function AdminNewsPage() {
 
   const handleAnalyze = async (id: number) => {
     await newsApi.analyze(id)
-    toast.success('Đã xếp hàng phân tích lại')
+    toast.success(t('adminNews.toastAnalyzeSuccess'))
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Xoá tin tức này?')) return
+    if (!confirm(t('adminNews.confirmDelete'))) return
     await newsApi.delete(id)
-    toast.success('Đã xoá')
+    toast.success(t('adminNews.toastDeleteSuccess'))
     load()
   }
 
@@ -179,11 +182,11 @@ export default function AdminNewsPage() {
   const saveEdit = async (id: number) => {
     try {
       await newsApi.patch(id, editForm)
-      toast.success('Đã cập nhật')
+      toast.success(t('adminNews.toastUpdateSuccess'))
       setEditingId(null)
       load()
     } catch {
-      toast.error('Lỗi khi cập nhật')
+      toast.error(t('adminNews.toastUpdateError'))
     }
   }
 
@@ -191,8 +194,8 @@ export default function AdminNewsPage() {
     <div className="p-6 space-y-4 fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Quản lý tin tức</h2>
-          <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{news.length} tin tức trên trang này</p>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('adminNews.pageTitle')}</h2>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('adminNews.pageSubtitle', { count: news.length })}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -200,7 +203,7 @@ export default function AdminNewsPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
             style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
           >
-            <Plus size={14} /> Thêm / Import tin tức
+            <Plus size={14} /> {t('adminNews.addImportButton')}
           </button>
         </div>
       </div>
@@ -227,14 +230,14 @@ export default function AdminNewsPage() {
 
           {importTab === 'manual' && (
             <form onSubmit={handleCreate} className="space-y-3">
-              <input className="field-input" placeholder="Tiêu đề *" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
-              <textarea className="field-input resize-none" rows={3} placeholder="Nội dung" value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
+              <input className="field-input" placeholder={t('adminNews.placeholderTitle')} value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required />
+              <textarea className="field-input resize-none" rows={3} placeholder={t('adminNews.placeholderContent')} value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))} />
               <div className="grid grid-cols-2 gap-3">
-                <input className="field-input" placeholder="Nguồn" value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
+                <input className="field-input" placeholder={t('adminNews.placeholderSource')} value={form.source} onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))} />
                 <input type="date" className="field-input" value={form.published_date} onChange={(e) => setForm((f) => ({ ...f, published_date: e.target.value }))} />
               </div>
               <button type="submit" className="px-5 py-2 rounded-xl text-[13px] font-medium text-white" style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}>
-                Lưu tin tức
+                {t('adminNews.saveArticleButton')}
               </button>
             </form>
           )}
@@ -242,7 +245,7 @@ export default function AdminNewsPage() {
           {importTab === 'csv' && (
             <div className="space-y-3">
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                Chọn file CSV với cột bắt buộc <strong>title</strong> (tuỳ chọn: content, source, published_date, url)
+                {t('adminNews.csvHintBefore')} <strong>{t('adminNews.csvHintField')}</strong> {t('adminNews.csvHintAfter')}
               </p>
               <button
                 type="button"
@@ -250,7 +253,7 @@ export default function AdminNewsPage() {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}
               >
-                <Upload size={14} /> Chọn file CSV
+                <Upload size={14} /> {t('adminNews.chooseCsvFile')}
               </button>
               <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleUploadCsv} />
             </div>
@@ -277,14 +280,14 @@ export default function AdminNewsPage() {
                   style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
                 >
                   {urlLoading ? (
-                    <><Loader2 size={14} className="animate-spin" /> Đang lấy...</>
+                    <><Loader2 size={14} className="animate-spin" /> {t('adminNews.urlImporting')}</>
                   ) : (
-                    <><Globe size={14} /> Import</>
+                    <><Globe size={14} /> {t('adminNews.urlImportButton')}</>
                   )}
                 </button>
               </div>
               <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
-                Hỗ trợ: cafef.vn, vnexpress.net, vietstock.vn, tinnhanhchungkhoan.vn, ndh.vn, baomoi.com
+                {t('adminNews.urlSupportedSites')}
               </p>
             </form>
           )}
@@ -294,16 +297,16 @@ export default function AdminNewsPage() {
       <form onSubmit={handleSearch} className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
-          <input className="field-input pl-9" placeholder="Tìm theo tiêu đề..." value={q} onChange={(e) => setQ(e.target.value)} />
+          <input className="field-input pl-9" placeholder={t('adminNews.searchPlaceholder')} value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         <select className="field-input w-auto" value={sentiment} onChange={(e) => setSentiment(e.target.value)}>
-          <option value="">Tất cả sentiment</option>
+          <option value="">{t('adminNews.allSentiments')}</option>
           {SENTIMENT_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <input type="date" className="field-input w-auto" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         <input type="date" className="field-input w-auto" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
         <button type="submit" className="px-4 py-2 rounded-xl text-[13px]" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
-          Lọc
+          {t('adminNews.filterButton')}
         </button>
       </form>
 
@@ -312,16 +315,28 @@ export default function AdminNewsPage() {
           <table className="w-full text-[12px]">
             <thead>
               <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                {['', 'ID', 'Tiêu đề', 'Nguồn', 'Ngày đăng', 'Mã CP', 'Event', 'Sentiment', 'Impact', 'Trạng thái', 'Hành động'].map((h, i) => (
+                {[
+                  '',
+                  t('adminNews.colId'),
+                  t('adminNews.colTitle'),
+                  t('adminNews.colSource'),
+                  t('adminNews.colPublishedDate'),
+                  t('adminNews.colStockCode'),
+                  t('adminNews.colEvent'),
+                  t('adminNews.colSentiment'),
+                  t('adminNews.colImpact'),
+                  t('adminNews.colStatus'),
+                  t('adminNews.colAction'),
+                ].map((h, i) => (
                   <th key={h || `col-${i}`} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Đang tải...</td></tr>
+                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>{t('adminNews.loadingRow')}</td></tr>
               ) : news.length === 0 ? (
-                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>Không có tin tức nào</td></tr>
+                <tr><td colSpan={11} className="text-center py-8" style={{ color: 'var(--text-faint)' }}>{t('adminNews.noArticles')}</td></tr>
               ) : (
                 news.map((n) => (
                   <Fragment key={n.id}>
@@ -331,7 +346,7 @@ export default function AdminNewsPage() {
                         onClick={() => setExpandedId((v) => (v === n.id ? null : n.id))}
                         className="p-1 rounded-md"
                         style={{ color: 'var(--text-faint)' }}
-                        title={expandedId === n.id ? 'Thu gọn' : 'Xem nội dung gốc'}
+                        title={expandedId === n.id ? t('adminNews.collapse') : t('adminNews.viewOriginalContent')}
                       >
                         {expandedId === n.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                       </button>
@@ -351,7 +366,7 @@ export default function AdminNewsPage() {
                               className="inline-flex items-center gap-1 text-[10.5px] hover:underline mt-0.5"
                               style={{ color: '#2563eb' }}
                             >
-                              <ExternalLink size={10} /> Đọc bài gốc
+                              <ExternalLink size={10} /> {t('adminNews.readOriginal')}
                             </a>
                           )}
                         </div>
@@ -382,21 +397,21 @@ export default function AdminNewsPage() {
                       ) : n.is_analyzed ? (
                         <StatusBadge status="PASS" />
                       ) : (
-                        <StatusBadge status="Chờ phân tích" />
+                        <StatusBadge status={t('adminNews.statusPendingAnalysis')} />
                       )}
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
                         {editingId === n.id ? (
                           <>
-                            <button onClick={() => saveEdit(n.id)} className="p-1.5 rounded-lg" style={{ color: '#10b981' }} title="Lưu"><Check size={14} /></button>
-                            <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-secondary)' }} title="Huỷ"><X size={14} /></button>
+                            <button onClick={() => saveEdit(n.id)} className="p-1.5 rounded-lg" style={{ color: '#10b981' }} title={t('adminNews.titleSave')}><Check size={14} /></button>
+                            <button onClick={() => setEditingId(null)} className="p-1.5 rounded-lg" style={{ color: 'var(--text-secondary)' }} title={t('adminNews.titleCancel')}><X size={14} /></button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => startEdit(n)} className="p-1.5 rounded-lg" style={{ color: '#2dd4bf' }} title="Sửa"><Pencil size={14} /></button>
-                            <button onClick={() => handleAnalyze(n.id)} className="p-1.5 rounded-lg" style={{ color: '#fbbf24' }} title="Phân tích lại"><RefreshCw size={14} /></button>
-                            <button onClick={() => handleDelete(n.id)} className="p-1.5 rounded-lg" style={{ color: '#f87171' }} title="Xoá"><Trash2 size={14} /></button>
+                            <button onClick={() => startEdit(n)} className="p-1.5 rounded-lg" style={{ color: '#2dd4bf' }} title={t('adminNews.titleEdit')}><Pencil size={14} /></button>
+                            <button onClick={() => handleAnalyze(n.id)} className="p-1.5 rounded-lg" style={{ color: '#fbbf24' }} title={t('adminNews.titleReanalyze')}><RefreshCw size={14} /></button>
+                            <button onClick={() => handleDelete(n.id)} className="p-1.5 rounded-lg" style={{ color: '#f87171' }} title={t('adminNews.titleDelete')}><Trash2 size={14} /></button>
                           </>
                         )}
                       </div>
@@ -419,11 +434,11 @@ export default function AdminNewsPage() {
 
       <div className="flex items-center justify-between">
         <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))} className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
-          ← Trang trước
+          {t('adminNews.prevPage')}
         </button>
-        <span className="text-[12px]" style={{ color: 'var(--text-faint)' }}>Trang {page + 1}</span>
+        <span className="text-[12px]" style={{ color: 'var(--text-faint)' }}>{t('adminNews.pageIndicator', { page: page + 1 })}</span>
         <button disabled={news.length < pageSize} onClick={() => setPage((p) => p + 1)} className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: '#cbd5e1' }}>
-          Trang sau →
+          {t('adminNews.nextPage')}
         </button>
       </div>
     </div>

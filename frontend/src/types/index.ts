@@ -9,6 +9,7 @@ export interface User {
   profile_complete?: boolean
   avatar_url?: string
   role: 'customer' | 'admin'
+  language?: 'en' | 'vi'
   is_active?: boolean
   created_at?: string
 }

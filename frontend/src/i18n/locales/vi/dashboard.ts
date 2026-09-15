@@ -1,0 +1,67 @@
+export default {
+  loadError: 'Không tải được dữ liệu tổng quan',
+  stats: {
+    news: 'Bài báo',
+    newsSub: '{{count}} đã phân tích',
+    stocks: 'Mã cổ phiếu',
+    stocksSub: 'Tìm thấy trong các bài báo',
+    companies: 'Công ty',
+    companiesSub: 'Có trong sơ đồ liên kết',
+    industries: 'Ngành nghề',
+    industriesSub: 'Có trong sơ đồ liên kết',
+  },
+  modelBanner: {
+    intro: 'Phần dự đoán đã được kiểm tra trên hàng nghìn bài báo cũ và',
+    highlight: 'đoán đúng hơn cách làm đơn giản {{delta}} điểm',
+    outro: '. Kết quả vẫn khiêm tốn — hãy đọc như một gợi ý, không phải lời khuyên mua bán.',
+    viewDetails: 'Xem chi tiết',
+  },
+  sentimentSection: {
+    title: 'Tin tốt hay tin xấu',
+    openFeed: 'Mở dòng tin',
+    filterTitle: 'Lọc tin {{label}}',
+  },
+  modelSection: {
+    title: 'Hệ thống dự đoán ra sao',
+    viewDetails: 'Xem chi tiết',
+    empty: 'Chưa có bài nào được hệ thống dự đoán.',
+    tickIncreasing: 'Có thể tăng',
+    tickDecreasing: 'Có thể giảm',
+    tickStable: 'Ít biến động',
+  },
+  industrySection: {
+    title: 'Ngành được nhắc nhiều',
+    viewGraph: 'Xem đồ thị',
+  },
+  newsSection: {
+    title: 'Tin mới nhất',
+    viewAll: 'Xem tất cả',
+    empty: 'Chưa có bài báo nào.',
+    importData: 'Nhập dữ liệu',
+  },
+  stockSection: {
+    title: 'Mã được nhắc nhiều',
+    allStocks: 'Tất cả mã',
+    empty: 'Chưa nhận diện được mã nào.',
+  },
+  newsByDate: {
+    title: 'Tin theo ngày',
+  },
+  footerBanner: {
+    prefix: 'Có',
+    suffix: 'loại sự việc để lọc trong Dòng tin, và sơ đồ liên kết cho thấy các mã ảnh hưởng gián tiếp tới nhau.',
+    importMore: 'Nhập thêm dữ liệu',
+  },
+  emptyState: {
+    title: 'Bắt đầu bằng việc nhập tin tức',
+    desc: 'Hệ thống đọc bài báo tài chính tiếng Việt, tìm ra bài nói về mã cổ phiếu nào và chuyện gì xảy ra, rồi ước lượng giá thường phản ứng thế nào sau loại tin đó.',
+    step1Title: 'Nhập dữ liệu',
+    step1Desc: 'Tải CSV, dán link báo, hoặc nhập tay',
+    step2Title: 'Hệ thống đọc bài',
+    step2Desc: 'Tìm mã cổ phiếu, việc gì xảy ra, tin tốt hay xấu',
+    step3Title: 'Xem kết quả',
+    step3Desc: 'Dòng tin, thông tin từng mã, và sơ đồ liên kết',
+    importNow: 'Nhập dữ liệu ngay',
+    viewMarket: 'Xem bảng giá thị trường',
+  },
+}

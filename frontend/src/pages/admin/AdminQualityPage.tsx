@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { AlertTriangle, CheckCircle2, PenLine, RefreshCw, Sliders, XCircle } from 'lucide-react'
 import adminApi from '../../services/adminApi'
 import { SkeletonBlock } from '../../components/Admin/AdminWidgets'
+import { useLanguage } from '../../context/LanguageContext'
 
 interface DataValidation {
   total_news: number
@@ -29,27 +30,6 @@ interface LabelAgreement {
   event_labeled_count: number
   accuracy_event: number | null
   selection_bias_note?: string
-}
-
-/** Điều kiện cần đạt — dùng cho danh sách trạng thái từng phép kiểm tra. */
-const CHECK_LABELS: Record<string, string> = {
-  no_missing_values: 'Không có bản ghi thiếu thông tin',
-  no_duplicates: 'Không có bản ghi trùng lặp',
-  label_consistency_ok: 'Tin tốt/xấu và dự đoán khớp chiều nhau',
-  enough_usable_rows: 'Đủ số bài dùng được',
-}
-
-/** Vấn đề tương ứng khi phép kiểm tra TRƯỢT.
- *
- *  Không dùng chung CHECK_LABELS cho phần tóm tắt: in "Không có bản ghi trùng
- *  lặp" ngay dưới dòng "Chưa đạt 1 phép kiểm tra" đọc như một lời khẳng định
- *  đã đạt, trong khi ý là ngược lại.
- */
-const FAILURE_LABELS: Record<string, string> = {
-  no_missing_values: 'có bản ghi thiếu thông tin quan trọng',
-  no_duplicates: 'có bản ghi trùng lặp',
-  label_consistency_ok: 'nhiều bài có tin tốt nhưng dự đoán giảm, hoặc ngược lại',
-  enough_usable_rows: 'quá ít bài dùng được',
 }
 
 function Card({
@@ -106,9 +86,24 @@ function Row({ label, value, accent }: { label: string; value: React.ReactNode; 
  * chờ Gán nhãn (thêm nhãn) và Cấu hình phân tích (đổi ngưỡng).
  */
 export default function AdminQualityPage() {
+  const { t } = useLanguage()
   const [validation, setValidation] = useState<DataValidation | null>(null)
   const [agreement, setAgreement] = useState<LabelAgreement | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const CHECK_LABELS: Record<string, string> = {
+    no_missing_values: t('adminQuality.checkLabels.noMissingValues'),
+    no_duplicates: t('adminQuality.checkLabels.noDuplicates'),
+    label_consistency_ok: t('adminQuality.checkLabels.labelConsistencyOk'),
+    enough_usable_rows: t('adminQuality.checkLabels.enoughUsableRows'),
+  }
+
+  const FAILURE_LABELS: Record<string, string> = {
+    no_missing_values: t('adminQuality.failureLabels.noMissingValues'),
+    no_duplicates: t('adminQuality.failureLabels.noDuplicates'),
+    label_consistency_ok: t('adminQuality.failureLabels.labelConsistencyOk'),
+    enough_usable_rows: t('adminQuality.failureLabels.enoughUsableRows'),
+  }
 
   const load = useCallback(() => {
     setLoading(true)
@@ -125,10 +120,10 @@ export default function AdminQualityPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Chất lượng dữ liệu
+            {t('adminQuality.title')}
           </h2>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Dữ liệu có sạch không, và máy đọc bài có giống người đọc không
+            {t('adminQuality.subtitle')}
           </p>
         </div>
         <button
@@ -136,7 +131,7 @@ export default function AdminQualityPage() {
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-[13px]"
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
         >
-          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Chạy lại kiểm định
+          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> {t('adminQuality.rerun')}
         </button>
       </div>
 
@@ -161,13 +156,15 @@ export default function AdminQualityPage() {
               <div>
                 <p className="text-[14px] font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {validation.overall_status === 'PASS'
-                    ? 'Dữ liệu đạt toàn bộ phép kiểm tra'
-                    : `Chưa đạt ${validation.failed_checks.length} phép kiểm tra`}
+                    ? t('adminQuality.allChecksPass')
+                    : t('adminQuality.failedChecksCount', { count: validation.failed_checks.length })}
                 </p>
                 <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                   {validation.overall_status === 'PASS'
-                    ? 'Mọi điều kiện đều thoả, kể cả tỉ lệ bản ghi dùng được cho mô hình.'
-                    : `Vấn đề: ${validation.failed_checks.map((c) => FAILURE_LABELS[c] || c).join(' · ')}.`}
+                    ? t('adminQuality.allChecksPassDesc')
+                    : t('adminQuality.issuesDesc', {
+                        issues: validation.failed_checks.map((c) => FAILURE_LABELS[c] || c).join(' · '),
+                      })}
                 </p>
               </div>
             </div>
@@ -177,39 +174,38 @@ export default function AdminQualityPage() {
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-medium text-white flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
               >
-                <PenLine size={12} /> Xử lý {validation.review_count} tin chờ gán nhãn
+                <PenLine size={12} /> {t('adminQuality.processQueueCta', { count: validation.review_count })}
               </Link>
             )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card
-              title="Pipeline dữ liệu"
-              desc="Bao nhiêu bài đi trọn được tới bước đưa ra nhận định"
+              title={t('adminQuality.pipelineTitle')}
+              desc={t('adminQuality.pipelineDesc')}
             >
               <div className="space-y-2.5">
-                <Row label="Tổng số tin" value={validation.total_news} />
-                <Row label="Đã xử lý" value={validation.total_processed} />
+                <Row label={t('adminQuality.totalNews')} value={validation.total_news} />
+                <Row label={t('adminQuality.processed')} value={validation.total_processed} />
                 <Row
-                  label="Dùng được"
+                  label={t('adminQuality.usable')}
                   value={`${validation.pass_count} (${validation.pass_pct}%)`}
                   accent={validation.pass_pct >= 50 ? '#0b7d5a' : '#c0392e'}
                 />
-                <Row label="Chờ gán nhãn thủ công" value={validation.review_count} accent="#b45309" />
+                <Row label={t('adminQuality.pendingManualReview')} value={validation.review_count} accent="#b45309" />
                 <Row
-                  label="Bỏ qua (không tìm thấy mã nào)"
+                  label={t('adminQuality.skipped')}
                   value={validation.drop_count}
                   accent={validation.drop_count > 0 ? '#c0392e' : undefined}
                 />
-                <Row label="Số lần một bài gắn với một mã" value={validation.news_symbol_rows} />
+                <Row label={t('adminQuality.newsSymbolRows')} value={validation.news_symbol_rows} />
               </div>
 
               {validation.drop_count > 0 && (
                 <p className="text-[11px] mt-3 pt-3" style={{ color: 'var(--text-faint)', borderTop: '1px dashed var(--border-subtle)' }}>
-                  Bài bị bỏ qua thường vì không nhắc tới mã nào hệ thống nhận ra. Thêm từ khoá
-                  hoặc tên gọi khác của công ty ở{' '}
+                  {t('adminQuality.skippedNotePrefix')}{' '}
                   <Link to="/admin/tuning" className="hover:underline" style={{ color: '#2563eb' }}>
-                    Cấu hình phân tích
+                    {t('adminQuality.tuningLink')}
                   </Link>
                   .
                 </p>
@@ -217,13 +213,13 @@ export default function AdminQualityPage() {
             </Card>
 
             <Card
-              title="Các phép kiểm tra"
-              desc="Chỉ báo ĐẠT khi tất cả mục dưới đây đều đạt"
+              title={t('adminQuality.checksTitle')}
+              desc={t('adminQuality.checksDesc')}
             >
               <div className="space-y-2.5 mb-4">
-                <Row label="Bản ghi thiếu thông tin" value={validation.missing_values} />
-                <Row label="Bản ghi trùng lặp" value={validation.duplicates} />
-                <Row label="Tin tốt/xấu và dự đoán khớp chiều nhau" value={`${validation.return_label_consistency}%`} />
+                <Row label={t('adminQuality.missingRecords')} value={validation.missing_values} />
+                <Row label={t('adminQuality.duplicateRecords')} value={validation.duplicates} />
+                <Row label={t('adminQuality.labelConsistencyPct')} value={`${validation.return_label_consistency}%`} />
               </div>
 
               <div className="space-y-1.5 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
@@ -249,46 +245,46 @@ export default function AdminQualityPage() {
 
           {/* Độ khớp nhãn — nội dung của trang "Kết quả kiểm định" cũ */}
           <Card
-            title="Máy đọc bài có giống người đọc không"
-            desc="So kết quả máy tự đọc với kết quả do quản trị viên tự đọc và xác nhận"
+            title={t('adminQuality.agreementTitle')}
+            desc={t('adminQuality.agreementDesc')}
             action={
               <Link
                 to="/admin/labeling"
                 className="inline-flex items-center gap-1.5 text-[12px] hover:underline"
                 style={{ color: '#2563eb' }}
               >
-                <PenLine size={12} /> Mở hàng chờ gán nhãn
+                <PenLine size={12} /> {t('adminQuality.openQueue')}
               </Link>
             }
           >
             {!agreement || agreement.total_labeled === 0 ? (
               <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                Chưa có mẫu nào được gán nhãn thủ công. Xử lý hàng chờ ở trang{' '}
+                {t('adminQuality.noLabeledPrefix')}{' '}
                 <Link to="/admin/labeling" className="hover:underline" style={{ color: '#2563eb' }}>
-                  Gán nhãn
+                  {t('adminQuality.labelingLink')}
                 </Link>{' '}
-                để hệ thống tính được độ khớp.
+                {t('adminQuality.noLabeledSuffix')}
               </p>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     {
-                      label: 'Giống nhau về tin tốt/xấu',
+                      label: t('adminQuality.sentimentAgreement'),
                       value: agreement.accuracy_sentiment != null ? `${agreement.accuracy_sentiment}%` : '—',
-                      sub: `${agreement.sentiment_labeled_count} mẫu`,
+                      sub: t('adminQuality.samplesCount', { count: agreement.sentiment_labeled_count }),
                       color: '#0b7d5a',
                     },
                     {
-                      label: 'Giống nhau về loại sự việc',
+                      label: t('adminQuality.eventAgreement'),
                       value: agreement.accuracy_event != null ? `${agreement.accuracy_event}%` : '—',
-                      sub: `${agreement.event_labeled_count} mẫu`,
+                      sub: t('adminQuality.samplesCount', { count: agreement.event_labeled_count }),
                       color: '#2563eb',
                     },
                     {
-                      label: 'Số bài đã xác nhận',
+                      label: t('adminQuality.confirmedCount'),
                       value: String(agreement.total_labeled),
-                      sub: 'Quản trị viên đã đọc',
+                      sub: t('adminQuality.adminReviewed'),
                       color: '#b45309',
                     },
                   ].map((m) => (
@@ -316,10 +312,9 @@ export default function AdminQualityPage() {
                 >
                   <AlertTriangle size={13} className="mt-0.5 flex-shrink-0" style={{ color: '#b45309' }} />
                   <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
-                    {agreement.selection_bias_note ||
-                      'Chỉ đo trên các bài đã vào hàng chờ gán nhãn, không đại diện cho toàn bộ dữ liệu.'}{' '}
-                    Đây <strong>không phải</strong> mức chính xác của phần dự đoán giá — con số đó
-                    nằm ở trang Bằng chứng mô hình.
+                    {agreement.selection_bias_note || t('adminQuality.selectionBiasDefault')}{' '}
+                    {t('adminQuality.notAccuracyPrefix')} <strong>{t('adminQuality.notAccuracyStrong')}</strong>{' '}
+                    {t('adminQuality.notAccuracySuffix')}
                   </p>
                 </div>
               </>
@@ -331,8 +326,7 @@ export default function AdminQualityPage() {
             style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-subtle)' }}
           >
             <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-              Muốn cải thiện các con số trên? Có hai cách: tự đọc và xác nhận thêm bài, hoặc
-              chỉnh lại cách hệ thống nhận diện.
+              {t('adminQuality.improveCta')}
             </p>
             <div className="flex gap-2">
               <Link
@@ -340,14 +334,14 @@ export default function AdminQualityPage() {
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px]"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
-                <PenLine size={12} /> Gán nhãn
+                <PenLine size={12} /> {t('adminQuality.labelingBtn')}
               </Link>
               <Link
                 to="/admin/tuning"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px]"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
-                <Sliders size={12} /> Cấu hình phân tích
+                <Sliders size={12} /> {t('adminQuality.tuningBtn')}
               </Link>
             </div>
           </div>

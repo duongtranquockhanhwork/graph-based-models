@@ -10,6 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { newsApi } from '../services/api'
+import { useLanguage } from './LanguageContext'
 
 const POLL_MS = 2500
 /** Sau mốc này thì ngừng theo dõi. Một tác vụ nền treo không được phép để lại
@@ -50,6 +51,7 @@ const AnalysisJobsContext = createContext<AnalysisJobsValue | undefined>(undefin
 export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
   const [jobs, setJobs] = useState<AnalysisJob[]>([])
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const jobsRef = useRef<AnalysisJob[]>([])
   jobsRef.current = jobs
 
@@ -82,7 +84,7 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
       const target = job.symbols.length === 1 ? `/stocks/${job.symbols[0]}` : '/news'
 
       toast.custom(
-        (t) => (
+        (toastItem) => (
           <div
             className="rounded-xl px-4 py-3 max-w-sm"
             style={{
@@ -92,36 +94,37 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
             }}
           >
             <p className="text-[13px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Đã phân tích xong {job.total} bài
+              {t('analysisJobs.doneTitle', { total: job.total })}
             </p>
             <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
               {job.scored > 0
-                ? `Mô hình chấm được ${job.scored} bài`
-                : 'Mô hình chưa chấm được bài nào'}
-              {job.refused > 0 && ` · từ chối ${job.refused} bài`}
-              {job.needsReview > 0 && ` · ${job.needsReview} bài cần xem lại`}
+                ? t('analysisJobs.scoredSome', { scored: job.scored })
+                : t('analysisJobs.scoredNone')}
+              {job.refused > 0 && t('analysisJobs.refusedSuffix', { refused: job.refused })}
+              {job.needsReview > 0 && t('analysisJobs.needsReviewSuffix', { count: job.needsReview })}
             </p>
             {job.symbols.length > 0 && (
               <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
-                Mã nhận diện: {job.symbols.slice(0, 6).join(', ')}
-                {job.symbols.length > 6 && '…'}
+                {t('analysisJobs.symbolsDetected', {
+                  symbols: job.symbols.slice(0, 6).join(', ') + (job.symbols.length > 6 ? '…' : ''),
+                })}
               </p>
             )}
             <div className="flex gap-2 mt-2.5">
               <button
                 onClick={() => {
-                  toast.dismiss(t.id)
+                  toast.dismiss(toastItem.id)
                   navigate(target)
                 }}
                 className="px-3 py-1.5 rounded-lg text-[12px] font-medium text-white"
                 style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
               >
-                Xem kết quả
+                {t('analysisJobs.viewResults')}
               </button>
               {job.scored > 0 && (
                 <button
                   onClick={() => {
-                    toast.dismiss(t.id)
+                    toast.dismiss(toastItem.id)
                     navigate('/prediction')
                   }}
                   className="px-3 py-1.5 rounded-lg text-[12px]"
@@ -131,15 +134,15 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
                     color: 'var(--text-secondary)',
                   }}
                 >
-                  Xem dự đoán
+                  {t('analysisJobs.viewPredictions')}
                 </button>
               )}
               <button
-                onClick={() => toast.dismiss(t.id)}
+                onClick={() => toast.dismiss(toastItem.id)}
                 className="px-2 py-1.5 rounded-lg text-[12px]"
                 style={{ color: 'var(--text-faint)' }}
               >
-                Đóng
+                {t('analysisJobs.close')}
               </button>
             </div>
           </div>
@@ -149,7 +152,7 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
         { duration: Infinity, position: 'bottom-right' },
       )
     },
-    [navigate],
+    [navigate, t],
   )
 
   useEffect(() => {
@@ -166,11 +169,7 @@ export function AnalysisJobsProvider({ children }: { children: ReactNode }) {
         // thay vì im lặng bỏ cuộc.
         if (Date.now() - job.startedAt > MAX_WAIT_MS) {
           setJobs((prev) => prev.map((j) => (j.id === job.id ? { ...j, done: true } : j)))
-          toast.error(
-            `Chưa xác nhận được kết quả phân tích cho ${job.total} bài sau 5 phút. ` +
-              'Mở trang Tin tức để kiểm tra trực tiếp.',
-            { duration: 8000 },
-          )
+          toast.error(t('analysisJobs.timeoutError', { total: job.total }), { duration: 8000 })
           continue
         }
 

@@ -1,0 +1,17 @@
+export default {
+  title: 'Profile',
+  subtitle: 'Admin account information and interface preferences',
+  accountSection: 'Account',
+  roleAdmin: 'Administrator',
+  appearanceSection: 'Appearance',
+  appearanceDesc: 'Choose a light or dark theme for the whole app',
+  themeDark: 'Currently using Dark theme',
+  themeLight: 'Currently using Light theme',
+  languageSection: 'Language',
+  languageDesc: 'Choose the language used across the whole app. Your choice is saved to your account.',
+  languageEnLabel: 'Currently using English',
+  languageViLabel: 'Đang dùng tiếng Việt',
+  securitySection: 'Security',
+  securityDesc: 'Change your account password',
+  forgotPassword: 'Forgot your current password?',
+}

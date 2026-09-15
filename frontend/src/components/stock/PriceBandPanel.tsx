@@ -1,6 +1,7 @@
 import { Ruler, ShieldAlert, Target } from 'lucide-react'
 import type { PriceBand } from '../../types'
 import { fmtNumber } from '../../utils/stockColors'
+import { useLanguage } from '../../context/LanguageContext'
 
 const VOLATILITY_LABEL = { LOW: 'thấp', MID: 'vừa', HIGH: 'cao' } as const
 
@@ -18,6 +19,7 @@ function signedPct(value: number): string {
  *  không bao giờ đứng một mình: nó đi kèm số liệu đã kiểm chứng của bảng giá
  *  vào lệnh cho đúng mức đặt lệnh gần nhất. */
 export default function PriceBandPanel({ band, loading }: { band: PriceBand | null; loading: boolean }) {
+  const { t } = useLanguage()
   if (loading) return <div className="skeleton h-24 rounded-xl" />
   if (!band) return null
 
@@ -35,7 +37,7 @@ export default function PriceBandPanel({ band, loading }: { band: PriceBand | nu
       <div className="flex items-center gap-2">
         <Ruler size={14} style={{ color: 'var(--text-faint)' }} />
         <h4 className="text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-          Vùng giá tham khảo ({band.sessions_used} phiên gần nhất)
+          {t('priceBand.title', { sessions: band.sessions_used })}
         </h4>
       </div>
 
@@ -43,7 +45,7 @@ export default function PriceBandPanel({ band, loading }: { band: PriceBand | nu
         <div
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full"
           style={{ left: `${Math.max(0, Math.min(100, position(band.current_price)))}%`, background: '#2563eb' }}
-          title={`Giá hiện tại: ${fmtNumber(band.current_price)} đ`}
+          title={t('priceBand.currentPriceTooltip', { price: fmtNumber(band.current_price) })}
         />
         {band.pullback_reference_price < band.current_price && (
           <div
@@ -53,7 +55,7 @@ export default function PriceBandPanel({ band, loading }: { band: PriceBand | nu
               background: 'var(--bg-card)',
               borderColor: '#b45309',
             }}
-            title={`Mốc chờ giảm về: ${fmtNumber(band.pullback_reference_price)} đ`}
+            title={t('priceBand.pullbackTooltip', { price: fmtNumber(band.pullback_reference_price) })}
           />
         )}
       </div>
@@ -66,7 +68,7 @@ export default function PriceBandPanel({ band, loading }: { band: PriceBand | nu
       <div className="grid grid-cols-2 gap-2 pt-1" style={{ borderTop: '1px solid var(--border-subtle)' }}>
         <div>
           <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>
-            Độ lệch chuẩn lợi suất ngày
+            {t('priceBand.dailyVolatility')}
           </p>
           <p className="text-[13px] font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {band.daily_volatility_pct.toFixed(2)}%
@@ -74,7 +76,7 @@ export default function PriceBandPanel({ band, loading }: { band: PriceBand | nu
         </div>
         <div>
           <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>
-            Nếu chờ giá giảm ~2 độ lệch chuẩn
+            {t('priceBand.pullback2Sigma')}
           </p>
           <p className="text-[13px] font-semibold tabular-nums" style={{ color: '#b45309' }}>
             {fmtNumber(band.pullback_reference_price)} đ

@@ -1,0 +1,15 @@
+export default {
+  tagline: 'VN Stock Knowledge Graph',
+  nav: 'Điều hướng chính',
+  investor: 'Nhà đầu tư',
+  groupWatch: 'Theo dõi',
+  groupExplore: 'Khám phá',
+  groupData: 'Dữ liệu',
+  dashboard: 'Tổng quan',
+  feed: 'Dòng tin',
+  stocks: 'Cổ phiếu',
+  graph: 'Knowledge Graph',
+  reports: 'Độ chính xác',
+  import: 'Nhập dữ liệu',
+  settings: 'Cài đặt',
+}

@@ -5,6 +5,7 @@ import { CheckCircle2, Eye, EyeOff, Info, ShieldCheck, Sliders } from 'lucide-re
 import adminApi from '../../services/adminApi'
 import type { NewsArticle } from '../../types'
 import { SkeletonBlock } from '../../components/Admin/AdminWidgets'
+import { useLanguage } from '../../context/LanguageContext'
 
 const SENTIMENT_OPTIONS = ['Positive', 'Negative', 'Neutral']
 
@@ -22,6 +23,7 @@ interface Draft {
 }
 
 export default function AdminLabelingPage() {
+  const { t } = useLanguage()
   const [queue, setQueue] = useState<NewsArticle[]>([])
   const [loading, setLoading] = useState(true)
   const [drafts, setDrafts] = useState<Record<number, Draft>>({})
@@ -71,32 +73,31 @@ export default function AdminLabelingPage() {
   const submit = async (id: number) => {
     const draft = drafts[id]
     if (!draft?.manual_sentiment) {
-      toast.error('Hãy chọn tin tốt hay xấu trước khi xác nhận')
+      toast.error(t('adminLabeling.toastNeedSentiment'))
       return
     }
     try {
       await adminApi.labeling.submit(id, draft)
-      toast.success('Đã gán nhãn')
+      toast.success(t('adminLabeling.toastSubmitSuccess'))
       setQueue((q) => q.filter((n) => n.id !== id))
     } catch {
-      toast.error('Lỗi khi gán nhãn')
+      toast.error(t('adminLabeling.toastSubmitError'))
     }
   }
 
   const skip = (id: number) => {
     setQueue((q) => q.filter((n) => n.id !== id))
-    toast('Đã bỏ qua bài này', { icon: '↷' })
+    toast(t('adminLabeling.toastSkipped'), { icon: '↷' })
   }
 
   return (
     <div className="p-4 sm:p-6 space-y-4 fade-in">
       <div>
         <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Tự đọc và xác nhận
+          {t('adminLabeling.pageTitle')}
         </h2>
         <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {queue.length} bài đang chờ — những bài hệ thống không đọc ra kết luận, hoặc kết luận
-          với mức chắc chắn thấp
+          {t('adminLabeling.pageSubtitle', { count: queue.length })}
         </p>
       </div>
 
@@ -107,16 +108,14 @@ export default function AdminLabelingPage() {
         <Info size={15} className="mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
         <div className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
           <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Đọc bài rồi hãy quyết định — đừng xem máy đoán gì trước.
+            {t('adminLabeling.infoBoxBold')}
           </p>
           <p className="mt-1">
-            Nhãn bạn gán ở đây được dùng để{' '}
+            {t('adminLabeling.infoBoxBefore')}{' '}
             <Link to="/admin/quality" className="underline" style={{ color: '#2563eb' }}>
-              chấm điểm chính hệ thống
+              {t('adminLabeling.infoBoxLinkText')}
             </Link>
-            . Nếu
-            bạn bị ảnh hưởng bởi đáp án của máy, con số chấm được sẽ chỉ là máy tự đồng ý với
-            chính nó. Vì vậy các ô để trống và đáp án của máy bị ẩn cho tới khi bạn chủ động mở.
+            {t('adminLabeling.infoBoxAfter')}
           </p>
         </div>
       </div>
@@ -131,7 +130,7 @@ export default function AdminLabelingPage() {
           <div className="flex items-center gap-3">
             <CheckCircle2 size={18} className="text-emerald-400" />
             <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
-              Không còn bài nào cần bạn xem lại
+              {t('adminLabeling.emptyQueue')}
             </span>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -140,14 +139,14 @@ export default function AdminLabelingPage() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px]"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
-              <ShieldCheck size={12} /> Xem kết quả vừa xác nhận
+              <ShieldCheck size={12} /> {t('adminLabeling.viewConfirmedResults')}
             </Link>
             <Link
               to="/admin/tuning"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px]"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
-              <Sliders size={12} /> Chỉnh mức nhạy của hàng chờ
+              <Sliders size={12} /> {t('adminLabeling.tuneQueueSensitivity')}
             </Link>
           </div>
         </div>
@@ -175,7 +174,7 @@ export default function AdminLabelingPage() {
                     style={{ color: 'var(--text-muted)' }}
                     htmlFor={`sent-${n.id}`}
                   >
-                    Theo bạn, đây là tin
+                    {t('adminLabeling.sentimentQuestionLabel')}
                   </label>
                   <select
                     id={`sent-${n.id}`}
@@ -188,7 +187,7 @@ export default function AdminLabelingPage() {
                       }))
                     }
                   >
-                    <option value="">— Chọn —</option>
+                    <option value="">{t('adminLabeling.chooseOption')}</option>
                     {SENTIMENT_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -203,7 +202,7 @@ export default function AdminLabelingPage() {
                     style={{ color: 'var(--text-muted)' }}
                     htmlFor={`event-${n.id}`}
                   >
-                    Bài này nói về việc gì
+                    {t('adminLabeling.eventQuestionLabel')}
                   </label>
                   <select
                     id={`event-${n.id}`}
@@ -216,7 +215,7 @@ export default function AdminLabelingPage() {
                       }))
                     }
                   >
-                    <option value="">— Không có —</option>
+                    <option value="">{t('adminLabeling.noneOption')}</option>
                     {eventTypes.map((e) => (
                       <option key={e} value={e}>
                         {e}
@@ -230,7 +229,7 @@ export default function AdminLabelingPage() {
                   className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
                   style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
                 >
-                  Xác nhận
+                  {t('adminLabeling.confirmButton')}
                 </button>
 
                 <button
@@ -242,7 +241,7 @@ export default function AdminLabelingPage() {
                     color: 'var(--text-secondary)',
                   }}
                 >
-                  Không chắc — bỏ qua
+                  {t('adminLabeling.skipButton')}
                 </button>
               </div>
 
@@ -255,12 +254,12 @@ export default function AdminLabelingPage() {
                   style={{ color: 'var(--text-faint)' }}
                 >
                   {revealed[n.id] ? <EyeOff size={12} /> : <Eye size={12} />}
-                  {revealed[n.id] ? 'Ẩn đáp án của máy' : 'Xem máy đoán gì (sau khi bạn đã quyết định)'}
+                  {revealed[n.id] ? t('adminLabeling.hideMachineAnswer') : t('adminLabeling.showMachineAnswer')}
                 </button>
                 {revealed[n.id] && (
                   <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                    Máy đọc ra: <strong>{n.sentiment || '—'}</strong> · dự đoán giá:{' '}
-                    <strong>{n.predicted_trend || 'không trả lời'}</strong> · mức chắc chắn:{' '}
+                    {t('adminLabeling.machineReadPrefix')} <strong>{n.sentiment || '—'}</strong> {t('adminLabeling.machinePredictedPrice')}{' '}
+                    <strong>{n.predicted_trend || t('adminLabeling.noAnswer')}</strong> {t('adminLabeling.machineConfidence')}{' '}
                     <strong>
                       {n.prediction_confidence != null
                         ? `${Math.round(n.prediction_confidence * 100)}%`

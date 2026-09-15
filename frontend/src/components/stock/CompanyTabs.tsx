@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import stockDetailApi from '../../services/stockDetailApi'
+import { useLanguage } from '../../context/LanguageContext'
 import type {
   CompanyEvent,
   FinancialStatements,
@@ -23,13 +24,13 @@ import { fmtNumber } from '../../utils/stockColors'
  */
 
 const TABS = [
-  { key: 'so-lenh', label: 'Sổ lệnh' },
-  { key: 'ho-so', label: 'Hồ sơ' },
-  { key: 'thong-ke', label: 'Thống kê' },
-  { key: 'co-dong', label: 'Cổ đông' },
-  { key: 'von-co-tuc', label: 'Vốn và cổ tức' },
-  { key: 'su-kien', label: 'Lịch sự kiện' },
-  { key: 'tai-chinh', label: 'Tài chính' },
+  { key: 'so-lenh', labelKey: 'orderBook' },
+  { key: 'ho-so', labelKey: 'profile' },
+  { key: 'thong-ke', labelKey: 'stats' },
+  { key: 'co-dong', labelKey: 'shareholders' },
+  { key: 'von-co-tuc', labelKey: 'capitalDividend' },
+  { key: 'su-kien', labelKey: 'events' },
+  { key: 'tai-chinh', labelKey: 'financials' },
 ] as const
 type TabKey = (typeof TABS)[number]['key']
 
@@ -76,6 +77,7 @@ function DepthRow({
 }
 
 function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null }) {
+  const { t } = useLanguage()
   const [trades, setTrades] = useState<IntradayTrade[] | undefined>()
 
   useEffect(() => {
@@ -99,7 +101,7 @@ function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null 
   }, [symbol])
 
   if (!quote) {
-    return <EmptyState text="Theo dõi mã này để xem sổ lệnh thời gian thực" />
+    return <EmptyState text={t('companyTabs.orderBook.noQuote')} />
   }
 
   const bidTotal = quote.bid_1_volume + quote.bid_2_volume + quote.bid_3_volume
@@ -110,16 +112,16 @@ function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>
-          Độ sâu thị trường
+          {t('companyTabs.orderBook.marketDepth')}
         </p>
         <table className="w-full">
           <thead>
             <tr style={{ color: 'var(--text-faint)' }}>
               <th className="text-left text-[10px] font-medium pb-1"></th>
-              <th className="text-right text-[10px] font-medium pb-1">KL mua</th>
-              <th className="text-right text-[10px] font-medium pb-1">Giá mua</th>
-              <th className="text-left text-[10px] font-medium pb-1 pl-3">Giá bán</th>
-              <th className="text-left text-[10px] font-medium pb-1">KL bán</th>
+              <th className="text-right text-[10px] font-medium pb-1">{t('companyTabs.orderBook.bidVolume')}</th>
+              <th className="text-right text-[10px] font-medium pb-1">{t('companyTabs.orderBook.bidPrice')}</th>
+              <th className="text-left text-[10px] font-medium pb-1 pl-3">{t('companyTabs.orderBook.askPrice')}</th>
+              <th className="text-left text-[10px] font-medium pb-1">{t('companyTabs.orderBook.askVolume')}</th>
             </tr>
           </thead>
           <tbody>
@@ -131,8 +133,8 @@ function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null 
 
         <div className="mt-3">
           <div className="flex justify-between text-[11px] mb-1">
-            <span style={{ color: '#10b981' }}>Dư mua {fmtNumber(bidTotal)}</span>
-            <span style={{ color: '#ef4444' }}>Dư bán {fmtNumber(askTotal)}</span>
+            <span style={{ color: '#10b981' }}>{t('companyTabs.orderBook.bid', { volume: fmtNumber(bidTotal) })}</span>
+            <span style={{ color: '#ef4444' }}>{t('companyTabs.orderBook.ask', { volume: fmtNumber(askTotal) })}</span>
           </div>
           <div className="flex h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-surface)' }}>
             <div style={{ width: bidPct + '%', background: '#10b981' }} />
@@ -143,31 +145,31 @@ function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null 
 
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--text-faint)' }}>
-          Khớp lệnh gần nhất
+          {t('companyTabs.orderBook.latestMatches')}
         </p>
         {trades === undefined ? (
           <Loading />
         ) : trades.length === 0 ? (
-          <EmptyState text="Chưa có dữ liệu khớp lệnh" />
+          <EmptyState text={t('companyTabs.orderBook.noMatches')} />
         ) : (
           <div className="max-h-64 overflow-y-auto">
             <table className="w-full text-[11px]">
               <thead className="sticky top-0" style={{ background: 'var(--bg-card)' }}>
                 <tr style={{ color: 'var(--text-faint)' }}>
-                  <th className="text-left font-medium py-1">Thời gian</th>
-                  <th className="text-right font-medium py-1">Giá</th>
-                  <th className="text-right font-medium py-1">KL</th>
-                  <th className="text-right font-medium py-1">M/B</th>
+                  <th className="text-left font-medium py-1">{t('companyTabs.orderBook.time')}</th>
+                  <th className="text-right font-medium py-1">{t('companyTabs.orderBook.price')}</th>
+                  <th className="text-right font-medium py-1">{t('companyTabs.orderBook.volume')}</th>
+                  <th className="text-right font-medium py-1">{t('companyTabs.orderBook.buySell')}</th>
                 </tr>
               </thead>
               <tbody>
-                {trades.map((t, i) => (
+                {trades.map((trade, i) => (
                   <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)' }}>
-                    <td className="py-1" style={{ color: 'var(--text-faint)' }}>{t.time}</td>
-                    <td className="py-1 text-right tabular-nums" style={{ color: 'var(--text-primary)' }}>{fmtNumber(t.price)}</td>
-                    <td className="py-1 text-right tabular-nums" style={{ color: 'var(--text-secondary)' }}>{fmtNumber(t.volume)}</td>
-                    <td className="py-1 text-right font-medium" style={{ color: t.match_type === 'Buy' ? '#10b981' : '#ef4444' }}>
-                      {t.match_type === 'Buy' ? 'M' : 'B'}
+                    <td className="py-1" style={{ color: 'var(--text-faint)' }}>{trade.time}</td>
+                    <td className="py-1 text-right tabular-nums" style={{ color: 'var(--text-primary)' }}>{fmtNumber(trade.price)}</td>
+                    <td className="py-1 text-right tabular-nums" style={{ color: 'var(--text-secondary)' }}>{fmtNumber(trade.volume)}</td>
+                    <td className="py-1 text-right font-medium" style={{ color: trade.match_type === 'Buy' ? '#10b981' : '#ef4444' }}>
+                      {trade.match_type === 'Buy' ? t('companyTabs.orderBook.buy') : t('companyTabs.orderBook.sell')}
                     </td>
                   </tr>
                 ))}
@@ -181,6 +183,7 @@ function OrderBook({ symbol, quote }: { symbol: string; quote: LiveQuote | null 
 }
 
 export default function CompanyTabs({ symbol, quote }: { symbol: string; quote: LiveQuote | null }) {
+  const { t } = useLanguage()
   const [tab, setTab] = useState<TabKey>('so-lenh')
 
   const [overview, setOverview] = useState<StockOverview | null>()
@@ -219,19 +222,19 @@ export default function CompanyTabs({ symbol, quote }: { symbol: string; quote: 
   return (
     <div className="section-card" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
       <div className="flex gap-0 overflow-x-auto mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-        {TABS.map((t) => (
+        {TABS.map((tabItem) => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className="px-3.5 py-2.5 text-[13px] whitespace-nowrap transition-colors"
             style={{
-              color: tab === t.key ? '#2563eb' : 'var(--text-muted)',
-              fontWeight: tab === t.key ? 600 : 400,
-              borderBottom: tab === t.key ? '2px solid #2563eb' : '2px solid transparent',
+              color: tab === tabItem.key ? '#2563eb' : 'var(--text-muted)',
+              fontWeight: tab === tabItem.key ? 600 : 400,
+              borderBottom: tab === tabItem.key ? '2px solid #2563eb' : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
-            {t.label}
+            {t(`companyTabs.tabs.${tabItem.labelKey}`)}
           </button>
         ))}
       </div>
@@ -240,27 +243,27 @@ export default function CompanyTabs({ symbol, quote }: { symbol: string; quote: 
         {tab === 'so-lenh' && <OrderBook symbol={symbol} quote={quote} />}
 
           {tab === 'ho-so' && (
-          overview === undefined ? <Loading /> : !overview ? <EmptyState text="Chưa có dữ liệu hồ sơ công ty" /> : (
+          overview === undefined ? <Loading /> : !overview ? <EmptyState text={t('companyTabs.profile.loading')} /> : (
             <div className="space-y-3">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[12px]">
-                <div><p style={{ color: 'var(--text-faint)' }}>Ngành</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.sector || '—'}</p></div>
-                <div><p style={{ color: 'var(--text-faint)' }}>Vốn hoá</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview.market_cap)}</p></div>
-                <div><p style={{ color: 'var(--text-faint)' }}>Ngày niêm yết</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.listing_date?.slice(0, 10) || '—'}</p></div>
-                <div><p style={{ color: 'var(--text-faint)' }}>% Sở hữu nước ngoài</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.foreigner_percentage != null ? `${(overview.foreigner_percentage * 100).toFixed(1)}%` : '—'}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.profile.sector')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.sector || '—'}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.profile.marketCap')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview.market_cap)}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.profile.listingDate')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.listing_date?.slice(0, 10) || '—'}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.profile.foreignOwnership')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview.foreigner_percentage != null ? `${(overview.foreigner_percentage * 100).toFixed(1)}%` : '—'}</p></div>
               </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{overview.company_profile || 'Chưa có mô tả công ty'}</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{overview.company_profile || t('companyTabs.profile.noDescription')}</p>
             </div>
           )
         )}
 
         {tab === 'co-dong' && (
-          shareholders === undefined ? <Loading /> : shareholders.length === 0 ? <EmptyState text="Chưa có dữ liệu cổ đông" /> : (
+          shareholders === undefined ? <Loading /> : shareholders.length === 0 ? <EmptyState text={t('companyTabs.shareholders.empty')} /> : (
             <table className="w-full text-[12px]">
               <thead>
                 <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <th className="text-left font-medium py-2">Cổ đông</th>
-                  <th className="text-right font-medium py-2">Số lượng CP</th>
-                  <th className="text-right font-medium py-2">% sở hữu</th>
+                  <th className="text-left font-medium py-2">{t('companyTabs.shareholders.name')}</th>
+                  <th className="text-right font-medium py-2">{t('companyTabs.shareholders.quantity')}</th>
+                  <th className="text-right font-medium py-2">{t('companyTabs.shareholders.percent')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,16 +283,16 @@ export default function CompanyTabs({ symbol, quote }: { symbol: string; quote: 
           overview === undefined ? <Loading /> : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-[12px]">
-                <div><p style={{ color: 'var(--text-faint)' }}>Số CP đang lưu hành</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.issue_share)}</p></div>
-                <div><p style={{ color: 'var(--text-faint)' }}>Cổ tức / CP (ước tính)</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.dividend_per_share_tsr)}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.capitalDividend.outstandingShares')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.issue_share)}</p></div>
+                <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.capitalDividend.dividendPerShare')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.dividend_per_share_tsr)}</p></div>
               </div>
-              <EmptyState text="Chưa có dữ liệu lịch sử vốn/cổ tức chi tiết theo từng đợt" />
+              <EmptyState text={t('companyTabs.capitalDividend.noHistory')} />
             </div>
           )
         )}
 
         {tab === 'su-kien' && (
-          events === undefined ? <Loading /> : events.length === 0 ? <EmptyState text="Chưa có sự kiện nào" /> : (
+          events === undefined ? <Loading /> : events.length === 0 ? <EmptyState text={t('companyTabs.events.empty')} /> : (
             <div className="space-y-2">
               {events.map((ev) => (
                 <div key={ev.id} className="py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
@@ -304,33 +307,33 @@ export default function CompanyTabs({ symbol, quote }: { symbol: string; quote: 
         {tab === 'thong-ke' && (
           overview === undefined ? <Loading /> : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-[12px]">
-              <div><p style={{ color: 'var(--text-faint)' }}>KL khớp TB 1 tháng</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.average_match_volume1_month)}</p></div>
-              <div><p style={{ color: 'var(--text-faint)' }}>GT khớp TB 1 tháng</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.average_match_value1_month)}</p></div>
-              <div><p style={{ color: 'var(--text-faint)' }}>Cao nhất 52 tuần</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.highest_price1_year)}</p></div>
-              <div><p style={{ color: 'var(--text-faint)' }}>Thấp nhất 52 tuần</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.lowest_price1_year)}</p></div>
-              <div><p style={{ color: 'var(--text-faint)' }}>% Nhà nước sở hữu</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview?.state_percentage != null ? `${(overview.state_percentage * 100).toFixed(1)}%` : '—'}</p></div>
-              <div><p style={{ color: 'var(--text-faint)' }}>Giá mục tiêu (khuyến nghị)</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.target_price)}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.avgVolume1m')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.average_match_volume1_month)}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.avgValue1m')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.average_match_value1_month)}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.high52w')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.highest_price1_year)}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.low52w')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.lowest_price1_year)}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.statePercent')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{overview?.state_percentage != null ? `${(overview.state_percentage * 100).toFixed(1)}%` : '—'}</p></div>
+              <div><p style={{ color: 'var(--text-faint)' }}>{t('companyTabs.stats.targetPrice')}</p><p style={{ color: 'var(--text-primary)' }} className="font-medium">{fmtNumber(overview?.target_price)}</p></div>
             </div>
           )
         )}
 
         {tab === 'tai-chinh' && (
-          financials === undefined ? <Loading /> : !financials.available ? <EmptyState text="Chưa có dữ liệu báo cáo tài chính" /> : (
+          financials === undefined ? <Loading /> : !financials.available ? <EmptyState text={t('companyTabs.financials.empty')} /> : (
             <div className="space-y-6">
-              <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>Giới hạn 4 kỳ gần nhất (gói dữ liệu cộng đồng)</p>
+              <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>{t('companyTabs.financials.limitedNote')}</p>
               {([
-                ['Kết quả kinh doanh', financials.income_statement],
-                ['Bảng cân đối kế toán', financials.balance_sheet],
-                ['Lưu chuyển tiền tệ', financials.cash_flow],
-              ] as const).map(([title, rows]) =>
+                ['incomeStatement', financials.income_statement],
+                ['balanceSheet', financials.balance_sheet],
+                ['cashFlow', financials.cash_flow],
+              ] as const).map(([titleKey, rows]) =>
                 rows.length === 0 ? null : (
-                  <div key={title}>
-                    <h4 className="text-[13px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{title}</h4>
+                  <div key={titleKey}>
+                    <h4 className="text-[13px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{t(`companyTabs.financials.${titleKey}`)}</h4>
                     <div className="overflow-x-auto">
                       <table className="w-full text-[11px]">
                         <thead>
                           <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                            <th className="text-left font-medium py-1.5 pr-3">Chỉ tiêu</th>
+                            <th className="text-left font-medium py-1.5 pr-3">{t('companyTabs.financials.item')}</th>
                             {years(rows).map((y) => <th key={y} className="text-right font-medium py-1.5 pl-3">{y}</th>)}
                           </tr>
                         </thead>

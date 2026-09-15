@@ -12,6 +12,7 @@ import {
 import BrandMark from '../common/BrandMark'
 import { useAuth } from '../../context/AuthContext'
 import { useLayout } from '../../context/LayoutContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 /** Điều hướng quản trị, gom theo việc admin thực sự làm.
  *
@@ -24,28 +25,28 @@ import { useLayout } from '../../context/LayoutContext'
  *    không có thao tác quản trị nào, và kém hơn trang Bảng giá đã có.
  * 9/10 trang không có một liên kết đi tiếp nào.
  */
-const groups: { title: string; links: { to: string; icon: typeof LayoutDashboard; label: string }[] }[] = [
+const groups: { titleKey: string; links: { to: string; icon: typeof LayoutDashboard; labelKey: string }[] }[] = [
   {
-    title: 'Vận hành',
+    titleKey: 'adminSidebar.groupOps',
     links: [
-      { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
-      { to: '/admin/news', icon: Newspaper, label: 'Dữ liệu tin tức' },
-      { to: '/admin/labeling', icon: PenLine, label: 'Tự đọc và xác nhận' },
+      { to: '/admin/dashboard', icon: LayoutDashboard, labelKey: 'adminSidebar.dashboard' },
+      { to: '/admin/news', icon: Newspaper, labelKey: 'adminSidebar.news' },
+      { to: '/admin/labeling', icon: PenLine, labelKey: 'adminSidebar.labeling' },
     ],
   },
   {
-    title: 'Chất lượng',
+    titleKey: 'adminSidebar.groupQuality',
     links: [
-      { to: '/admin/quality', icon: ShieldCheck, label: 'Chất lượng dữ liệu' },
-      { to: '/admin/tuning', icon: Sliders, label: 'Cách đọc hiểu bài' },
+      { to: '/admin/quality', icon: ShieldCheck, labelKey: 'adminSidebar.quality' },
+      { to: '/admin/tuning', icon: Sliders, labelKey: 'adminSidebar.tuning' },
     ],
   },
   {
-    title: 'Hệ thống',
+    titleKey: 'adminSidebar.groupSystem',
     links: [
-      { to: '/admin/users', icon: Users, label: 'Người dùng' },
-      { to: '/admin/live', icon: TrendingUp, label: 'Cổ phiếu' },
-      { to: '/admin/profile', icon: Settings, label: 'Hồ sơ của tôi' },
+      { to: '/admin/users', icon: Users, labelKey: 'adminSidebar.users' },
+      { to: '/admin/live', icon: TrendingUp, labelKey: 'adminSidebar.stocks' },
+      { to: '/admin/profile', icon: Settings, labelKey: 'adminSidebar.profile' },
     ],
   },
 ]
@@ -54,6 +55,7 @@ const groups: { title: string; links: { to: string; icon: typeof LayoutDashboard
 export default function AdminSidebar() {
   const { user } = useAuth()
   const { sidebarOpen, closeSidebar } = useLayout()
+  const { t } = useLanguage()
   const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
 
   return (
@@ -70,7 +72,7 @@ export default function AdminSidebar() {
       className={`w-64 flex flex-col flex-shrink-0 fixed inset-y-0 left-0 z-50 transition-transform duration-200 lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}
-      aria-label="Điều hướng quản trị"
+      aria-label={t('adminSidebar.nav')}
       style={{
         background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%)',
         borderRight: '2px solid #10b981',
@@ -91,7 +93,7 @@ export default function AdminSidebar() {
               FinNexus KG
             </h1>
             <p className="text-[10px] mt-0.5 truncate" style={{ color: '#10b981' }}>
-              Admin Console
+              {t('adminSidebar.console')}
             </p>
           </div>
         </div>
@@ -100,15 +102,15 @@ export default function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-3 overflow-y-auto">
         {groups.map((group) => (
-          <div key={group.title} className="mb-3">
+          <div key={group.titleKey} className="mb-3">
             <p
               className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-widest"
               style={{ color: 'var(--text-faint)' }}
             >
-              {group.title}
+              {t(group.titleKey)}
             </p>
             <div className="space-y-0.5">
-              {group.links.map(({ to, icon: Icon, label }) => (
+              {group.links.map(({ to, icon: Icon, labelKey }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -132,7 +134,7 @@ export default function AdminSidebar() {
                         className="flex-shrink-0 transition-colors"
                         style={{ color: isActive ? '#10b981' : 'var(--text-muted)' }}
                       />
-                      <span className="flex-1 text-[13px]">{label}</span>
+                      <span className="flex-1 text-[13px]">{t(labelKey)}</span>
                       {isActive && (
                         <div
                           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -170,7 +172,7 @@ export default function AdminSidebar() {
             <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>
               {user?.full_name || user?.email}
             </p>
-            <p className="text-[10px]" style={{ color: '#10b981' }}>Quản trị viên</p>
+            <p className="text-[10px]" style={{ color: '#10b981' }}>{t('adminSidebar.adminRole')}</p>
           </div>
         </div>
       </NavLink>

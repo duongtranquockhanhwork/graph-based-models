@@ -1,0 +1,30 @@
+export default {
+  events: {
+    profit_growth: 'Profit growth',
+    profit_decline: 'Profit decline',
+    dividend: 'Dividend',
+    merger: 'Merger/acquisition',
+    new_contract: 'Contract/tender win',
+    penalty: 'Violation/penalty',
+    leadership_change: 'Leadership change',
+    share_issuance: 'Share issuance',
+    expansion: 'Expansion',
+  },
+  sentiment: {
+    Positive: 'Good news',
+    Negative: 'Bad news',
+    Neutral: 'Neutral news',
+  },
+  trend: {
+    INCREASING: 'May rise',
+    DECREASING: 'May fall',
+    UNCHANGED: 'Little change',
+  },
+  viewStock: 'View stock information for {{symbol}}',
+  filterByEvent: 'Filter news with {{label}}',
+  notPredicted: 'Not predicted',
+  notPredictedTitle: 'Open the article to see why this could not be predicted',
+  abstainedTitle: 'The system is not confident enough to make a prediction for this article',
+  confidenceTitle: 'System confidence level: {{pct}}%',
+  abstained: 'Not confident enough',
+}

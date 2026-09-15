@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import AuthLayout from '../../components/Auth/AuthLayout'
 import EmailOtpForm from '../../components/Auth/EmailOtpForm'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 const HOME_BY_ROLE: Record<'admin' | 'customer', string> = {
   admin: '/admin/dashboard',
@@ -19,6 +20,7 @@ function errDetail(err: unknown): string | undefined {
 
 export default function CompleteProfilePage() {
   const { user, isAuthenticated, isLoading, completeProfile, linkEmail } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [fullName, setFullName] = useState(user?.full_name || '')
   const [dateOfBirth, setDateOfBirth] = useState(user?.date_of_birth || '')
@@ -49,9 +51,9 @@ export default function CompleteProfilePage() {
     setIsSubmitting(true)
     try {
       await completeProfile(fullName, dateOfBirth)
-      toast.success('Đã lưu thông tin hồ sơ')
+      toast.success(t('completeProfile.saveSuccessToast'))
     } catch (err) {
-      toast.error(errDetail(err) || 'Không thể lưu thông tin')
+      toast.error(errDetail(err) || t('completeProfile.saveErrorToast'))
     } finally {
       setIsSubmitting(false)
     }
@@ -60,18 +62,18 @@ export default function CompleteProfilePage() {
   const handleEmailLinked = async (email: string, code: string) => {
     try {
       await linkEmail(email, code)
-      toast.success('Đã liên kết email')
+      toast.success(t('completeProfile.emailLinkedToast'))
     } catch (err) {
-      toast.error(errDetail(err) || 'Không thể liên kết email')
+      toast.error(errDetail(err) || t('completeProfile.emailLinkErrorToast'))
     }
   }
 
   return (
-    <AuthLayout title="Hoàn tất hồ sơ" subtitle="Cần thêm vài thông tin trước khi tiếp tục">
+    <AuthLayout title={t('completeProfile.title')} subtitle={t('completeProfile.subtitle')}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Họ và tên
+            {t('completeProfile.fullNameLabel')}
           </label>
           <div className="relative">
             <UserIcon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -80,7 +82,7 @@ export default function CompleteProfilePage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Nguyễn Văn A"
+              placeholder={t('completeProfile.fullNamePlaceholder')}
               className="field-input pl-10"
             />
           </div>
@@ -88,7 +90,7 @@ export default function CompleteProfilePage() {
 
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Ngày sinh
+            {t('completeProfile.dateOfBirthLabel')}
           </label>
           <div className="relative">
             <Calendar size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -113,16 +115,16 @@ export default function CompleteProfilePage() {
           }}
         >
           {isSubmitting && <Loader2 size={15} className="animate-spin" />}
-          Lưu thông tin
+          {t('completeProfile.saveButton')}
         </button>
       </form>
 
       {needsVerification && (
         <div className="mt-6 pt-5 space-y-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
           <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-            Tài khoản của bạn chưa xác thực OTP qua email — bắt buộc để tiếp tục sử dụng.
+            {t('completeProfile.verificationRequiredMessage')}
           </p>
-          <EmailOtpForm onVerified={handleEmailLinked} submitLabel="Liên kết email" />
+          <EmailOtpForm onVerified={handleEmailLinked} submitLabel={t('completeProfile.linkEmailButton')} />
         </div>
       )}
     </AuthLayout>

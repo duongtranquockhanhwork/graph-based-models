@@ -1,9 +1,10 @@
 import { Target } from 'lucide-react'
 import { useModelInfo } from '../../hooks/useModelInfo'
 import type { EntryLadder, EntryLadderCell } from '../../types'
+import { useLanguage } from '../../context/LanguageContext'
 
-const VOLATILITY_LABEL = { LOW: 'thấp', MID: 'vừa', HIGH: 'cao' } as const
-const BAND_LABEL = { LOW: 'thấp', MEDIUM: 'trung bình', HIGH: 'cao' } as const
+const VOLATILITY_KEYS = ['LOW', 'MID', 'HIGH'] as const
+const BAND_KEYS = ['LOW', 'MEDIUM', 'HIGH'] as const
 // Giá tham chiếu từ mô hình tính theo nghìn đồng; hiển thị theo đồng cho khớp
 // với trang cổ phiếu và vùng giá tham khảo.
 const PANEL_TO_VND = 1000
@@ -23,7 +24,7 @@ function price(value: number): string {
   return value.toLocaleString('vi-VN', { maximumFractionDigits: 0 })
 }
 
-type Pick = { cell: EntryLadderCell; volatility: keyof typeof VOLATILITY_LABEL | null; band: keyof typeof BAND_LABEL; exact: boolean }
+type Pick = { cell: EntryLadderCell; volatility: (typeof VOLATILITY_KEYS)[number] | null; band: (typeof BAND_KEYS)[number]; exact: boolean }
 
 /** Nhóm sự kiện giống bài này nhất mà vẫn đủ số lần quan sát: cùng mức biến
  *  động trước tin và cùng mức biến động mô hình dự kiến; thiếu dữ liệu thì lùi
@@ -60,8 +61,19 @@ export default function EntryLadderPanel({
   referenceClose: number | null
   referenceSession: string | null
 }) {
+  const { t } = useLanguage()
   const info = useModelInfo()
   const ladder = info?.entry_ladder
+  const VOLATILITY_LABEL: Record<(typeof VOLATILITY_KEYS)[number], string> = {
+    LOW: t('entryLadder.volatilityLabel.LOW'),
+    MID: t('entryLadder.volatilityLabel.MID'),
+    HIGH: t('entryLadder.volatilityLabel.HIGH'),
+  }
+  const BAND_LABEL: Record<(typeof BAND_KEYS)[number], string> = {
+    LOW: t('entryLadder.bandLabel.LOW'),
+    MEDIUM: t('entryLadder.bandLabel.MEDIUM'),
+    HIGH: t('entryLadder.bandLabel.HIGH'),
+  }
   if (!ladder?.cells?.ALL) return null
 
   const pLarge = 1 - (probabilities.NEUTRAL ?? 0)
@@ -73,10 +85,10 @@ export default function EntryLadderPanel({
 
   const market = chosen.cell.market_at_next_open.mean_net_if_filled
   const rows = [
-    ...(market != null ? [{ key: 'open', label: 'Mua khi mở cửa phiên kế tiếp', at: null as number | null, fill: 1, net: market }] : []),
+    ...(market != null ? [{ key: 'open', label: t('entryLadder.buyAtNextOpen'), at: null as number | null, fill: 1, net: market }] : []),
     ...levels.map((row) => ({
       key: String(row.level),
-      label: row.level === 0 ? 'Đặt mua đúng giá tham chiếu' : `Đặt mua thấp hơn ${pct(-row.level)}`,
+      label: row.level === 0 ? t('entryLadder.buyAtReference') : t('entryLadder.buyBelowReference', { pct: pct(-row.level) }),
       at: referenceClose != null ? referenceClose * PANEL_TO_VND * (1 + row.level) : null,
       fill: row.fill_rate as number,
       net: row.mean_net_if_filled ?? null,
@@ -90,39 +102,39 @@ export default function EntryLadderPanel({
 
   return (
     <section
-      aria-label="Mua ở giá nào thì được gì"
+      aria-label={t('entryLadder.ariaLabel')}
       className="rounded-xl p-3 mt-2 space-y-2"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
     >
       <p className="text-[11px] font-semibold uppercase tracking-wide flex items-center gap-1.5" style={{ color: 'var(--text-faint)' }}>
-        <Target size={12} /> Mua ở giá nào thì được gì — theo dữ liệu đã xảy ra
+        <Target size={12} /> {t('entryLadder.heading')}
       </p>
       <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-        So với giá tham chiếu
+        {t('entryLadder.comparedToReference')}
         {referenceClose != null && (
           <>
             {' '}
-            <strong style={{ color: 'var(--text-primary)' }}>{price(referenceClose * PANEL_TO_VND)}</strong> (đồng
-            {referenceSession ? `, đóng cửa phiên ${referenceSession}` : ''})
+            <strong style={{ color: 'var(--text-primary)' }}>{price(referenceClose * PANEL_TO_VND)}</strong> ({t('entryLadder.thousandDong')}
+            {referenceSession ? t('entryLadder.closeOfSession', { session: referenceSession }) : ''})
           </>
         )}
-        . Nhóm so sánh:{' '}
+        . {t('entryLadder.comparisonGroup')}{' '}
         {chosen.volatility
-          ? `mã có biến động trước tin ${VOLATILITY_LABEL[chosen.volatility]}${
-              chosen.exact ? `, mức biến động dự kiến ${BAND_LABEL[chosen.band]}` : ''
+          ? `${t('entryLadder.groupVolatility', { volatility: VOLATILITY_LABEL[chosen.volatility] })}${
+              chosen.exact ? t('entryLadder.groupExpectedBand', { band: BAND_LABEL[chosen.band] }) : ''
             }`
-          : 'mọi sự kiện'}{' '}
-        — {chosen.cell.events.toLocaleString('vi-VN')} lần quan sát.
+          : t('entryLadder.groupAll')}{' '}
+        {t('entryLadder.observationsCount', { count: chosen.cell.events.toLocaleString('vi-VN') })}
       </p>
 
       <div className="overflow-x-auto">
         <table className="w-full text-[11px] tabular-nums">
           <thead>
             <tr style={{ color: 'var(--text-faint)' }}>
-              <th className="text-left font-medium py-1 pr-2">Cách vào lệnh</th>
-              <th className="text-right font-medium py-1 px-2">Giá</th>
-              <th className="text-right font-medium py-1 px-2">Khớp trong {ladder.sessions} phiên</th>
-              <th className="text-right font-medium py-1 pl-2">Lãi/lỗ TB sau phí khi khớp</th>
+              <th className="text-left font-medium py-1 pr-2">{t('entryLadder.colEntryMethod')}</th>
+              <th className="text-right font-medium py-1 px-2">{t('entryLadder.colPrice')}</th>
+              <th className="text-right font-medium py-1 px-2">{t('entryLadder.colFillRate', { sessions: ladder.sessions })}</th>
+              <th className="text-right font-medium py-1 pl-2">{t('entryLadder.colNetProfit')}</th>
             </tr>
           </thead>
           <tbody>
@@ -142,20 +154,22 @@ export default function EntryLadderPanel({
 
       <p className="text-[11px]" style={{ color: 'var(--text-secondary)' }}>
         {anyProfit
-          ? 'Có mức giá cho lãi trung bình dương ở nhóm này, nhưng khi xét hàng chục nhóm cùng lúc, vài nhóm dương là điều ngẫu nhiên cũng tạo ra được — đừng coi đó là tín hiệu.'
-          : `Không mức giá nào cho lãi trung bình sau phí ở nhóm này.${
-              waitingLosesLess
-                ? ' Chờ giá thấp hơn làm khoản lỗ trung bình nhỏ lại, đổi lại lệnh ít khi khớp hơn.'
-                : ''
-            }`}
+          ? t('entryLadder.anyProfitNotice')
+          : t('entryLadder.noProfitNotice', {
+              waitingNote: waitingLosesLess ? t('entryLadder.waitingLosesLessNote') : '',
+            })}
       </p>
       <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>
-        Tỉ lệ khớp ước lượng trên dữ liệu tới {ladder.validation.trained_until} và kiểm lại trên năm{' '}
-        {ladder.validation.checked_on}
-        {error != null ? `: lệch trung bình ${(error * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 })} điểm %` : ''}.
-        Lệnh khớp ở phiên đầu tiên có giá thấp nhất chạm mức đặt; lãi/lỗ tính tới giá đóng cửa phiên thứ{' '}
-        {ladder.sessions}, sau phí mua bán {pct(ladder.round_trip_cost, 1)}. Số liệu mô tả điều đã xảy ra, không phải
-        lời khuyên đầu tư.
+        {t('entryLadder.footerNote', {
+          trainedUntil: ladder.validation.trained_until,
+          checkedOn: ladder.validation.checked_on,
+          errorNote:
+            error != null
+              ? t('entryLadder.errorNote', { error: (error * 100).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) })
+              : '',
+          sessions: ladder.sessions,
+          cost: pct(ladder.round_trip_cost, 1),
+        })}
       </p>
     </section>
   )

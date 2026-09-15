@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from firebase_admin import auth as firebase_auth
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -10,6 +11,7 @@ from app.core.email_otp import issue_code as issue_email_otp
 from app.core.email_otp import verify_code as verify_email_otp
 from app.core.firebase import get_firebase_app
 from app.core.ratelimit import (
+    email_exists_limit,
     email_otp_request_limit,
     email_otp_verify_limit,
     forgot_password_limit,
@@ -35,6 +37,7 @@ from app.schemas.auth import (
     PhoneVerifyRequest,
     ResetPasswordRequest,
     TokenResponse,
+    UpdateLanguageRequest,
     UpdateProfileRequest,
     UserLogin,
     UserOut,
@@ -164,6 +167,19 @@ def link_phone(
     return current_user
 
 
+@router.get("/email-exists", dependencies=[Depends(email_exists_limit)])
+def check_email_exists(email: EmailStr = Query(...), db: Session = Depends(get_db)):
+    """Cho frontend kiểm tra email đã có tài khoản chưa TRƯỚC khi gửi OTP
+    đăng ký, để tránh gửi mã cho một email sẽ bị từ chối ngay sau đó (xem
+    nhánh "email đã có tài khoản" trong /email-otp/verify).
+
+    Cố ý lộ thông tin tồn tại của email (khác /email-otp/request) — đây là
+    lựa chọn UX có chủ đích, bù lại bằng rate limit riêng (email_exists_limit).
+    """
+    exists = db.query(User).filter(User.email == email).first() is not None
+    return {"exists": exists}
+
+
 @router.post("/email-otp/request", dependencies=[Depends(email_otp_request_limit)])
 def request_email_otp(payload: EmailOtpRequest):
     code = issue_email_otp(payload.email)
@@ -245,6 +261,21 @@ def update_me(
         # "" xoá avatar (về lại chữ cái đầu tên); chuỗi khác thì đã được
         # _validate_avatar_url xác nhận là data URI ảnh hợp lệ.
         current_user.avatar_url = payload.avatar_url or None
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.patch("/language", response_model=UserOut)
+def update_language(
+    payload: UpdateLanguageRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Đổi ngôn ngữ giao diện, lưu riêng cho tài khoản đang đăng nhập. Tách
+    khỏi PATCH /me vì đó bắt buộc full_name — đổi ngôn ngữ không nên kéo theo
+    yêu cầu đó."""
+    current_user.language = payload.language
     db.commit()
     db.refresh(current_user)
     return current_user

@@ -1,0 +1,28 @@
+export default {
+  types: {
+    candle: 'Candle',
+    ohlc: 'OHLC bars',
+    line: 'Line',
+    area: 'Area',
+    bar: 'Bar',
+  },
+  maTooltip: '{{period}}-session moving average',
+  volume: 'Volume',
+  zoomIn: 'Zoom in',
+  zoomInAriaLabel: 'Zoom in on chart',
+  zoomOut: 'Zoom out',
+  zoomOutAriaLabel: 'Zoom out on chart',
+  resetView: 'View full range',
+  resetViewAriaLabel: 'View the entire time range',
+  sessionsVisible: '{{visible}}/{{total}} sessions',
+  overviewStripAriaLabel: 'Time range currently viewed',
+  noData: 'No historical price data yet',
+  tooltip: {
+    open: 'Open',
+    high: 'High',
+    low: 'Low',
+    close: 'Close',
+    volume: 'Volume',
+  },
+  hint: 'Scroll to zoom · drag horizontally to pan · double-click to reset view · drag the highlighted strip below to select a range',
+}
