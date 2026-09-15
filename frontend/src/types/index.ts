@@ -36,8 +36,6 @@ export interface NewsArticle {
   prediction_confidence?: number
   prediction_decision?: string
   prediction_explanation?: PredictionExplanation
-  /** Bản giải thích của Claude nếu đã từng tạo cho bài này. */
-  ai_analysis?: AiAnalysis | null
   is_analyzed: boolean
   needs_manual_label?: boolean
   manual_sentiment?: string
@@ -312,25 +310,6 @@ export interface RecommendationEvidence {
   }
 }
 
-/** Bản giải thích do Claude viết cho một bài, lưu trong NewsArticle.ai_analysis. */
-export interface AiAnalysis {
-  version: number
-  input_sha256: string
-  model: string
-  generated_at: string
-  analysis: {
-    what_happened: string
-    /** Điểm cụ thể (số liệu, quyết định, sự kiện) có khả năng ảnh hưởng đến
-     *  giá — khác risks_to_watch (caveat về độ tin cậy của chính bài báo). */
-    key_points: string[]
-    affected: { name: string; relation: 'DIRECT' | 'INDIRECT'; why: string }[]
-    model_reading: string
-    risks_to_watch: string[]
-    limits: string
-  }
-  usage?: Record<string, number | null>
-}
-
 export interface LiveQuote {
   symbol: string
   company_name: string | null
@@ -406,13 +385,33 @@ export interface PriceBand {
   symbol: string
   as_of_session: string | null
   sessions_used: number
+  /** model_panel: cùng bảng giá mô hình dùng · vnstock: khi mô hình chưa cấu hình. */
+  price_source: 'model_panel' | 'vnstock'
+  /** Mọi giá trong phản hồi tính theo đồng, như phần còn lại của trang cổ phiếu. */
+  price_unit: 'VND'
   current_price: number
   range_low: number
   range_high: number
   daily_volatility_pct: number
   pullback_reference_price: number
+  /** Số liệu đã kiểm chứng của bảng giá vào lệnh cho mức đặt lệnh gần mốc chờ nhất. */
+  validated_entry: PriceBandValidatedEntry | null
   is_investment_advice: false
   disclaimer: string
+}
+
+export interface PriceBandValidatedEntry {
+  volatility_group: 'LOW' | 'MID' | 'HIGH' | null
+  order_level: number
+  pullback_depth: number
+  fill_rate: number
+  mean_net_if_filled: number | null
+  market_at_next_open_mean_net: number | null
+  events: number | null
+  sessions: number
+  round_trip_cost: number
+  trained_until: string | null
+  checked_on: string | null
 }
 
 export interface Shareholder {

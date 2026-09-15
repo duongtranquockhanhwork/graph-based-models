@@ -4,6 +4,9 @@ import type { EntryLadder, EntryLadderCell } from '../../types'
 
 const VOLATILITY_LABEL = { LOW: 'thấp', MID: 'vừa', HIGH: 'cao' } as const
 const BAND_LABEL = { LOW: 'thấp', MEDIUM: 'trung bình', HIGH: 'cao' } as const
+// Giá tham chiếu từ mô hình tính theo nghìn đồng; hiển thị theo đồng cho khớp
+// với trang cổ phiếu và vùng giá tham khảo.
+const PANEL_TO_VND = 1000
 
 function pct(value: number, digits = 0): string {
   return `${(value * 100).toLocaleString('vi-VN', {
@@ -17,7 +20,7 @@ function signed(value: number): string {
 }
 
 function price(value: number): string {
-  return value.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  return value.toLocaleString('vi-VN', { maximumFractionDigits: 0 })
 }
 
 type Pick = { cell: EntryLadderCell; volatility: keyof typeof VOLATILITY_LABEL | null; band: keyof typeof BAND_LABEL; exact: boolean }
@@ -74,7 +77,7 @@ export default function EntryLadderPanel({
     ...levels.map((row) => ({
       key: String(row.level),
       label: row.level === 0 ? 'Đặt mua đúng giá tham chiếu' : `Đặt mua thấp hơn ${pct(-row.level)}`,
-      at: referenceClose != null ? referenceClose * (1 + row.level) : null,
+      at: referenceClose != null ? referenceClose * PANEL_TO_VND * (1 + row.level) : null,
       fill: row.fill_rate as number,
       net: row.mean_net_if_filled ?? null,
     })),
@@ -99,7 +102,7 @@ export default function EntryLadderPanel({
         {referenceClose != null && (
           <>
             {' '}
-            <strong style={{ color: 'var(--text-primary)' }}>{price(referenceClose)}</strong> (nghìn đồng
+            <strong style={{ color: 'var(--text-primary)' }}>{price(referenceClose * PANEL_TO_VND)}</strong> (đồng
             {referenceSession ? `, đóng cửa phiên ${referenceSession}` : ''})
           </>
         )}
