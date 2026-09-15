@@ -96,6 +96,47 @@ def _extract_by_paragraph_density(soup) -> Optional[str]:
 
 
 def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
+    """Tác vụ nền cho một bài: phân tích, và nếu hỏng thì ghi nhận là hỏng.
+
+    Starlette chạy các tác vụ nền của cùng một request NỐI TIẾP; một ngoại lệ
+    thoát ra ở một tác vụ làm mọi tác vụ phía sau không bao giờ chạy. Bài hỏng
+    còn kẹt mãi ở ``is_analyzed=False`` nên giao diện theo dõi tiến trình chờ vô
+    hạn. Chặn ở đây để mỗi bài kết thúc với một trạng thái rõ ràng, và các bài
+    còn lại trong lô vẫn được phân tích. SystemExit cũng chặn, vì vnai gọi
+    sys.exit khi vượt hạn mức.
+    """
+    try:
+        _analyze_one(news_id, importer_user_id)
+    except (Exception, SystemExit):
+        logger.exception("Phân tích bài %s thất bại", news_id)
+        _mark_analysis_failed(news_id)
+
+
+def _mark_analysis_failed(news_id: int) -> None:
+    try:
+        with SessionLocal() as db:
+            news = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
+            if not news:
+                return
+            news.predicted_trend = None
+            news.prediction_confidence = None
+            news.prediction_decision = "ERROR"
+            news.prediction_explanation = {
+                "status": "ERROR",
+                "reason": "analysis_failed",
+                "message": (
+                    "Hệ thống gặp lỗi khi phân tích bài này. "
+                    "Quản trị viên có thể chạy lại phân tích cho riêng bài này."
+                ),
+            }
+            news.needs_manual_label = True
+            news.is_analyzed = True
+            db.commit()
+    except Exception:
+        logger.exception("Không ghi được trạng thái lỗi cho bài %s", news_id)
+
+
+def _analyze_one(news_id: int, importer_user_id: Optional[int] = None) -> None:
     """Phân tích một bài báo trong tác vụ nền.
 
     Tác vụ này mở phiên CSDL của riêng nó. Bản trước nhận phiên của request
@@ -350,6 +391,7 @@ def list_news(
     current_user: User = Depends(get_current_user),
 ):
     limit = max(1, min(limit, 200))
+    skip = max(0, skip)
     query = db.query(NewsArticle)
     scope = owner_scope(current_user)
     if scope is not None:
@@ -375,13 +417,29 @@ def list_news(
         if stock:
             query = query.filter(cast(NewsArticle.stocks_mentioned, Text).ilike(f"%{stock.upper()}%"))
 
-        rows = query.order_by(NewsArticle.id.desc()).limit(skip + limit * 5).all()
-        if event_type:
-            rows = [n for n in rows if event_type in (n.events_detected or [])]
-        if stock:
-            stock_upper = stock.upper()
-            rows = [n for n in rows if stock_upper in (n.stocks_mentioned or [])]
-        return rows[skip : skip + limit]
+        # LIKE chỉ lọc thô: "ACB" khớp cả "ACBS". Bản trước lấy đúng
+        # skip + limit*5 dòng mới nhất rồi mới lọc chính xác, nên khi các dòng
+        # khớp thô nhưng sai nằm dày ở đầu, bài khớp thật ở sâu hơn bị bỏ sót và
+        # trang trả về thiếu hoặc rỗng. Giờ đọc theo từng lô cho tới khi gom đủ
+        # skip + limit bài khớp chính xác, hoặc hết dữ liệu.
+        stock_upper = stock.upper() if stock else None
+        wanted = skip + limit
+        batch_size = 500
+        matched: List[NewsArticle] = []
+        ordered = query.order_by(NewsArticle.id.desc())
+        offset = 0
+        while len(matched) < wanted:
+            batch = ordered.offset(offset).limit(batch_size).all()
+            if not batch:
+                break
+            for n in batch:
+                if event_type and event_type not in (n.events_detected or []):
+                    continue
+                if stock_upper and stock_upper not in (n.stocks_mentioned or []):
+                    continue
+                matched.append(n)
+            offset += len(batch)
+        return matched[skip:wanted]
 
     return query.order_by(NewsArticle.id.desc()).offset(skip).limit(limit).all()
 

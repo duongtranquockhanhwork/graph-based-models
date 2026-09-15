@@ -10,12 +10,16 @@ thực tế nhân lên theo số worker; khởi động lại thì bộ đếm v
 nhiều worker, thay ``_MemoryBackend`` bằng Redis mà giữ nguyên interface.
 """
 
+import ipaddress
 import threading
 import time
 from collections import defaultdict, deque
-from typing import Deque, Dict
+from functools import lru_cache
+from typing import Deque, Dict, Tuple
 
 from fastapi import HTTPException, Request, status
+
+from app.core.config import settings
 
 
 class _MemoryBackend:
@@ -50,10 +54,44 @@ def reset() -> None:
     _backend.reset()
 
 
+@lru_cache(maxsize=8)
+def _trusted_networks(raw: str) -> Tuple[ipaddress._BaseNetwork, ...]:
+    networks = []
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(part, strict=False))
+        except ValueError:
+            continue
+    return tuple(networks)
+
+
+def _is_trusted_proxy(host: str | None) -> bool:
+    if not host:
+        return False
+    try:
+        addr = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return any(addr in net for net in _trusted_networks(settings.TRUSTED_PROXY_IPS))
+
+
 def _client_key(request: Request, scope: str) -> str:
-    # X-Forwarded-For chỉ đáng tin khi có reverse proxy ta kiểm soát đặt nó.
-    # nginx trong repo này đặt X-Real-IP, nên ưu tiên nó rồi mới tới peer.
-    ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "unknown")
+    """Khoá đếm theo IP người gọi.
+
+    Bản trước ưu tiên header X-Real-IP bất kể ai gửi. Khi backend mở cổng trực
+    tiếp, kẻ tấn công chỉ cần đổi header này mỗi request là có một bộ đếm mới,
+    vượt mọi hạn mức đăng nhập và OTP. Giờ header chỉ được dùng khi kết nối
+    đến từ reverse proxy nằm trong TRUSTED_PROXY_IPS (nginx của hệ thống).
+    """
+    peer = request.client.host if request.client else None
+    ip = peer or "unknown"
+    if _is_trusted_proxy(peer):
+        forwarded = (request.headers.get("x-real-ip") or "").strip()
+        if forwarded:
+            ip = forwarded
     return f"{scope}:{ip}"
 
 

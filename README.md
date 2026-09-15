@@ -210,8 +210,8 @@ docker compose up -d --build
 | Dịch vụ | Địa chỉ |
 |---|---|
 | Giao diện | http://localhost:3000 |
-| API | http://localhost:8000 |
-| API docs | http://localhost:8000/docs *(tự động tắt khi `ENVIRONMENT=production`)* |
+| API | http://localhost:3000/api *(đi qua nginx; cổng 8000 của backend không mở ra ngoài để rate limit nhận đúng IP người gọi)* |
+| API docs | chỉ có khi chạy backend trực tiếp ở chế độ development: http://localhost:8000/docs |
 
 ### Chạy từng phần (development)
 

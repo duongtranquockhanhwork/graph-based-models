@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     SMTP_FROM: str = "no-reply@finnexus.local"
     FRONTEND_URL: str = "http://localhost:3000"
 
+    # Reverse proxy được tin cậy: IP hoặc dải CIDR, cách nhau bằng dấu phẩy. Chỉ
+    # khi kết nối đến TỪ một địa chỉ trong danh sách này, header X-Real-IP mới
+    # được dùng làm IP người dùng cho rate limit. Để trống (mặc định) thì luôn
+    # dùng IP của chính kết nối — header do client tự gửi không bao giờ được tin.
+    TRUSTED_PROXY_IPS: str = ""
+
     # Mô hình FinNexus KG (repo nghiên cứu). Trỏ tới thư mục gốc chứa
     # config/inference_article_scoring_v1.yaml và outputs/model_experiments/.
     # Để trống -> hệ thống chạy với bộ luật heuristic và nói rõ điều đó
