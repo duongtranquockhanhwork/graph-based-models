@@ -1,3 +1,4 @@
+import logging
 import math
 import time
 from datetime import datetime, timezone
@@ -5,9 +6,22 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 
+logger = logging.getLogger("finnexus.live_price")
+
 LIVE_QUOTE_TTL_SECONDS = 10
 
 _cache: Dict[str, Dict] = {}
+
+
+class PriceProviderUnavailable(RuntimeError):
+    """Bảng giá không trả lời được: vượt hạn mức, lỗi mạng, hay lỗi của chính
+    thư viện vnstock/vnai."""
+
+
+def _describe(exc: BaseException) -> str:
+    # vnai chèn emoji vào thông điệp lỗi; ghi nguyên văn ra console cp1252 của
+    # Windows sẽ lại sinh UnicodeEncodeError ngay trong lúc ghi log.
+    return f"{type(exc).__name__}: {exc}".encode("ascii", "backslashreplace").decode("ascii")
 
 
 def _num(value) -> float:
@@ -64,15 +78,21 @@ def _row_to_quote(row: pd.Series) -> Optional[Dict]:
 
 
 def _fetch_quotes(symbols: List[str]) -> Dict[str, Dict]:
-    from vnstock import Trading
-
     try:
+        # import nằm trong try: vnai có thể in thông báo (và hỏng vì mã hoá
+        # console) ngay lúc được nạp.
+        from vnstock import Trading
+
         trading = Trading(source="VCI")
         board = trading.price_board(symbols_list=symbols)
     except SystemExit as exc:
         # vnstock gọi sys.exit khi vượt hạn mức gọi API. Trong web server, điều
         # đó sẽ làm sập cả tiến trình; đổi thành lỗi thường của riêng request này.
-        raise RuntimeError(f"vnstock quota: {exc}") from None
+        raise PriceProviderUnavailable(f"vnstock quota: {_describe(exc)}") from None
+    except Exception as exc:
+        # Quá 20 yêu cầu/phút vnai ném RateLimitExceeded; trên console cp1252,
+        # dòng cảnh báo có emoji nó tự in ra lại ném UnicodeEncodeError.
+        raise PriceProviderUnavailable(_describe(exc)) from None
 
     result: Dict[str, Dict] = {}
     if ("listing", "symbol") not in board.columns:
@@ -90,7 +110,13 @@ def get_live_quotes(symbols: List[str]) -> Dict[str, Dict]:
     stale = [s for s in symbols if s not in _cache or now - _cache[s]["fetched_at"] > LIVE_QUOTE_TTL_SECONDS]
 
     if stale:
-        fresh = _fetch_quotes(stale)
+        try:
+            fresh = _fetch_quotes(stale)
+        except Exception as exc:
+            # Không làm hỏng nơi gọi: trả về giá đã có trong cache (dù cũ),
+            # hoặc rỗng nếu chưa từng tải được.
+            logger.warning("Bảng giá không khả dụng cho %s: %s", stale, _describe(exc))
+            fresh = {}
         for symbol in stale:
             if symbol in fresh:
                 _cache[symbol] = {"data": fresh[symbol], "fetched_at": now}
