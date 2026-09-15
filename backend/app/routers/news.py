@@ -14,15 +14,14 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import SessionLocal, get_db
 from app.core.deps import get_current_user, owner_scope, require_admin
-from app.core.ratelimit import ai_analysis_limit, import_url_limit, upload_limit
+from app.core.ratelimit import import_url_limit, upload_limit
 from app.core.settings_store import get_float_setting
 from app.core.url_guard import UnsafeUrl, safe_get
 from app.models.news import NewsArticle
 from app.models.user import User
 from app.schemas.admin import NewsPatch
 from app.schemas.schemas import NewsCreate, NewsResponse
-from app.services import ai_analysis_service, watchlist_service
-from app.services.finnexus_service import recommendation_evidence
+from app.services import watchlist_service
 from app.services.graph_service import get_graph_features
 from app.services.nlp_service import analyze_article
 from app.services.prediction_service import predict_for_article
@@ -142,14 +141,6 @@ def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
         news.prediction_explanation = prediction["prediction_explanation"]
         news.is_analyzed = True
 
-        # Bản giải thích của Claude chỉ còn đúng nếu đầu vào của nó không đổi.
-        # Kết quả mô hình đổi thì bỏ bản cũ; không đổi thì giữ — mỗi lần tạo tốn
-        # tiền, không có lý do gì để vứt một bản vẫn còn đúng.
-        if news.ai_analysis and not ai_analysis_service.is_fresh(
-            news.ai_analysis, ai_analysis_service.article_payload(news), recommendation_evidence()
-        ):
-            news.ai_analysis = None
-
         # Vào hàng chờ gán nhãn khi mô hình KHÔNG trả lời được, hoặc trả lời
         # với độ tin cậy dưới ngưỡng. Bài mô hình đã chấm dứt khoát thì không
         # cần người xem lại — trước đây ngưỡng 0.6 cao hơn mọi độ tin cậy mà
@@ -165,8 +156,25 @@ def _run_analysis(news_id: int, importer_user_id: Optional[int] = None) -> None:
         db.commit()
 
         if importer_user_id is not None:
-            for stock in result.get("stocks", []):
-                watchlist_service.add_symbol(db, importer_user_id, stock)
+            _auto_add_to_watchlist(db, importer_user_id, result.get("stocks", []), news_id)
+
+
+def _auto_add_to_watchlist(db: Session, user_id: int, symbols: List[str], news_id: int) -> None:
+    """Thêm các mã của bài vào watchlist người nhập — việc phụ, không bao giờ
+    được làm hỏng việc chính.
+
+    Nhập CSV xếp mọi bài vào CÙNG một danh sách BackgroundTasks; một ngoại lệ
+    thoát ra ở đây dừng luôn các bài còn lại trong hàng (đã xảy ra: 6/22 bài).
+    SystemExit cũng phải chặn, vì vnai gọi sys.exit khi vượt hạn mức.
+    """
+    for stock in symbols:
+        try:
+            watchlist_service.add_symbol(db, user_id, stock)
+        except (Exception, SystemExit) as exc:
+            db.rollback()
+            logger.warning(
+                "Bỏ qua tự thêm %s vào watchlist (bài %s): %s", stock, news_id, type(exc).__name__
+            )
 
 
 @router.post("/upload-csv", dependencies=[Depends(upload_limit)])
@@ -433,48 +441,6 @@ def analysis_status(
         "needs_review": sum(1 for n in analyzed if n.needs_manual_label),
         "symbols": symbols[:12],
     }
-
-
-@router.get("/ai-analysis/status")
-def ai_analysis_status(_user: User = Depends(get_current_user)):
-    """Giao diện hỏi trước khi hiện nút, để không bày ra một nút mà bấm vào chỉ
-    nhận được thông báo "chưa cấu hình"."""
-    return {"configured": ai_analysis_service.is_configured(), "model": settings.ANTHROPIC_MODEL}
-
-
-@router.post("/{news_id}/ai-analysis", dependencies=[Depends(ai_analysis_limit)])
-def create_ai_analysis(
-    news_id: int,
-    db: Session = Depends(get_db),
-    _user: User = Depends(get_current_user),
-):
-    """Claude giải thích một bài. Có bản còn hiệu lực thì trả ngay, không gọi API.
-
-    Chạy đồng bộ chứ không đưa vào hàng đợi: người dùng vừa bấm nút và đang chờ
-    đúng câu trả lời này. FastAPI chạy hàm ``def`` trong thread pool, nên việc
-    chờ Claude không chặn các request khác.
-    """
-    n = db.query(NewsArticle).filter(NewsArticle.id == news_id).first()
-    if not n or (owner_scope(_user) is not None and n.owner_id != _user.id):
-        raise HTTPException(404, "Không tìm thấy bài báo")
-    if not n.is_analyzed:
-        raise HTTPException(
-            409, {"message": "Bài đang được phân tích. Thử lại sau ít giây.", "reason": "not_analyzed"}
-        )
-
-    article = ai_analysis_service.article_payload(n)
-    evidence = recommendation_evidence()
-    if ai_analysis_service.is_fresh(n.ai_analysis, article, evidence):
-        return n.ai_analysis
-
-    try:
-        record = ai_analysis_service.analyze(article, evidence)
-    except ai_analysis_service.AnalysisUnavailable as exc:
-        raise HTTPException(exc.status, {"message": exc.message, "reason": exc.reason}) from exc
-
-    n.ai_analysis = record
-    db.commit()
-    return record
 
 
 @router.get("/{news_id}", response_model=NewsResponse)

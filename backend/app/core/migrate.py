@@ -44,7 +44,6 @@ _COLUMNS = [
     ("news_articles", "actual_trend", "VARCHAR(20)"),
     ("news_articles", "actual_trend_pct_change", "FLOAT"),
     ("news_articles", "prediction_decision", "VARCHAR(30)"),
-    ("news_articles", "ai_analysis", "JSON"),
     ("news_articles", "owner_id", "INTEGER"),
 ]
 

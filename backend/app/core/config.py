@@ -58,14 +58,6 @@ class Settings(BaseSettings):
     # do rõ ràng — không bao giờ bị chấm trên giá cũ.
     FINNEXUS_LIVE_PRICES: bool = True
 
-    # Claude giải thích bài báo (tuỳ chọn). Để trống khoá thì tính năng tự tắt;
-    # SDK cũng tự đọc ANTHROPIC_API_KEY từ biến môi trường, nhưng khai báo ở đây
-    # để khoá đặt trong file .env cũng dùng được — pydantic-settings nạp .env vào
-    # Settings chứ không vào os.environ.
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_MODEL: str = "claude-opus-5"
-    AI_ANALYSIS_TIMEOUT: float = 120.0
-
     # Giới hạn nhập liệu — chặn DoS qua upload và qua import URL.
     MAX_CSV_BYTES: int = 5 * 1024 * 1024
     MAX_CSV_ROWS: int = 2000
