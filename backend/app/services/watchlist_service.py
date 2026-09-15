@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.watchlist import WatchlistItem
 from app.services.live_price_service import symbol_exists
+from app.services.nlp_service import STOCK_DICT
 
 
 def list_symbols(db: Session, user_id: int) -> List[str]:
@@ -29,7 +30,10 @@ def add_symbol(db: Session, user_id: int, symbol: str) -> bool:
     if existing:
         return True
 
-    if not symbol_exists(symbol):
+    # Mã nằm trong từ điển 257 mã của mô hình là mã thật, không cần hỏi bảng
+    # giá. Nhập một CSV 22 bài từng gọi vnstock một lần cho mỗi mã và chạm hạn
+    # mức 20 yêu cầu/phút ngay giữa lô.
+    if symbol not in STOCK_DICT and not symbol_exists(symbol):
         return False
 
     db.add(WatchlistItem(user_id=user_id, symbol=symbol))
