@@ -5,11 +5,13 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Link2, Newspaper, PenLine, Shi
 import adminApi from '../../services/adminApi'
 import type { AdminDashboardStats } from '../../types'
 import { StatCard, SectionCard, SkeletonBlock, StatusBadge, CHART_TOOLTIP_STYLE } from '../../components/Admin/AdminWidgets'
+import { useLanguage } from '../../context/LanguageContext'
 
 const SENTIMENT_COLORS: Record<string, string> = { Positive: '#10b981', Negative: '#ef4444', Neutral: '#64748b' }
 const TREND_COLORS: Record<string, string> = { INCREASING: '#10b981', DECREASING: '#ef4444', UNCHANGED: '#64748b' }
 
 export default function AdminDashboardPage() {
+  const { t } = useLanguage()
   const [data, setData] = useState<AdminDashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +33,7 @@ export default function AdminDashboardPage() {
   if (!data) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-red-400 text-sm">Không thể tải dữ liệu dashboard admin</p>
+        <p className="text-red-400 text-sm">{t('adminDashboard.loadError')}</p>
       </div>
     )
   }
@@ -44,29 +46,29 @@ export default function AdminDashboardPage() {
     <div className="p-4 sm:p-6 space-y-5 fade-in">
       <div>
         <p className="text-[11px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
-          Dữ liệu đi qua các bước
+          {t('adminDashboard.pipelineSectionLabel')}
         </p>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <StatCard icon={Newspaper} label="Tổng số tin" value={stats.total_news} accent="#14b8a6" sub="Đã nhập vào hệ thống" />
-          <StatCard icon={Link2} label="Lần bài gắn với mã" value={stats.news_symbol_rows} accent="#84cc16" sub="Sau khi tìm ra mã trong bài" />
-          <StatCard icon={CheckCircle2} label="Đủ thông tin để nhận định" value={stats.model_ready_rows} accent="#0ea5e9" sub="Có đủ tin tốt/xấu, dự đoán và mã" />
-          <StatCard icon={ShieldCheck} label="Dùng được" value={stats.pass_count} sub={`${stats.pass_pct}% số tin đã xử lý`} accent="#10b981" />
-          <StatCard icon={PenLine} label="Chờ gán nhãn" value={stats.review_count} accent="#f59e0b" sub="Hệ thống không đủ chắc chắn" />
-          <StatCard icon={XCircle} label="Bỏ qua" value={stats.drop_count} accent="#ef4444" sub="Không tìm thấy mã nào trong bài" />
+          <StatCard icon={Newspaper} label={t('adminDashboard.statTotalNewsLabel')} value={stats.total_news} accent="#14b8a6" sub={t('adminDashboard.statTotalNewsSub')} />
+          <StatCard icon={Link2} label={t('adminDashboard.statSymbolRowsLabel')} value={stats.news_symbol_rows} accent="#84cc16" sub={t('adminDashboard.statSymbolRowsSub')} />
+          <StatCard icon={CheckCircle2} label={t('adminDashboard.statModelReadyLabel')} value={stats.model_ready_rows} accent="#0ea5e9" sub={t('adminDashboard.statModelReadySub')} />
+          <StatCard icon={ShieldCheck} label={t('adminDashboard.statPassLabel')} value={stats.pass_count} sub={t('adminDashboard.statPassSub', { pct: stats.pass_pct })} accent="#10b981" />
+          <StatCard icon={PenLine} label={t('adminDashboard.statReviewLabel')} value={stats.review_count} accent="#f59e0b" sub={t('adminDashboard.statReviewSub')} />
+          <StatCard icon={XCircle} label={t('adminDashboard.statDropLabel')} value={stats.drop_count} accent="#ef4444" sub={t('adminDashboard.statDropSub')} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <SectionCard title="Chất lượng dữ liệu" action={<StatusBadge status={data_quality.overall_status} />}>
+        <SectionCard title={t('adminDashboard.dataQualityTitle')} action={<StatusBadge status={data_quality.overall_status} />}>
           <div className="space-y-2.5">
-            <QualityRow label="Bản ghi thiếu thông tin" value={data_quality.missing_values} />
-            <QualityRow label="Tin tốt/xấu khớp chiều dự đoán" value={`${data_quality.return_label_consistency}%`} />
-            <QualityRow label="Tỉ lệ bài dùng được" value={`${data_quality.pass_pct}%`} />
-            <QualityRow label="Bài trùng lặp" value={data_quality.duplicates} />
+            <QualityRow label={t('adminDashboard.qualityMissingValues')} value={data_quality.missing_values} />
+            <QualityRow label={t('adminDashboard.qualityLabelConsistency')} value={`${data_quality.return_label_consistency}%`} />
+            <QualityRow label={t('adminDashboard.qualityPassRate')} value={`${data_quality.pass_pct}%`} />
+            <QualityRow label={t('adminDashboard.qualityDuplicates')} value={data_quality.duplicates} />
           </div>
         </SectionCard>
 
-        <SectionCard title="Hệ thống dự đoán ra sao">
+        <SectionCard title={t('adminDashboard.predictionDistTitle')}>
           {trendData.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -82,7 +84,7 @@ export default function AdminDashboardPage() {
           <Legend items={trendData} colors={TREND_COLORS} />
         </SectionCard>
 
-        <SectionCard title="Tin tốt hay tin xấu">
+        <SectionCard title={t('adminDashboard.sentimentDistTitle')}>
           {sentimentData.length === 0 ? (
             <EmptyChart />
           ) : (
@@ -100,18 +102,18 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <SectionCard title="Hoạt động hệ thống">
+        <SectionCard title={t('adminDashboard.activityTitle')}>
           {activity.length === 0 ? (
-            <p className="text-[12px]" style={{ color: 'var(--text-faint)' }}>Chưa có hoạt động nào</p>
+            <p className="text-[12px]" style={{ color: 'var(--text-faint)' }}>{t('adminDashboard.noActivity')}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-[12px]">
                 <thead>
                   <tr style={{ color: 'var(--text-faint)' }}>
-                    <th className="text-left font-medium pb-2">Thời gian</th>
-                    <th className="text-left font-medium pb-2">Hoạt động</th>
-                    <th className="text-left font-medium pb-2">Người thực hiện</th>
-                    <th className="text-left font-medium pb-2">Trạng thái</th>
+                    <th className="text-left font-medium pb-2">{t('adminDashboard.tableTime')}</th>
+                    <th className="text-left font-medium pb-2">{t('adminDashboard.tableActivity')}</th>
+                    <th className="text-left font-medium pb-2">{t('adminDashboard.tableActor')}</th>
+                    <th className="text-left font-medium pb-2">{t('adminDashboard.tableStatus')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -129,11 +131,11 @@ export default function AdminDashboardPage() {
           )}
         </SectionCard>
 
-        <SectionCard title="Cảnh báo hệ thống">
+        <SectionCard title={t('adminDashboard.alertsTitle')}>
           {alerts.length === 0 ? (
             <div className="flex items-center gap-2" style={{ color: '#10b981' }}>
               <CheckCircle2 size={16} />
-              <span className="text-[13px]">Không có cảnh báo</span>
+              <span className="text-[13px]">{t('adminDashboard.noAlerts')}</span>
             </div>
           ) : (
             <div className="space-y-1.5">
@@ -159,12 +161,12 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <SummaryLink
           to="/admin/quality"
-          title="Chất lượng dữ liệu"
-          detail={`${data_quality.overall_status} · khớp nhãn ${validation_results.accuracy_sentiment ?? '—'}%`}
+          title={t('adminDashboard.summaryQualityTitle')}
+          detail={t('adminDashboard.summaryQualityDetail', { status: data_quality.overall_status, accuracy: validation_results.accuracy_sentiment ?? '—' })}
         />
-        <SummaryLink to="/admin/labeling" title="Tự đọc và xác nhận" detail={`${stats.review_count} mẫu đang chờ`} />
-        <SummaryLink to="/admin/tuning" title="Cách đọc hiểu bài" detail="Ngưỡng và từ khoá sự kiện" />
-        <SummaryLink to="/admin/users" title="Người dùng" detail={`${users_summary.total} tài khoản`} />
+        <SummaryLink to="/admin/labeling" title={t('adminDashboard.summaryLabelingTitle')} detail={t('adminDashboard.summaryLabelingDetail', { count: stats.review_count })} />
+        <SummaryLink to="/admin/tuning" title={t('adminDashboard.summaryTuningTitle')} detail={t('adminDashboard.summaryTuningDetail')} />
+        <SummaryLink to="/admin/users" title={t('adminDashboard.summaryUsersTitle')} detail={t('adminDashboard.summaryUsersDetail', { count: users_summary.total })} />
       </div>
     </div>
   )
@@ -204,14 +206,16 @@ function Legend({ items, colors }: { items: { name: string; value: number }[]; c
 }
 
 function EmptyChart() {
+  const { t } = useLanguage()
   return (
     <div className="h-[160px] flex items-center justify-center text-[12px]" style={{ color: 'var(--text-faint)' }}>
-      Chưa có dữ liệu
+      {t('adminDashboard.noChartData')}
     </div>
   )
 }
 
 function SummaryLink({ to, title, detail }: { to: string; title: string; detail: string }) {
+  const { t } = useLanguage()
   return (
     <Link
       to={to}
@@ -220,7 +224,7 @@ function SummaryLink({ to, title, detail }: { to: string; title: string; detail:
     >
       <p className="text-[12px] font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{title}</p>
       <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{detail}</p>
-      <p className="text-[11px] mt-2" style={{ color: '#059669' }}>Xem chi tiết →</p>
+      <p className="text-[11px] mt-2" style={{ color: '#059669' }}>{t('adminDashboard.viewDetails')}</p>
     </Link>
   )
 }

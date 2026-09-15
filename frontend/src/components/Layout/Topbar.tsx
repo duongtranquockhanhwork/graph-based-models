@@ -3,16 +3,17 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Activity, CalendarDays, ChevronDown, LogOut, Menu } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLayout } from '../../context/LayoutContext'
+import { useLanguage } from '../../context/LanguageContext'
 import AnalysisIndicator from './AnalysisIndicator'
 
-const PAGE_INFO: Record<string, { title: string; breadcrumb: string }> = {
-  '/dashboard': { title: 'Tổng quan', breadcrumb: 'Hôm nay thị trường có gì' },
-  '/feed': { title: 'Dòng tin', breadcrumb: 'Tin đã đọc · lọc theo tin tốt/xấu, sự việc, mã' },
-  '/stocks': { title: 'Cổ phiếu', breadcrumb: 'Danh mục theo dõi và toàn bộ mã' },
-  '/graph': { title: 'Knowledge Graph', breadcrumb: 'Sơ đồ liên kết giữa tin, mã, ngành và sự việc' },
-  '/reports': { title: 'Độ chính xác', breadcrumb: 'Hệ thống đoán đúng đến đâu' },
-  '/import': { title: 'Nhập dữ liệu', breadcrumb: 'CSV · URL · Thủ công' },
-  '/settings': { title: 'Cài đặt', breadcrumb: 'Hồ sơ cá nhân và giao diện' },
+const PAGE_INFO_KEYS: Record<string, { title: string; breadcrumb: string }> = {
+  '/dashboard': { title: 'topbar.page.dashboardTitle', breadcrumb: 'topbar.page.dashboardBreadcrumb' },
+  '/feed': { title: 'topbar.page.feedTitle', breadcrumb: 'topbar.page.feedBreadcrumb' },
+  '/stocks': { title: 'topbar.page.stocksTitle', breadcrumb: 'topbar.page.stocksBreadcrumb' },
+  '/graph': { title: 'topbar.page.graphTitle', breadcrumb: 'topbar.page.graphBreadcrumb' },
+  '/reports': { title: 'topbar.page.reportsTitle', breadcrumb: 'topbar.page.reportsBreadcrumb' },
+  '/import': { title: 'topbar.page.importTitle', breadcrumb: 'topbar.page.importBreadcrumb' },
+  '/settings': { title: 'topbar.page.settingsTitle', breadcrumb: 'topbar.page.settingsBreadcrumb' },
 }
 
 export default function Topbar() {
@@ -20,11 +21,17 @@ export default function Topbar() {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const { toggleSidebar } = useLayout()
+  const { t, language } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
   const stockMatch = pathname.match(/^\/stocks\/([A-Za-z0-9]+)$/)
   const info = stockMatch
-    ? { title: `Hồ sơ mã ${stockMatch[1].toUpperCase()}`, breadcrumb: 'Giá · biểu đồ · nhận định · liên kết · tin liên quan' }
-    : PAGE_INFO[pathname] || { title: 'FinNexus KG', breadcrumb: '' }
+    ? {
+        title: t('topbar.page.stockDetailTitle', { symbol: stockMatch[1].toUpperCase() }),
+        breadcrumb: t('topbar.page.stockDetailBreadcrumb'),
+      }
+    : PAGE_INFO_KEYS[pathname]
+      ? { title: t(PAGE_INFO_KEYS[pathname].title), breadcrumb: t(PAGE_INFO_KEYS[pathname].breadcrumb) }
+      : { title: t('topbar.defaultTitle'), breadcrumb: '' }
 
   const handleLogout = () => {
     logout()
@@ -34,7 +41,7 @@ export default function Topbar() {
   const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
 
   const now = new Date()
-  const dateStr = now.toLocaleDateString('vi-VN', {
+  const dateStr = now.toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -53,7 +60,7 @@ export default function Topbar() {
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           onClick={toggleSidebar}
-          aria-label="Mở menu điều hướng"
+          aria-label={t('topbar.openMenu')}
           className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0"
           style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
         >
@@ -83,7 +90,7 @@ export default function Topbar() {
           }}
         >
           <Activity size={11} className="text-emerald-500 pulse-dot" />
-          <span className="text-[11px] text-emerald-600 font-medium">Live</span>
+          <span className="text-[11px] text-emerald-600 font-medium">{t('topbar.live')}</span>
         </div>
 
         <div className="relative">
@@ -115,7 +122,7 @@ export default function Topbar() {
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}
             >
               <div className="px-3.5 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{user?.full_name || 'Người dùng'}</p>
+                <p className="text-[12px] truncate" style={{ color: 'var(--text-primary)' }}>{user?.full_name || t('topbar.user')}</p>
                 <p className="text-[11px] truncate" style={{ color: 'var(--text-faint)' }}>
                   {user?.email || user?.phone}
                 </p>
@@ -125,7 +132,7 @@ export default function Topbar() {
                 className="w-full flex items-center gap-2 px-3.5 py-2.5 text-[13px] hover:bg-black/5 transition-colors"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Cài đặt
+                {t('topbar.settings')}
               </button>
               <button
                 onClick={handleLogout}
@@ -133,7 +140,7 @@ export default function Topbar() {
                 style={{ color: '#dc2626' }}
               >
                 <LogOut size={14} />
-                Đăng xuất
+                {t('topbar.logout')}
               </button>
             </div>
           )}

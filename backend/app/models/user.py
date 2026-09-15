@@ -22,6 +22,10 @@ class User(Base):
     avatar_url = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     role = Column(String(20), nullable=False, default="customer")
+    # Ngôn ngữ giao diện của tài khoản ("en" hoặc "vi"). Mặc định "en" — kể cả
+    # cho tài khoản cũ được backfill qua migrate.py. Đổi trong Hồ sơ, áp dụng
+    # lại ngay khi đăng nhập trên bất kỳ thiết bị nào.
+    language = Column(String(5), nullable=False, default="en")
     # Tăng lên mỗi khi mật khẩu đổi. JWT mang theo giá trị tại lúc phát
     # hành, nên mọi token cũ hết hiệu lực ngay khi người dùng đổi mật khẩu.
     token_version = Column(Integer, nullable=False, default=0)

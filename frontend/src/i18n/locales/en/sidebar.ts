@@ -1,0 +1,15 @@
+export default {
+  tagline: 'VN Stock Knowledge Graph',
+  nav: 'Main navigation',
+  investor: 'Investor',
+  groupWatch: 'Watch',
+  groupExplore: 'Explore',
+  groupData: 'Data',
+  dashboard: 'Overview',
+  feed: 'News feed',
+  stocks: 'Stocks',
+  graph: 'Knowledge Graph',
+  reports: 'Accuracy',
+  import: 'Import data',
+  settings: 'Settings',
+}

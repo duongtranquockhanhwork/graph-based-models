@@ -1,0 +1,18 @@
+export default {
+  title: 'Settings',
+  subtitle: 'Account information and interface preferences',
+  profile: 'Profile',
+  roleAdmin: 'Administrator',
+  roleCustomer: 'Investor',
+  appearance: 'Appearance',
+  appearanceDesc: 'Choose a light or dark theme for the whole app',
+  themeDark: 'Currently using Dark theme',
+  themeLight: 'Currently using Light theme',
+  language: 'Language',
+  languageDesc: 'Choose the language used across the whole app. Your choice is saved to your account.',
+  languageEnLabel: 'Currently using English',
+  languageViLabel: 'Đang dùng tiếng Việt',
+  security: 'Security',
+  securityDesc: 'Change your account password',
+  forgotCurrentPassword: 'Forgot your current password?',
+}

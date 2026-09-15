@@ -1,0 +1,15 @@
+export default {
+  emailPlaceholder: 'you@example.com',
+  emailExistsError: 'An account already exists with this email',
+  sendOtpButton: 'Send verification code',
+  verifyButton: 'Verify',
+  otpPlaceholder: '6-digit verification code',
+  changeEmailButton: 'Change email address',
+  resendButton: 'Resend code',
+  resendButtonCooldown: 'Resend code ({{seconds}}s)',
+  otpSentToast: 'Verification code sent to your email',
+  otpSendErrorToast: 'Could not send the code, check your email address',
+  otpResentToast: 'Verification code resent',
+  otpResendErrorToast: 'Could not resend the code, try again in a few minutes',
+  otpInvalidToast: 'Incorrect or expired verification code',
+}

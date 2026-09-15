@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
-import { isPasswordStrong, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
+import { useLanguage } from '../../context/LanguageContext'
+import { isPasswordStrong, getPasswordRequirementsMessage } from '../../utils/passwordStrength'
 
 export default function ChangePasswordForm() {
   const { changePassword } = useAuth()
+  const { t } = useLanguage()
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -13,22 +15,22 @@ export default function ChangePasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isPasswordStrong(next)) {
-      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
+      toast.error(getPasswordRequirementsMessage(t))
       return
     }
     if (next !== confirm) {
-      toast.error('Mật khẩu nhập lại không khớp')
+      toast.error(t('changePassword.confirmMismatch'))
       return
     }
     setLoading(true)
     try {
       await changePassword(current, next)
-      toast.success('Đã đổi mật khẩu')
+      toast.success(t('changePassword.changeSuccess'))
       setCurrent('')
       setNext('')
       setConfirm('')
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Không thể đổi mật khẩu'
+      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t('changePassword.changeError')
       toast.error(msg)
     } finally {
       setLoading(false)
@@ -40,7 +42,7 @@ export default function ChangePasswordForm() {
       <input
         type="password"
         className="field-input"
-        placeholder="Mật khẩu hiện tại"
+        placeholder={t('changePassword.currentPasswordPlaceholder')}
         value={current}
         onChange={(e) => setCurrent(e.target.value)}
         required
@@ -48,7 +50,7 @@ export default function ChangePasswordForm() {
       <input
         type="password"
         className="field-input"
-        placeholder="Mật khẩu mới (hoa, thường, số, ký tự đặc biệt)"
+        placeholder={t('changePassword.newPasswordPlaceholder')}
         value={next}
         onChange={(e) => setNext(e.target.value)}
         required
@@ -56,7 +58,7 @@ export default function ChangePasswordForm() {
       <input
         type="password"
         className="field-input"
-        placeholder="Nhập lại mật khẩu mới"
+        placeholder={t('changePassword.confirmPasswordPlaceholder')}
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
         required
@@ -67,7 +69,7 @@ export default function ChangePasswordForm() {
         className="px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
         style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
       >
-        {loading ? 'Đang lưu...' : 'Đổi mật khẩu'}
+        {loading ? t('changePassword.saving') : t('changePassword.submit')}
       </button>
     </form>
   )

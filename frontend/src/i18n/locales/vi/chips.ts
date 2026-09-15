@@ -1,0 +1,30 @@
+export default {
+  events: {
+    profit_growth: 'Lợi nhuận tăng',
+    profit_decline: 'Lợi nhuận giảm',
+    dividend: 'Chia cổ tức',
+    merger: 'Sáp nhập/mua lại',
+    new_contract: 'Hợp đồng/trúng thầu',
+    penalty: 'Vi phạm/xử phạt',
+    leadership_change: 'Thay đổi lãnh đạo',
+    share_issuance: 'Phát hành cổ phiếu',
+    expansion: 'Mở rộng đầu tư',
+  },
+  sentiment: {
+    Positive: 'Tin tốt',
+    Negative: 'Tin xấu',
+    Neutral: 'Tin trung tính',
+  },
+  trend: {
+    INCREASING: 'Có thể tăng',
+    DECREASING: 'Có thể giảm',
+    UNCHANGED: 'Ít biến động',
+  },
+  viewStock: 'Xem thông tin cổ phiếu {{symbol}}',
+  filterByEvent: 'Lọc tin có {{label}}',
+  notPredicted: 'Chưa dự đoán được',
+  notPredictedTitle: 'Mở bài để xem vì sao chưa dự đoán được',
+  abstainedTitle: 'Hệ thống không đủ chắc chắn nên không đưa ra dự đoán cho bài này',
+  confidenceTitle: 'Mức chắc chắn của hệ thống: {{pct}}%',
+  abstained: 'Chưa đủ chắc chắn',
+}

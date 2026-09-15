@@ -88,5 +88,9 @@ phone_verify_limit = RateLimit("phone_verify", limit=10, window_seconds=600)
 # Gửi mã OTP qua email — giới hạn chặt hơn login vì mỗi lần gửi là một email thật.
 email_otp_request_limit = RateLimit("email_otp_request", limit=5, window_seconds=3600)
 email_otp_verify_limit = RateLimit("email_otp_verify", limit=10, window_seconds=600)
+# Kiểm tra email đã có tài khoản chưa (trước khi bật nút gửi OTP đăng ký) —
+# có hạn mức riêng vì endpoint này cố ý lộ email có tồn tại hay không, nên
+# giới hạn tần suất để không bị lợi dụng dò danh sách email trong hệ thống.
+email_exists_limit = RateLimit("email_exists", limit=30, window_seconds=3600)
 import_url_limit = RateLimit("import_url", limit=20, window_seconds=3600)
 upload_limit = RateLimit("upload", limit=10, window_seconds=3600)

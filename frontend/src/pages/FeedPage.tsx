@@ -6,7 +6,8 @@ import { newsApi, type NewsFilters } from '../services/api'
 import type { NewsArticle } from '../types'
 import { useAuth } from '../context/AuthContext'
 import NewsCard from '../components/news/NewsCard'
-import { EVENT_LABELS, SENTIMENT_COLORS, SENTIMENT_LABELS, SymbolChip } from '../components/common/Chips'
+import { EVENT_LABELS, SENTIMENT_COLORS, SymbolChip } from '../components/common/Chips'
+import { useLanguage } from '../context/LanguageContext'
 
 const PAGE_SIZE = 30
 
@@ -88,6 +89,7 @@ function FacetButton({
  * chia sẻ được và bấm Quay lại vẫn giữ nguyên.
  */
 export default function FeedPage() {
+  const { t } = useLanguage()
   const { user } = useAuth()
   const [params, setParams] = useSearchParams()
   const [news, setNews] = useState<NewsArticle[]>([])
@@ -140,7 +142,7 @@ export default function FeedPage() {
     newsApi
       .list(filters)
       .then((r) => setNews(r.data))
-      .catch(() => toast.error('Không tải được dòng tin'))
+      .catch(() => toast.error(t('feed.loadError')))
       .finally(() => setLoading(false))
   }, [filters])
 
@@ -169,9 +171,9 @@ export default function FeedPage() {
   }, [news])
 
   const activeFilters = [
-    sentiment && { key: 'sentiment', label: SENTIMENT_LABELS[sentiment] || sentiment },
-    event && { key: 'event', label: EVENT_LABELS[event] || event },
-    stock && { key: 'stock', label: `Mã ${stock}` },
+    sentiment && { key: 'sentiment', label: t(`chips.sentiment.${sentiment}`) },
+    event && { key: 'event', label: t(`chips.events.${event}`) },
+    stock && { key: 'stock', label: t('feed.stockFilterLabel', { stock }) },
     source && { key: 'source', label: source },
   ].filter(Boolean) as { key: string; label: string }[]
 
@@ -181,16 +183,16 @@ export default function FeedPage() {
     setPendingDelete(null)
     try {
       await newsApi.delete(id)
-      toast.success('Đã xoá bài báo')
+      toast.success(t('feed.deleteSuccess'))
       setNews((prev) => prev.filter((n) => n.id !== id))
     } catch {
-      toast.error('Không xoá được. Thao tác này cần quyền quản trị viên.')
+      toast.error(t('feed.deleteError'))
     }
   }
 
   const facetPanel = (
     <>
-      <FacetGroup title="Tin tốt hay xấu">
+      <FacetGroup title={t('feed.facets.sentiment')}>
         {['Positive', 'Neutral', 'Negative'].map((s) => (
           <FacetButton
             key={s}
@@ -199,32 +201,32 @@ export default function FeedPage() {
             count={facetCounts.sentiments[s]}
             dotColor={SENTIMENT_COLORS[s]}
           >
-            {SENTIMENT_LABELS[s]}
+            {t(`chips.sentiment.${s}`)}
           </FacetButton>
         ))}
       </FacetGroup>
 
-      <FacetGroup title="Chuyện gì xảy ra">
-        {Object.entries(EVENT_LABELS).map(([key, label]) => (
+      <FacetGroup title={t('feed.facets.event')}>
+        {Object.keys(EVENT_LABELS).map((key) => (
           <FacetButton
             key={key}
             active={event === key}
             onClick={() => setFacet('event', key)}
             count={facetCounts.events[key]}
           >
-            {label}
+            {t(`chips.events.${key}`)}
           </FacetButton>
         ))}
       </FacetGroup>
 
       {Object.keys(facetCounts.symbols).length > 0 && (
-        <FacetGroup title="Mã được nhắc nhiều">
+        <FacetGroup title={t('feed.facets.stock')}>
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(facetCounts.symbols)
               .sort((a, b) => b[1] - a[1])
               .slice(0, 12)
               .map(([sym, count]) => (
-                <button key={sym} onClick={() => setFacet('stock', sym)} title={`Lọc theo ${sym}`}>
+                <button key={sym} onClick={() => setFacet('stock', sym)} title={t('feed.facets.stockFilterTitle', { symbol: sym })}>
                   <span
                     className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded font-semibold"
                     style={
@@ -243,7 +245,7 @@ export default function FeedPage() {
       )}
 
       {Object.keys(facetCounts.sources).length > 1 && (
-        <FacetGroup title="Báo nào đăng">
+        <FacetGroup title={t('feed.facets.source')}>
           {Object.entries(facetCounts.sources)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 8)
@@ -267,10 +269,10 @@ export default function FeedPage() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Dòng tin
+            {t('feed.title')}
           </h2>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Tin đã được đọc và phân tích — lọc theo tin tốt/xấu, loại sự việc, mã cổ phiếu hoặc báo
+            {t('feed.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -279,7 +281,7 @@ export default function FeedPage() {
             className="lg:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px]"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
-            <Filter size={13} /> Bộ lọc
+            <Filter size={13} /> {t('feed.filtersButton')}
             {activeFilters.length > 0 && (
               <span className="w-4 h-4 rounded-full text-[9px] flex items-center justify-center text-white" style={{ background: '#2563eb' }}>
                 {activeFilters.length}
@@ -288,7 +290,7 @@ export default function FeedPage() {
           </button>
           <button
             onClick={load}
-            aria-label="Tải lại dòng tin"
+            aria-label={t('feed.reloadLabel')}
             className="p-2 rounded-xl"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
@@ -300,7 +302,7 @@ export default function FeedPage() {
             style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
           >
             <Upload size={13} />
-            <span className="hidden sm:inline">Nhập dữ liệu</span>
+            <span className="hidden sm:inline">{t('feed.importData')}</span>
           </Link>
         </div>
       </div>
@@ -310,7 +312,7 @@ export default function FeedPage() {
         <aside
           className={`${showFilters ? 'block' : 'hidden'} lg:block rounded-2xl p-3.5 h-fit lg:sticky lg:top-4`}
           style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
-          aria-label="Bộ lọc dòng tin"
+          aria-label={t('feed.facetLabel')}
         >
           {facetPanel}
           <button
@@ -319,7 +321,7 @@ export default function FeedPage() {
             className="w-full px-2 py-1.5 rounded-lg text-[12px] disabled:opacity-40"
             style={{ color: 'var(--text-muted)' }}
           >
-            Xoá toàn bộ bộ lọc
+            {t('feed.clearAll')}
           </button>
         </aside>
 
@@ -329,17 +331,17 @@ export default function FeedPage() {
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
             <input
               className="field-input pl-8 h-10 text-[13px]"
-              placeholder="Tìm theo tiêu đề trong toàn bộ dữ liệu…"
+              placeholder={t('feed.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Tìm bài báo theo tiêu đề"
+              aria-label={t('feed.searchAriaLabel')}
             />
           </div>
 
           {activeFilters.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 mb-3">
               <span className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
-                Đang lọc:
+                {t('feed.filtering')}
               </span>
               {activeFilters.map((f) => (
                 <button
@@ -368,19 +370,19 @@ export default function FeedPage() {
             >
               <Newspaper size={28} style={{ color: 'var(--text-faint)' }} />
               <p className="mt-3 text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                {activeFilters.length || search ? 'Không có tin nào khớp bộ lọc' : 'Chưa có tin nào'}
+                {activeFilters.length || search ? t('feed.emptyFiltered') : t('feed.emptyNone')}
               </p>
               <p className="text-[12px] mt-1 max-w-sm" style={{ color: 'var(--text-muted)' }}>
                 {activeFilters.length || search
-                  ? 'Thử bỏ bớt điều kiện lọc, hoặc nhập thêm dữ liệu.'
-                  : 'Thêm vài bài báo để hệ thống đọc và tìm ra mã cổ phiếu, sự việc liên quan.'}
+                  ? t('feed.emptyFilteredDesc')
+                  : t('feed.emptyNoneDesc')}
               </p>
               <Link
                 to="/import"
                 className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
                 style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
               >
-                Nhập dữ liệu
+                {t('feed.importData')}
               </Link>
             </div>
           ) : (
@@ -402,10 +404,10 @@ export default function FeedPage() {
                   className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
                 >
-                  Trang trước
+                  {t('feed.prevPage')}
                 </button>
                 <span className="text-[12px]" style={{ color: 'var(--text-faint)' }}>
-                  Trang {page + 1}
+                  {t('feed.pageLabel', { page: page + 1 })}
                 </span>
                 <button
                   disabled={news.length < PAGE_SIZE}
@@ -413,7 +415,7 @@ export default function FeedPage() {
                   className="px-3 py-1.5 rounded-lg text-[12px] disabled:opacity-40"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
                 >
-                  Trang sau
+                  {t('feed.nextPage')}
                 </button>
               </div>
             </>
@@ -438,13 +440,13 @@ export default function FeedPage() {
               <AlertTriangle size={18} className="mt-0.5 flex-shrink-0" style={{ color: '#ef4444' }} />
               <div className="min-w-0">
                 <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Xoá bài báo này?
+                  {t('feed.deleteModal.title')}
                 </h3>
                 <p className="text-[13px] mt-1 break-words" style={{ color: 'var(--text-secondary)' }}>
                   {pendingDelete.title}
                 </p>
                 <p className="text-[12px] mt-2" style={{ color: 'var(--text-faint)' }}>
-                  Bài sẽ bị xoá vĩnh viễn khỏi hệ thống và khỏi sơ đồ liên kết. Không lấy lại được.
+                  {t('feed.deleteModal.warning')}
                 </p>
               </div>
             </div>
@@ -454,14 +456,14 @@ export default function FeedPage() {
                 className="px-4 py-2 rounded-xl text-[13px]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
-                Huỷ
+                {t('feed.deleteModal.cancel')}
               </button>
               <button
                 onClick={confirmDelete}
                 className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
                 style={{ background: '#dc2626' }}
               >
-                Xoá vĩnh viễn
+                {t('feed.deleteModal.confirm')}
               </button>
             </div>
           </div>

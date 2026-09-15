@@ -1,8 +1,10 @@
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme()
+  const { language } = useLanguage()
   const isDark = theme === 'dark'
 
   return (
@@ -11,7 +13,7 @@ export default function ThemeToggle() {
       onClick={toggleTheme}
       className="relative inline-flex items-center h-8 w-16 rounded-full transition-colors flex-shrink-0"
       style={{ background: isDark ? '#1e3556' : '#cbd5e1' }}
-      aria-label="Chuyển giao diện sáng/tối"
+      aria-label={language === 'vi' ? 'Chuyển giao diện sáng/tối' : 'Toggle light/dark theme'}
     >
       <span
         className="absolute top-1 left-1 w-6 h-6 rounded-full flex items-center justify-center transition-transform"

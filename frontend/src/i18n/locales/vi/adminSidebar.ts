@@ -1,0 +1,16 @@
+export default {
+  console: 'Admin Console',
+  nav: 'Điều hướng quản trị',
+  adminRole: 'Quản trị viên',
+  groupOps: 'Vận hành',
+  groupQuality: 'Chất lượng',
+  groupSystem: 'Hệ thống',
+  dashboard: 'Tổng quan',
+  news: 'Dữ liệu tin tức',
+  labeling: 'Tự đọc và xác nhận',
+  quality: 'Chất lượng dữ liệu',
+  tuning: 'Cách đọc hiểu bài',
+  users: 'Người dùng',
+  stocks: 'Cổ phiếu',
+  profile: 'Hồ sơ của tôi',
+}

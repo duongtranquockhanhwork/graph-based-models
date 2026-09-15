@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -62,6 +62,7 @@ class UserOut(BaseModel):
     profile_complete: bool = False
     avatar_url: Optional[str] = None
     role: str = "customer"
+    language: str = "en"
     is_active: bool = True
     created_at: Optional[datetime] = None
 
@@ -107,6 +108,10 @@ class UpdateProfileRequest(BaseModel):
 
     _dob = field_validator("date_of_birth")(_validate_dob)
     _avatar = field_validator("avatar_url")(_validate_avatar_url)
+
+
+class UpdateLanguageRequest(BaseModel):
+    language: Literal["en", "vi"]
 
 
 class ChangePasswordRequest(BaseModel):

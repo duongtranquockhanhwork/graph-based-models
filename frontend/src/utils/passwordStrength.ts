@@ -3,8 +3,11 @@
 // tránh ba nơi tự chép lại quy tắc rồi lệch nhau theo thời gian.
 export const PASSWORD_MIN_LENGTH = 8
 
-export const PASSWORD_REQUIREMENTS_MESSAGE =
-  `Mật khẩu cần tối thiểu ${PASSWORD_MIN_LENGTH} ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt`
+// Nhận `t` từ useLanguage() của nơi gọi — bản thân file util này không phải
+// component nên không thể tự dùng hook.
+export function getPasswordRequirementsMessage(t: (key: string, params?: Record<string, string | number>) => string): string {
+  return t('auth.passwordRequirements', { minLength: PASSWORD_MIN_LENGTH })
+}
 
 export function isPasswordStrong(password: string): boolean {
   if (password.length < PASSWORD_MIN_LENGTH) return false

@@ -1,0 +1,16 @@
+export default {
+  imageProcessError: 'Không xử lý được ảnh',
+  notAnImage: 'Vui lòng chọn một file ảnh',
+  imageTooLarge: 'Ảnh quá lớn (tối đa 10MB)',
+  canvasUnsupported: 'Trình duyệt không hỗ trợ xử lý ảnh',
+  removeAvatar: 'Xoá ảnh đại diện',
+  nameRequired: 'Họ tên không được để trống',
+  dobFuture: 'Ngày sinh không được vượt quá ngày hiện tại',
+  saveSuccess: 'Đã lưu hồ sơ',
+  saveError: 'Không thể lưu hồ sơ',
+  changeAvatar: 'Đổi ảnh đại diện',
+  fullName: 'Họ và tên',
+  dateOfBirth: 'Ngày sinh',
+  saving: 'Đang lưu...',
+  saveChanges: 'Lưu thay đổi',
+}

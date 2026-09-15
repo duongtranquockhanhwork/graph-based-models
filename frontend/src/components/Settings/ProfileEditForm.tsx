@@ -2,12 +2,14 @@ import { useRef, useState, type ChangeEvent } from 'react'
 import toast from 'react-hot-toast'
 import { Camera, Loader2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 import { fileToAvatarDataUrl } from '../../utils/imageResize'
 
 const todayISO = new Date().toISOString().slice(0, 10)
 
 export default function ProfileEditForm() {
   const { user, updateProfile } = useAuth()
+  const { t } = useLanguage()
   const [fullName, setFullName] = useState(user?.full_name || '')
   const [dateOfBirth, setDateOfBirth] = useState(user?.date_of_birth || '')
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar_url || null)
@@ -30,11 +32,11 @@ export default function ProfileEditForm() {
     if (!file) return
     setUploading(true)
     try {
-      const dataUrl = await fileToAvatarDataUrl(file)
+      const dataUrl = await fileToAvatarDataUrl(file, t)
       setAvatarPreview(dataUrl)
       setAvatarDirty(true)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Không xử lý được ảnh')
+      toast.error(err instanceof Error ? err.message : t('profileEdit.imageProcessError'))
     } finally {
       setUploading(false)
     }
@@ -47,21 +49,21 @@ export default function ProfileEditForm() {
 
   const handleSave = async () => {
     if (!fullName.trim()) {
-      toast.error('Họ tên không được để trống')
+      toast.error(t('profileEdit.nameRequired'))
       return
     }
     if (dateOfBirth && dateOfBirth > todayISO) {
-      toast.error('Ngày sinh không được vượt quá ngày hiện tại')
+      toast.error(t('profileEdit.dobFuture'))
       return
     }
     setSaving(true)
     try {
       await updateProfile(fullName.trim(), dateOfBirth || undefined, avatarDirty ? avatarPreview || '' : undefined)
       setAvatarDirty(false)
-      toast.success('Đã lưu hồ sơ')
+      toast.success(t('profileEdit.saveSuccess'))
     } catch (err: unknown) {
       const msg =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Không thể lưu hồ sơ'
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || t('profileEdit.saveError')
       toast.error(msg)
     } finally {
       setSaving(false)
@@ -88,8 +90,8 @@ export default function ProfileEditForm() {
             disabled={uploading}
             className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
-            title="Đổi ảnh đại diện"
-            aria-label="Đổi ảnh đại diện"
+            title={t('profileEdit.changeAvatar')}
+            aria-label={t('profileEdit.changeAvatar')}
           >
             {uploading ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
           </button>
@@ -102,7 +104,7 @@ export default function ProfileEditForm() {
             className="text-[12px] hover:underline"
             style={{ color: 'var(--text-muted)' }}
           >
-            Xoá ảnh đại diện
+            {t('profileEdit.removeAvatar')}
           </button>
         )}
       </div>
@@ -110,13 +112,13 @@ export default function ProfileEditForm() {
       <div className="grid sm:grid-cols-2 gap-3">
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Họ và tên
+            {t('profileEdit.fullName')}
           </label>
           <input className="field-input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
         </div>
         <div>
           <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Ngày sinh
+            {t('profileEdit.dateOfBirth')}
           </label>
           <input
             type="date"
@@ -135,7 +137,7 @@ export default function ProfileEditForm() {
         className="px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50 transition-opacity"
         style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
       >
-        {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+        {saving ? t('profileEdit.saving') : t('profileEdit.saveChanges')}
       </button>
     </div>
   )

@@ -26,9 +26,9 @@ import NewsCard from '../components/news/NewsCard'
 import {
   EVENT_LABELS,
   SENTIMENT_COLORS,
-  SENTIMENT_LABELS,
   SymbolChip,
 } from '../components/common/Chips'
+import { useLanguage } from '../context/LanguageContext'
 
 const CHART_TOOLTIP_STYLE = {
   background: 'var(--bg-card)',
@@ -104,10 +104,11 @@ function SectionCard({
 }
 
 function EmptyState() {
+  const { t } = useLanguage()
   const steps = [
-    { n: '1', t: 'Nhập dữ liệu', d: 'Tải CSV, dán link báo, hoặc nhập tay' },
-    { n: '2', t: 'Hệ thống đọc bài', d: 'Tìm mã cổ phiếu, việc gì xảy ra, tin tốt hay xấu' },
-    { n: '3', t: 'Xem kết quả', d: 'Dòng tin, thông tin từng mã, và sơ đồ liên kết' },
+    { n: '1', t: t('dashboard.emptyState.step1Title'), d: t('dashboard.emptyState.step1Desc') },
+    { n: '2', t: t('dashboard.emptyState.step2Title'), d: t('dashboard.emptyState.step2Desc') },
+    { n: '3', t: t('dashboard.emptyState.step3Title'), d: t('dashboard.emptyState.step3Desc') },
   ]
   return (
     <div className="p-4 sm:p-6 fade-in">
@@ -122,11 +123,10 @@ function EmptyState() {
           <Newspaper size={24} className="text-white" />
         </div>
         <h2 className="text-[20px] font-bold" style={{ color: 'var(--text-primary)' }}>
-          Bắt đầu bằng việc nhập tin tức
+          {t('dashboard.emptyState.title')}
         </h2>
         <p className="text-[13px] mt-2 max-w-lg" style={{ color: 'var(--text-muted)' }}>
-          Hệ thống đọc bài báo tài chính tiếng Việt, tìm ra bài nói về mã cổ phiếu nào và
-          chuyện gì xảy ra, rồi ước lượng giá thường phản ứng thế nào sau loại tin đó.
+          {t('dashboard.emptyState.desc')}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 w-full max-w-2xl text-left">
@@ -158,14 +158,14 @@ function EmptyState() {
             className="px-5 py-2.5 rounded-xl text-[13px] font-medium text-white"
             style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
           >
-            Nhập dữ liệu ngay
+            {t('dashboard.emptyState.importNow')}
           </Link>
           <Link
             to="/stocks"
             className="px-5 py-2.5 rounded-xl text-[13px] font-medium"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
-            Xem bảng giá thị trường
+            {t('dashboard.emptyState.viewMarket')}
           </Link>
         </div>
       </div>
@@ -174,6 +174,7 @@ function EmptyState() {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recent, setRecent] = useState<NewsArticle[]>([])
   const [model, setModel] = useState<ModelInfo | null>(null)
@@ -208,7 +209,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-[13px]" style={{ color: '#dc2626' }}>
-          Không tải được dữ liệu tổng quan
+          {t('dashboard.loadError')}
         </p>
       </div>
     )
@@ -226,33 +227,33 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatTile
           icon={Newspaper}
-          label="Bài báo"
+          label={t('dashboard.stats.news')}
           value={stats.total_news}
-          sub={`${stats.analyzed_news} đã phân tích`}
+          sub={t('dashboard.stats.newsSub', { count: stats.analyzed_news })}
           accent="#2563eb"
           to="/feed"
         />
         <StatTile
           icon={TrendingUp}
-          label="Mã cổ phiếu"
+          label={t('dashboard.stats.stocks')}
           value={stats.total_stocks}
-          sub="Tìm thấy trong các bài báo"
+          sub={t('dashboard.stats.stocksSub')}
           accent="#0b7d5a"
           to="/stocks"
         />
         <StatTile
           icon={Building2}
-          label="Công ty"
+          label={t('dashboard.stats.companies')}
           value={stats.total_companies}
-          sub="Có trong sơ đồ liên kết"
+          sub={t('dashboard.stats.companiesSub')}
           accent="#b45309"
           to="/graph"
         />
         <StatTile
           icon={Network}
-          label="Ngành nghề"
+          label={t('dashboard.stats.industries')}
           value={stats.top_industries.length}
-          sub="Có trong sơ đồ liên kết"
+          sub={t('dashboard.stats.industriesSub')}
           accent="#7c3aed"
           to="/graph"
         />
@@ -268,15 +269,15 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2.5 min-w-0">
             <ShieldCheck size={16} style={{ color: '#0b7d5a' }} />
             <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-              Phần dự đoán đã được kiểm tra trên hàng nghìn bài báo cũ và{' '}
+              {t('dashboard.modelBanner.intro')}{' '}
               <strong style={{ color: '#0b7d5a' }}>
-                đoán đúng hơn cách làm đơn giản {(model.performance.delta_vs_baseline * 100).toFixed(1)} điểm
+                {t('dashboard.modelBanner.highlight', { delta: (model.performance.delta_vs_baseline * 100).toFixed(1) })}
               </strong>
-              . Kết quả vẫn khiêm tốn — hãy đọc như một gợi ý, không phải lời khuyên mua bán.
+              {t('dashboard.modelBanner.outro')}
             </p>
           </div>
           <span className="inline-flex items-center gap-1 text-[12px] flex-shrink-0" style={{ color: '#2563eb' }}>
-            Xem chi tiết <ArrowRight size={12} />
+            {t('dashboard.modelBanner.viewDetails')} <ArrowRight size={12} />
           </span>
         </Link>
       )}
@@ -284,10 +285,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Cảm xúc — bấm vào để lọc dòng tin */}
         <SectionCard
-          title="Tin tốt hay tin xấu"
+          title={t('dashboard.sentimentSection.title')}
           action={
             <Link to="/feed" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-              Mở dòng tin
+              {t('dashboard.sentimentSection.openFeed')}
             </Link>
           }
         >
@@ -297,11 +298,11 @@ export default function DashboardPage() {
                 key={name}
                 to={`/feed?sentiment=${name}`}
                 className="block"
-                title={`Lọc tin ${SENTIMENT_LABELS[name] || name}`}
+                title={t('dashboard.sentimentSection.filterTitle', { label: t(`chips.sentiment.${name}`) })}
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-                    {SENTIMENT_LABELS[name] || name}
+                    {t(`chips.sentiment.${name}`)}
                   </span>
                   <span className="text-[12px] font-semibold tabular-nums" style={{ color: SENTIMENT_COLORS[name] }}>
                     {value}
@@ -323,16 +324,16 @@ export default function DashboardPage() {
 
         {/* Kết luận mô hình */}
         <SectionCard
-          title="Hệ thống dự đoán ra sao"
+          title={t('dashboard.modelSection.title')}
           action={
             <Link to="/feed" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-              Xem chi tiết
+              {t('dashboard.modelSection.viewDetails')}
             </Link>
           }
         >
           {eventEntries.length === 0 ? (
             <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-              Chưa có bài nào được hệ thống dự đoán.
+              {t('dashboard.modelSection.empty')}
             </p>
           ) : (
             <ResponsiveContainer width="100%" height={160}>
@@ -340,7 +341,7 @@ export default function DashboardPage() {
                 <XAxis
                   dataKey="name"
                   tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-                  tickFormatter={(v) => (v === 'INCREASING' ? 'Có thể tăng' : v === 'DECREASING' ? 'Có thể giảm' : 'Ít biến động')}
+                  tickFormatter={(v) => (v === 'INCREASING' ? t('dashboard.modelSection.tickIncreasing') : v === 'DECREASING' ? t('dashboard.modelSection.tickDecreasing') : t('dashboard.modelSection.tickStable'))}
                 />
                 <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} allowDecimals={false} />
                 <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
@@ -359,10 +360,10 @@ export default function DashboardPage() {
 
         {/* Ngành — bấm để lọc */}
         <SectionCard
-          title="Ngành được nhắc nhiều"
+          title={t('dashboard.industrySection.title')}
           action={
             <Link to="/graph" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-              Xem đồ thị
+              {t('dashboard.industrySection.viewGraph')}
             </Link>
           }
         >
@@ -393,18 +394,18 @@ export default function DashboardPage() {
         {/* Tin mới nhất — dùng chung NewsCard, bấm mã là sang hồ sơ mã */}
         <div className="lg:col-span-2">
           <SectionCard
-            title="Tin mới nhất"
+            title={t('dashboard.newsSection.title')}
             action={
               <Link to="/feed" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-                Xem tất cả
+                {t('dashboard.newsSection.viewAll')}
               </Link>
             }
           >
             {recent.length === 0 ? (
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                Chưa có bài báo nào.{' '}
+                {t('dashboard.newsSection.empty')}{' '}
                 <Link to="/import" className="hover:underline" style={{ color: '#2563eb' }}>
-                  Nhập dữ liệu
+                  {t('dashboard.newsSection.importData')}
                 </Link>
               </p>
             ) : (
@@ -419,16 +420,16 @@ export default function DashboardPage() {
 
         <div className="space-y-4">
           <SectionCard
-            title="Mã được nhắc nhiều"
+            title={t('dashboard.stockSection.title')}
             action={
               <Link to="/stocks" className="text-[11px] hover:underline" style={{ color: '#2563eb' }}>
-                Tất cả mã
+                {t('dashboard.stockSection.allStocks')}
               </Link>
             }
           >
             {stats.top_stocks.length === 0 ? (
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                Chưa nhận diện được mã nào.
+                {t('dashboard.stockSection.empty')}
               </p>
             ) : (
               <div className="space-y-2">
@@ -454,7 +455,7 @@ export default function DashboardPage() {
           </SectionCard>
 
           {stats.news_by_date.length > 1 && (
-            <SectionCard title="Tin theo ngày">
+            <SectionCard title={t('dashboard.newsByDate.title')}>
               <ResponsiveContainer width="100%" height={120}>
                 <LineChart data={stats.news_by_date} margin={{ top: 6, right: 6, left: -24, bottom: 0 }}>
                   <XAxis dataKey="date" tick={{ fontSize: 9, fill: 'var(--text-faint)' }} minTickGap={30} />
@@ -473,8 +474,8 @@ export default function DashboardPage() {
         style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-subtle)' }}
       >
         <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-          Có <strong style={{ color: 'var(--text-primary)' }}>{Object.values(EVENT_LABELS).length}</strong> loại
-          sự việc để lọc trong Dòng tin, và sơ đồ liên kết cho thấy các mã ảnh hưởng gián tiếp tới nhau.
+          {t('dashboard.footerBanner.prefix')} <strong style={{ color: 'var(--text-primary)' }}>{Object.values(EVENT_LABELS).length}</strong>{' '}
+          {t('dashboard.footerBanner.suffix')}
         </p>
         <div className="flex gap-2">
           <Link
@@ -482,7 +483,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium text-white"
             style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
           >
-            <Upload size={12} /> Nhập thêm dữ liệu
+            <Upload size={12} /> {t('dashboard.footerBanner.importMore')}
           </Link>
         </div>
       </div>

@@ -11,6 +11,7 @@ import {
 import BrandMark from '../common/BrandMark'
 import { useAuth } from '../../context/AuthContext'
 import { useLayout } from '../../context/LayoutContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 /** Điều hướng gom theo câu hỏi người dùng đang hỏi, không theo bảng dữ liệu.
  *
@@ -18,27 +19,27 @@ import { useLayout } from '../../context/LayoutContext'
  * Phân tích cảm xúc) đọc cùng một bảng và chỉ khác bộ lọc, còn Cổ phiếu và
  * Bảng giá Live cùng liệt kê mã. Người dùng phải tự ghép chúng lại trong đầu.
  */
-const groups: { title: string; links: { to: string; icon: typeof LayoutDashboard; label: string }[] }[] = [
+const groups: { titleKey: string; links: { to: string; icon: typeof LayoutDashboard; labelKey: string }[] }[] = [
   {
-    title: 'Theo dõi',
+    titleKey: 'sidebar.groupWatch',
     links: [
-      { to: '/dashboard', icon: LayoutDashboard, label: 'Tổng quan' },
-      { to: '/feed', icon: Newspaper, label: 'Dòng tin' },
-      { to: '/stocks', icon: TrendingUp, label: 'Cổ phiếu' },
+      { to: '/dashboard', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+      { to: '/feed', icon: Newspaper, labelKey: 'sidebar.feed' },
+      { to: '/stocks', icon: TrendingUp, labelKey: 'sidebar.stocks' },
     ],
   },
   {
-    title: 'Khám phá',
+    titleKey: 'sidebar.groupExplore',
     links: [
-      { to: '/graph', icon: Network, label: 'Knowledge Graph' },
-      { to: '/reports', icon: FileBarChart, label: 'Độ chính xác' },
+      { to: '/graph', icon: Network, labelKey: 'sidebar.graph' },
+      { to: '/reports', icon: FileBarChart, labelKey: 'sidebar.reports' },
     ],
   },
   {
-    title: 'Dữ liệu',
+    titleKey: 'sidebar.groupData',
     links: [
-      { to: '/import', icon: Upload, label: 'Nhập dữ liệu' },
-      { to: '/settings', icon: Settings, label: 'Cài đặt' },
+      { to: '/import', icon: Upload, labelKey: 'sidebar.import' },
+      { to: '/settings', icon: Settings, labelKey: 'sidebar.settings' },
     ],
   },
 ]
@@ -47,6 +48,7 @@ const groups: { title: string; links: { to: string; icon: typeof LayoutDashboard
 export default function Sidebar() {
   const { user } = useAuth()
   const { sidebarOpen, closeSidebar } = useLayout()
+  const { t } = useLanguage()
   const initial = (user?.full_name || user?.email || '?').charAt(0).toUpperCase()
 
   return (
@@ -69,7 +71,7 @@ export default function Sidebar() {
           background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%)',
           borderRight: '1px solid var(--border-subtle)',
         }}
-        aria-label="Điều hướng chính"
+        aria-label={t('sidebar.nav')}
       >
         {/* Logo */}
         <div className="px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
@@ -83,7 +85,7 @@ export default function Sidebar() {
             <div className="min-w-0">
               <h1 className="font-bold text-[15px] leading-tight gradient-text">FinNexus KG</h1>
               <p className="text-[10px] mt-0.5 truncate" style={{ color: 'var(--text-faint)' }}>
-                VN Stock Knowledge Graph
+                {t('sidebar.tagline')}
               </p>
             </div>
           </div>
@@ -92,15 +94,15 @@ export default function Sidebar() {
         {/* Điều hướng */}
         <nav className="flex-1 px-3 py-3 overflow-y-auto">
           {groups.map((group) => (
-            <div key={group.title} className="mb-3">
+            <div key={group.titleKey} className="mb-3">
               <p
                 className="px-3 pt-1 pb-1.5 text-[10px] font-semibold uppercase tracking-widest"
                 style={{ color: 'var(--text-faint)' }}
               >
-                {group.title}
+                {t(group.titleKey)}
               </p>
               <div className="space-y-0.5">
-                {group.links.map(({ to, icon: Icon, label }) => (
+                {group.links.map(({ to, icon: Icon, labelKey }) => (
                   <NavLink
                     key={to}
                     to={to}
@@ -125,7 +127,7 @@ export default function Sidebar() {
                           className="flex-shrink-0 transition-colors"
                           style={{ color: isActive ? '#3b82f6' : 'var(--text-muted)' }}
                         />
-                        <span className="flex-1 text-[13px]">{label}</span>
+                        <span className="flex-1 text-[13px]">{t(labelKey)}</span>
                         {isActive && (
                           <div
                             className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -168,7 +170,7 @@ export default function Sidebar() {
                 {user?.full_name || user?.email}
               </p>
               <p className="text-[10px]" style={{ color: 'var(--text-faint)' }}>
-                Nhà đầu tư
+                {t('sidebar.investor')}
               </p>
             </div>
           </div>

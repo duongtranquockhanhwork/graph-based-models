@@ -1,0 +1,16 @@
+export default {
+  imageProcessError: 'Could not process the image',
+  notAnImage: 'Please select an image file',
+  imageTooLarge: 'Image is too large (10MB max)',
+  canvasUnsupported: 'Your browser does not support image processing',
+  removeAvatar: 'Remove avatar',
+  nameRequired: 'Full name cannot be empty',
+  dobFuture: 'Date of birth cannot be later than today',
+  saveSuccess: 'Profile saved',
+  saveError: 'Could not save profile',
+  changeAvatar: 'Change avatar',
+  fullName: 'Full name',
+  dateOfBirth: 'Date of birth',
+  saving: 'Saving...',
+  saveChanges: 'Save changes',
+}

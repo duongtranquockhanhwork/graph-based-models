@@ -3,19 +3,20 @@ import { Link, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Pause, Plus, RefreshCw, Search, Star, TrendingUp, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 import { analyticsApi } from '../services/api'
 import watchlistApi from '../services/watchlistApi'
 import type { LiveQuote, StockAggregation } from '../types'
 import { useAutoRefresh } from '../hooks/useAutoRefresh'
 import { COLOR_CEILING, COLOR_FLOOR, COLOR_REFERENCE, fmtNumber, trendColor } from '../utils/stockColors'
-import { SENTIMENT_COLORS, SENTIMENT_LABELS } from '../components/common/Chips'
+import { SENTIMENT_COLORS } from '../components/common/Chips'
 
 const REFRESH_OPTIONS = [
-  { label: '5 giây', ms: 5000 },
-  { label: '10 giây', ms: 10000 },
-  { label: '30 giây', ms: 30000 },
-  { label: '1 phút', ms: 60000 },
-  { label: 'Tắt', ms: 0 },
+  { key: 's5', ms: 5000 },
+  { key: 's10', ms: 10000 },
+  { key: 's30', ms: 30000 },
+  { key: 'm1', ms: 60000 },
+  { key: 'off', ms: 0 },
 ] as const
 
 const STORAGE_KEY = 'finnexus_live_interval'
@@ -23,6 +24,7 @@ const STORAGE_KEY = 'finnexus_live_interval'
 type Tab = 'watchlist' | 'all'
 
 function SentimentBar({ distribution }: { distribution: Record<string, number> }) {
+  const { t } = useLanguage()
   const total = Object.values(distribution).reduce((a, b) => a + b, 0)
   if (total === 0) {
     return (
@@ -39,7 +41,7 @@ function SentimentBar({ distribution }: { distribution: Record<string, number> }
             <div
               key={k}
               style={{ width: `${(distribution[k] / total) * 100}%`, background: SENTIMENT_COLORS[k] }}
-              title={`${SENTIMENT_LABELS[k]}: ${distribution[k]}`}
+              title={`${t(`chips.sentiment.${k}`)}: ${distribution[k]}`}
             />
           ) : null,
         )}
@@ -61,6 +63,7 @@ function SentimentBar({ distribution }: { distribution: Record<string, number> }
 export default function StocksPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useLanguage()
   // Trang này được gắn ở cả khu vực khách hàng (/stocks/:symbol) lẫn khu vực
   // quản trị (/admin/stocks/:symbol) — điều hướng bằng đường dẫn tuyệt đối cũ
   // luôn thoát ra ngoài /admin, khiến admin rơi vào route dành cho khách hàng
@@ -113,7 +116,7 @@ export default function StocksPage() {
     analyticsApi
       .stocks()
       .then((r) => setAll(r.data))
-      .catch(() => toast.error('Không tải được danh sách mã'))
+      .catch(() => toast.error(t('stocks.toast.loadAllError')))
       .finally(() => setAllLoading(false))
   }, [all.length])
 
@@ -129,13 +132,13 @@ export default function StocksPage() {
     setAdding(true)
     try {
       await watchlistApi.add(symbol)
-      toast.success(`Đã thêm ${symbol} vào danh mục theo dõi`)
+      toast.success(t('stocks.toast.addSuccess', { symbol }))
       setSymbolInput('')
       refreshNow()
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        'Không thể thêm mã cổ phiếu'
+        t('stocks.toast.addError')
       toast.error(msg)
     } finally {
       setAdding(false)
@@ -146,9 +149,9 @@ export default function StocksPage() {
     try {
       await watchlistApi.remove(symbol)
       setQuotes((prev) => prev.filter((q) => q.symbol !== symbol))
-      toast.success(`Đã bỏ theo dõi ${symbol}`)
+      toast.success(t('stocks.toast.removeSuccess', { symbol }))
     } catch {
-      toast.error('Không thể bỏ theo dõi')
+      toast.error(t('stocks.toast.removeError'))
     }
   }
 
@@ -169,28 +172,28 @@ export default function StocksPage() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Cổ phiếu
+            {t('stocks.title')}
           </h2>
           {tab === 'watchlist' ? (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[12px]" style={{ color: 'var(--text-muted)' }}>
               <span className="inline-flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: marketOpen ? '#10b981' : '#94a3b8' }} />
-                {marketOpen ? 'Đang trong phiên' : 'Ngoài giờ giao dịch'}
+                {marketOpen ? t('stocks.marketOpen') : t('stocks.marketClosed')}
               </span>
-              {lastUpdated && <span>Cập nhật {lastUpdated.toLocaleTimeString('vi-VN')}</span>}
+              {lastUpdated && <span>{t('stocks.updatedAt', { time: lastUpdated.toLocaleTimeString('vi-VN') })}</span>}
               {paused ? (
                 <span className="inline-flex items-center gap-1" style={{ color: '#b45309' }}>
-                  <Pause size={11} /> Tạm dừng khi rời tab
+                  <Pause size={11} /> {t('stocks.pausedOnLeave')}
                 </span>
               ) : secondsLeft !== null ? (
-                <span>Làm mới sau {secondsLeft}s</span>
+                <span>{t('stocks.refreshIn', { seconds: secondsLeft })}</span>
               ) : (
-                <span>Tự động cập nhật đang tắt</span>
+                <span>{t('stocks.autoRefreshOff')}</span>
               )}
             </div>
           ) : (
             <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              Toàn bộ mã trong từ điển, kèm số tin đã phân tích và phân bố cảm xúc
+              {t('stocks.allTabSubtitle')}
             </p>
           )}
         </div>
@@ -201,18 +204,18 @@ export default function StocksPage() {
               className="field-input w-28"
               value={intervalMs}
               onChange={(e) => changeInterval(Number(e.target.value))}
-              aria-label="Tần suất tự động cập nhật giá"
+              aria-label={t('stocks.refreshFrequencyLabel')}
             >
               {REFRESH_OPTIONS.map((o) => (
                 <option key={o.ms} value={o.ms}>
-                  {o.label}
+                  {t(`stocks.refreshOptions.${o.key}`)}
                 </option>
               ))}
             </select>
             <button
               onClick={refreshNow}
               disabled={refreshing}
-              aria-label="Cập nhật giá ngay"
+              aria-label={t('stocks.refreshNowLabel')}
               className="p-2 rounded-xl disabled:opacity-60"
               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
             >
@@ -221,11 +224,11 @@ export default function StocksPage() {
             <form onSubmit={handleAdd} className="flex items-center gap-2">
               <input
                 className="field-input w-28 sm:w-36"
-                placeholder="Thêm mã, vd: FPT"
+                placeholder={t('stocks.addSymbolPlaceholder')}
                 value={symbolInput}
                 onChange={(e) => setSymbolInput(e.target.value.toUpperCase())}
                 maxLength={10}
-                aria-label="Mã cổ phiếu cần thêm"
+                aria-label={t('stocks.addSymbolAriaLabel')}
               />
               <button
                 type="submit"
@@ -233,7 +236,7 @@ export default function StocksPage() {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-50"
                 style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
               >
-                <Plus size={14} /> Thêm
+                <Plus size={14} /> {t('stocks.add')}
               </button>
             </form>
           </div>
@@ -243,23 +246,23 @@ export default function StocksPage() {
       {/* Tab */}
       <div className="flex gap-1 mb-4" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         {([
-          { key: 'watchlist', label: 'Đang theo dõi', count: quotes.length },
-          { key: 'all', label: 'Tất cả mã', count: all.length || undefined },
-        ] as const).map((t) => (
+          { key: 'watchlist', label: t('stocks.tabs.watchlist'), count: quotes.length },
+          { key: 'all', label: t('stocks.tabs.all'), count: all.length || undefined },
+        ] as const).map((tabOpt) => (
           <button
-            key={t.key}
-            onClick={() => switchTab(t.key)}
+            key={tabOpt.key}
+            onClick={() => switchTab(tabOpt.key)}
             className="px-3.5 py-2.5 text-[13px] transition-colors relative"
             style={{
-              color: tab === t.key ? '#2563eb' : 'var(--text-muted)',
-              fontWeight: tab === t.key ? 600 : 400,
-              borderBottom: tab === t.key ? '2px solid #2563eb' : '2px solid transparent',
+              color: tab === tabOpt.key ? '#2563eb' : 'var(--text-muted)',
+              fontWeight: tab === tabOpt.key ? 600 : 400,
+              borderBottom: tab === tabOpt.key ? '2px solid #2563eb' : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
-            {t.label}
-            {t.count != null && (
-              <span className="ml-1.5 text-[11px] tabular-nums opacity-70">{t.count}</span>
+            {tabOpt.label}
+            {tabOpt.count != null && (
+              <span className="ml-1.5 text-[11px] tabular-nums opacity-70">{tabOpt.count}</span>
             )}
           </button>
         ))}
@@ -273,18 +276,18 @@ export default function StocksPage() {
           >
             <Star size={28} style={{ color: 'var(--text-faint)' }} />
             <p className="mt-3 text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
-              Chưa theo dõi mã nào
+              {t('stocks.emptyWatchlist.title')}
             </p>
             <p className="text-[12px] mt-1 max-w-sm" style={{ color: 'var(--text-muted)' }}>
-              Nhập mã ở ô phía trên, hoặc mở tab <strong>Tất cả mã</strong> để chọn. Mã được nhắc
-              trong bài báo bạn nhập cũng tự xuất hiện ở đây.
+              {t('stocks.emptyWatchlist.descriptionPre')} <strong>{t('stocks.tabs.all')}</strong>{' '}
+              {t('stocks.emptyWatchlist.descriptionPost')}
             </p>
             <button
               onClick={() => switchTab('all')}
               className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
               style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
             >
-              Xem tất cả mã
+              {t('stocks.emptyWatchlist.viewAll')}
             </button>
           </div>
         ) : (
@@ -293,7 +296,16 @@ export default function StocksPage() {
               <table className="w-full text-[13px]" style={{ minWidth: 720 }}>
                 <thead>
                   <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                    {['Mã', 'Công ty', 'Giá khớp', '+/-', '%', 'Khối lượng', 'Trần / TC / Sàn', ''].map((h) => (
+                    {[
+                      t('stocks.watchlistTable.symbol'),
+                      t('stocks.watchlistTable.company'),
+                      t('stocks.watchlistTable.matchedPrice'),
+                      t('stocks.watchlistTable.change'),
+                      t('stocks.watchlistTable.percent'),
+                      t('stocks.watchlistTable.volume'),
+                      t('stocks.watchlistTable.ceilingRefFloor'),
+                      '',
+                    ].map((h) => (
                       <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">
                         {h}
                       </th>
@@ -347,7 +359,7 @@ export default function StocksPage() {
                             e.stopPropagation()
                             handleRemove(q.symbol)
                           }}
-                          aria-label={`Bỏ theo dõi ${q.symbol}`}
+                          aria-label={t('stocks.watchlistTable.unwatch', { symbol: q.symbol })}
                           className="p-1.5 rounded-lg"
                           style={{ color: 'var(--text-faint)' }}
                         >
@@ -367,10 +379,10 @@ export default function StocksPage() {
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
             <input
               className="field-input pl-8 h-9 text-[13px]"
-              placeholder="Tìm theo mã hoặc tên công ty…"
+              placeholder={t('stocks.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Tìm mã cổ phiếu"
+              aria-label={t('stocks.searchAriaLabel')}
             />
           </div>
 
@@ -386,7 +398,14 @@ export default function StocksPage() {
                 <table className="w-full text-[13px]" style={{ minWidth: 640 }}>
                   <thead>
                     <tr style={{ color: 'var(--text-faint)', borderBottom: '1px solid var(--border-subtle)' }}>
-                      {['Mã', 'Công ty', 'Ngành', 'Số tin', 'Phân bố cảm xúc', ''].map((h) => (
+                      {[
+                        t('stocks.allTable.symbol'),
+                        t('stocks.allTable.company'),
+                        t('stocks.allTable.sector'),
+                        t('stocks.allTable.mentions'),
+                        t('stocks.allTable.sentimentDistribution'),
+                        '',
+                      ].map((h) => (
                         <th key={h} className="text-left font-medium px-3 py-2.5 whitespace-nowrap">
                           {h}
                         </th>
@@ -425,7 +444,7 @@ export default function StocksPage() {
                         <td className="px-3 py-2.5">
                           {watched.has(s.symbol) ? (
                             <span className="text-[11px] inline-flex items-center gap-1" style={{ color: '#0b7d5a' }}>
-                              <Star size={11} fill="currentColor" /> Đang theo dõi
+                              <Star size={11} fill="currentColor" /> {t('stocks.watching')}
                             </span>
                           ) : (
                             <button
@@ -433,16 +452,16 @@ export default function StocksPage() {
                                 e.stopPropagation()
                                 try {
                                   await watchlistApi.add(s.symbol)
-                                  toast.success(`Đã theo dõi ${s.symbol}`)
+                                  toast.success(t('stocks.toast.quickAddSuccess', { symbol: s.symbol }))
                                   refreshNow()
                                 } catch {
-                                  toast.error(`Không thêm được ${s.symbol}`)
+                                  toast.error(t('stocks.toast.quickAddError', { symbol: s.symbol }))
                                 }
                               }}
                               className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded-lg"
                               style={{ border: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}
                             >
-                              <Star size={11} /> Theo dõi
+                              <Star size={11} /> {t('stocks.watch')}
                             </button>
                           )}
                         </td>
@@ -461,7 +480,7 @@ export default function StocksPage() {
             >
               <TrendingUp size={26} style={{ color: 'var(--text-faint)' }} />
               <p className="mt-2 text-[13px]" style={{ color: 'var(--text-muted)' }}>
-                Không có mã nào khớp “{search}”
+                {t('stocks.noMatch', { search })}
               </p>
             </div>
           )}
@@ -469,9 +488,9 @@ export default function StocksPage() {
       )}
 
       <p className="text-[11px] mt-4" style={{ color: 'var(--text-faint)' }}>
-        Giá do vnstock cung cấp. Đây là công cụ nghiên cứu, không phải khuyến nghị đầu tư —{' '}
+        {t('stocks.footerDisclaimer')}{' '}
         <Link to="/reports" className="hover:underline" style={{ color: '#2563eb' }}>
-          xem bằng chứng mô hình
+          {t('stocks.footerLink')}
         </Link>
         .
       </p>

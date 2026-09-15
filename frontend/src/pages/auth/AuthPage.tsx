@@ -1,12 +1,14 @@
 import { useEffect, useState, type Dispatch, type FormEvent, type SetStateAction } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Calendar, Eye, EyeOff, Loader2, Lock, Mail, User as UserIcon } from 'lucide-react'
+import { Calendar, CheckCircle2, Eye, EyeOff, Loader2, Lock, Mail, User as UserIcon, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import BrandMark from '../../components/common/BrandMark'
 import EmailOtpForm from '../../components/Auth/EmailOtpForm'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
+import { authApi } from '../../services/authApi'
 import type { User } from '../../types'
-import { isPasswordStrong, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENTS_MESSAGE } from '../../utils/passwordStrength'
+import { getPasswordRequirementsMessage, isPasswordStrong, PASSWORD_MIN_LENGTH } from '../../utils/passwordStrength'
 
 type Mode = 'login' | 'register'
 
@@ -40,11 +42,12 @@ function LoginForm({
   onSubmit,
   onForgotPassword,
 }: LoginFormProps) {
+  const { t } = useLanguage()
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
         <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          Email
+          {t('auth.emailLabel')}
         </label>
         <div className="relative">
           <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -53,7 +56,7 @@ function LoginForm({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="ban@example.com"
+            placeholder={t('auth.emailPlaceholder')}
             className="field-input pl-10"
           />
         </div>
@@ -62,14 +65,14 @@ function LoginForm({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-[12px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-            Mật khẩu
+            {t('auth.passwordLabel')}
           </label>
           <button
             type="button"
             onClick={onForgotPassword}
             className="text-[12px] text-blue-400 hover:text-blue-300"
           >
-            Quên mật khẩu?
+            {t('auth.forgotPasswordLink')}
           </button>
         </div>
         <div className="relative">
@@ -88,7 +91,7 @@ function LoginForm({
             className="absolute right-3.5 top-1/2 -translate-y-1/2"
             style={{ color: 'var(--text-muted)' }}
             tabIndex={-1}
-            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-label={showPassword ? t('auth.hidePasswordAria') : t('auth.showPasswordAria')}
           >
             {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
@@ -105,7 +108,7 @@ function LoginForm({
         }}
       >
         {isSubmitting && <Loader2 size={15} className="animate-spin" />}
-        Đăng nhập
+        {t('auth.loginButton')}
       </button>
     </form>
   )
@@ -140,11 +143,12 @@ function RegisterForm({
   validateCommonFields,
   onEmailVerified,
 }: RegisterFormProps) {
+  const { t } = useLanguage()
   return (
     <div className="space-y-4">
       <div>
         <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          Họ và tên
+          {t('auth.fullNameLabel')}
         </label>
         <div className="relative">
           <UserIcon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -153,7 +157,7 @@ function RegisterForm({
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Nguyễn Văn A"
+            placeholder={t('auth.fullNamePlaceholder')}
             className="field-input pl-10"
           />
         </div>
@@ -161,7 +165,7 @@ function RegisterForm({
 
       <div>
         <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          Ngày sinh
+          {t('auth.dateOfBirthLabel')}
         </label>
         <div className="relative">
           <Calendar size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -178,7 +182,7 @@ function RegisterForm({
 
       <div>
         <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          Mật khẩu
+          {t('auth.passwordLabel')}
         </label>
         <div className="relative">
           <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -188,7 +192,7 @@ function RegisterForm({
             minLength={PASSWORD_MIN_LENGTH}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Chữ hoa, chữ thường, số, ký tự đặc biệt"
+            placeholder={t('auth.passwordHintPlaceholder')}
             className="field-input pl-10 pr-10"
           />
           <button
@@ -197,19 +201,19 @@ function RegisterForm({
             className="absolute right-3.5 top-1/2 -translate-y-1/2"
             style={{ color: 'var(--text-muted)' }}
             tabIndex={-1}
-            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-label={showPassword ? t('auth.hidePasswordAria') : t('auth.showPasswordAria')}
           >
             {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
         </div>
         <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>
-          {PASSWORD_REQUIREMENTS_MESSAGE}
+          {getPasswordRequirementsMessage(t)}
         </p>
       </div>
 
       <div>
         <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-          Nhập lại mật khẩu
+          {t('auth.confirmPasswordLabel')}
         </label>
         <div className="relative">
           <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -219,19 +223,72 @@ function RegisterForm({
             minLength={PASSWORD_MIN_LENGTH}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Nhập lại mật khẩu ở trên"
+            placeholder={t('auth.confirmPasswordPlaceholder')}
             className="field-input pl-10 pr-10"
           />
         </div>
       </div>
 
-      <EmailOtpForm onVerified={onEmailVerified} onBeforeSend={validateCommonFields} submitLabel="Tạo tài khoản" />
+      <EmailOtpForm onVerified={onEmailVerified} onBeforeSend={validateCommonFields} submitLabel={t('auth.createAccountTitle')} />
+    </div>
+  )
+}
+
+interface RegisterSuccessProps {
+  email: string
+  onGoToLogin: () => void
+  onDismiss: () => void
+}
+
+function RegisterSuccess({ email, onGoToLogin, onDismiss }: RegisterSuccessProps) {
+  const { t } = useLanguage()
+  return (
+    <div className="relative text-center py-4">
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="absolute -top-2 -right-2 p-1.5 rounded-full hover:bg-white/10 transition-colors"
+        style={{ color: 'var(--text-muted)' }}
+        aria-label={t('auth.closeLabel')}
+      >
+        <X size={16} />
+      </button>
+      <div
+        className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+        style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.25)' }}
+      >
+        <CheckCircle2 size={22} className="text-emerald-400" />
+      </div>
+      <h3 className="text-white font-semibold mb-1.5">{t('auth.registerSuccessTitle')}</h3>
+      <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+        {t('auth.registerSuccessDescPrefix')} <span style={{ color: 'var(--text-primary)' }}>{email}</span>
+        {t('auth.registerSuccessDescSuffix')}
+      </p>
+      <button
+        type="button"
+        onClick={onGoToLogin}
+        className="w-full py-2.5 rounded-lg font-semibold text-sm text-white transition-opacity"
+        style={{
+          background: 'linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%)',
+          boxShadow: '0 0 20px rgba(37,99,235,0.35)',
+        }}
+      >
+        {t('auth.goToLoginButton')}
+      </button>
+      <button
+        type="button"
+        onClick={onDismiss}
+        className="w-full mt-3 text-center text-[12px] text-blue-400 hover:text-blue-300"
+      >
+        {t('auth.registerAgainButton')}
+      </button>
     </div>
   )
 }
 
 export default function AuthPage() {
-  const { login, registerWithEmail } = useAuth()
+  const { login } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -278,10 +335,10 @@ export default function AuthPage() {
     setIsSubmitting(true)
     try {
       const user = await login(email, password)
-      toast.success('Đăng nhập thành công')
+      toast.success(t('auth.loginSuccessToast'))
       redirectAfterLogin(user)
     } catch (err) {
-      toast.error(errDetail(err) || 'Email hoặc mật khẩu không đúng')
+      toast.error(errDetail(err) || t('auth.loginErrorToast'))
     } finally {
       setIsSubmitting(false)
     }
@@ -293,35 +350,61 @@ export default function AuthPage() {
   const [regPassword, setRegPassword] = useState('')
   const [regConfirmPassword, setRegConfirmPassword] = useState('')
   const [showRegPassword, setShowRegPassword] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
 
   const validateCommonFields = (): boolean => {
     if (!fullName.trim()) {
-      toast.error('Vui lòng nhập họ và tên')
+      toast.error(t('auth.fullNameRequiredToast'))
       return false
     }
     if (!dateOfBirth) {
-      toast.error('Vui lòng chọn ngày sinh')
+      toast.error(t('auth.dateOfBirthRequiredToast'))
       return false
     }
     if (dateOfBirth > todayISO) {
-      toast.error('Ngày sinh không được vượt quá ngày hiện tại')
+      toast.error(t('auth.dateOfBirthFutureToast'))
       return false
     }
     if (!isPasswordStrong(regPassword)) {
-      toast.error(PASSWORD_REQUIREMENTS_MESSAGE)
+      toast.error(getPasswordRequirementsMessage(t))
       return false
     }
     if (regPassword !== regConfirmPassword) {
-      toast.error('Mật khẩu nhập lại không khớp')
+      toast.error(t('auth.passwordMismatchToast'))
       return false
     }
     return true
   }
 
   const handleEmailVerified = async (verifiedEmail: string, code: string) => {
-    await registerWithEmail(verifiedEmail, code, fullName, dateOfBirth, regPassword)
-    toast.success('Tạo tài khoản thành công')
-    navigate('/dashboard', { replace: true })
+    // Chỉ tạo tài khoản, KHÔNG tự đăng nhập — người dùng bấm "Đến trang đăng
+    // nhập" ở màn hình thành công thì mới đăng nhập, để họ tự xác nhận lại
+    // mật khẩu vừa đặt thay vì bị đẩy thẳng vào ứng dụng.
+    await authApi.emailOtpVerify(verifiedEmail, code, fullName, dateOfBirth, regPassword)
+    setRegisteredEmail(verifiedEmail)
+  }
+
+  const resetRegisterForm = () => {
+    setFullName('')
+    setDateOfBirth('')
+    setRegPassword('')
+    setRegConfirmPassword('')
+  }
+
+  const goToLoginFromSuccess = () => {
+    if (registeredEmail) setEmail(registeredEmail)
+    setRegisteredEmail(null)
+    resetRegisterForm()
+    // navigate (chứ không phải toggle()) để khớp nhánh "điều hướng từ bên
+    // ngoài" của effect theo dõi location.pathname — chuyển thẳng, không
+    // hiệu ứng trượt, vì đang rời khỏi màn hình thành công chứ không phải
+    // bấm nút chuyển tab đăng nhập/đăng ký.
+    navigate('/login', { replace: true })
+  }
+
+  const registerAgain = () => {
+    setRegisteredEmail(null)
+    resetRegisterForm()
   }
 
   const isRegister = mode === 'register'
@@ -355,6 +438,11 @@ export default function AuthPage() {
       onEmailVerified={handleEmailVerified}
     />
   )
+  const registerContentEl = registeredEmail ? (
+    <RegisterSuccess email={registeredEmail} onGoToLogin={goToLoginFromSuccess} onDismiss={registerAgain} />
+  ) : (
+    registerFormEl
+  )
 
   return (
     <div className="min-h-screen flex items-center justify-center auth-shell p-4 sm:p-8" style={{ background: PANEL_BG }}>
@@ -382,12 +470,12 @@ export default function AuthPage() {
 
             <div className="relative">
               <h2 className="text-3xl font-bold text-white leading-snug mb-8">
-                {isRegister ? 'Xin chào!' : 'Chào mừng trở lại!'}
+                {isRegister ? t('auth.welcomeRegisterTitle') : t('auth.welcomeLoginTitle')}
               </h2>
 
               <div className="flex items-center gap-3">
                 <span className="text-sm" style={{ color: '#94a3b8' }}>
-                  {isRegister ? 'Đã có tài khoản?' : 'Chưa có tài khoản?'}
+                  {isRegister ? t('auth.hasAccountQuestion') : t('auth.noAccountQuestion')}
                 </span>
                 <button
                   type="button"
@@ -401,7 +489,7 @@ export default function AuthPage() {
                     ;(e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.5)'
                   }}
                 >
-                  {isRegister ? 'Đăng nhập' : 'Đăng ký'}
+                  {isRegister ? t('auth.loginButton') : t('auth.registerButton')}
                 </button>
               </div>
             </div>
@@ -416,9 +504,9 @@ export default function AuthPage() {
           >
             <div className="w-full max-w-[380px]">
               <h2 className="text-2xl font-bold mb-6 text-white">
-                {displayMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}
+                {displayMode === 'register' ? t('auth.createAccountTitle') : t('auth.loginButton')}
               </h2>
-              {displayMode === 'login' ? loginFormEl : registerFormEl}
+              {displayMode === 'login' ? loginFormEl : registerContentEl}
             </div>
           </div>
         </div>
@@ -432,12 +520,14 @@ export default function AuthPage() {
           </div>
           <h1 className="font-bold text-[15px] gradient-text">FinNexus KG</h1>
         </div>
-        <h2 className="text-2xl font-bold mb-6 text-white">{isRegister ? 'Tạo tài khoản' : 'Đăng nhập'}</h2>
-        {mode === 'login' ? loginFormEl : registerFormEl}
+        <h2 className="text-2xl font-bold mb-6 text-white">
+          {isRegister ? t('auth.createAccountTitle') : t('auth.loginButton')}
+        </h2>
+        {mode === 'login' ? loginFormEl : registerContentEl}
         <p className="text-center text-[13px] mt-6" style={{ color: 'var(--text-secondary)' }}>
-          {isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
+          {isRegister ? t('auth.hasAccountQuestion') : t('auth.noAccountQuestion')}{' '}
           <button type="button" onClick={toggle} className="text-blue-400 hover:text-blue-300 font-medium">
-            {isRegister ? 'Đăng nhập' : 'Đăng ký ngay'}
+            {isRegister ? t('auth.loginButton') : t('auth.registerNowButton')}
           </button>
         </p>
       </div>

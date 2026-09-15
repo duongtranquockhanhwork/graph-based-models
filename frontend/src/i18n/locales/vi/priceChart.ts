@@ -1,0 +1,28 @@
+export default {
+  types: {
+    candle: 'Nến',
+    ohlc: 'Thanh OHLC',
+    line: 'Đường',
+    area: 'Vùng',
+    bar: 'Cột',
+  },
+  maTooltip: 'Đường giá trung bình {{period}} phiên gần nhất',
+  volume: 'Khối lượng',
+  zoomIn: 'Phóng to',
+  zoomInAriaLabel: 'Phóng to biểu đồ',
+  zoomOut: 'Thu nhỏ',
+  zoomOutAriaLabel: 'Thu nhỏ biểu đồ',
+  resetView: 'Xem lại toàn bộ',
+  resetViewAriaLabel: 'Xem lại toàn bộ khoảng thời gian',
+  sessionsVisible: '{{visible}}/{{total}} phiên',
+  overviewStripAriaLabel: 'Khoảng thời gian đang xem',
+  noData: 'Chưa có dữ liệu lịch sử giá',
+  tooltip: {
+    open: 'Mở',
+    high: 'Cao',
+    low: 'Thấp',
+    close: 'Đóng',
+    volume: 'Khối lượng',
+  },
+  hint: 'Lăn chuột để phóng to · kéo ngang để xem đoạn khác · nhấp đúp để xem lại toàn bộ · kéo khung sáng bên dưới để chọn khoảng',
+}

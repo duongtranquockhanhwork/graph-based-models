@@ -36,6 +36,7 @@ _COLUMNS = [
     ("users", "phone_verified", "BOOLEAN NOT NULL DEFAULT FALSE"),
     ("users", "email_verified", "BOOLEAN NOT NULL DEFAULT FALSE"),
     ("users", "firebase_uid", "VARCHAR(128)"),
+    ("users", "language", "VARCHAR(5) NOT NULL DEFAULT 'en'"),
     ("news_articles", "needs_manual_label", "BOOLEAN DEFAULT FALSE"),
     ("news_articles", "manual_sentiment", "VARCHAR(20)"),
     ("news_articles", "manual_event_type", "VARCHAR(50)"),

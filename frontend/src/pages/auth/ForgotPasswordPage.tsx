@@ -4,9 +4,11 @@ import { Loader2, Mail, MailCheck } from 'lucide-react'
 import toast from 'react-hot-toast'
 import AuthLayout from '../../components/Auth/AuthLayout'
 import { useAuth } from '../../context/AuthContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 export default function ForgotPasswordPage() {
   const { forgotPassword } = useAuth()
+  const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
@@ -18,14 +20,14 @@ export default function ForgotPasswordPage() {
       await forgotPassword(email)
       setSent(true)
     } catch {
-      toast.error('Có lỗi xảy ra, vui lòng thử lại')
+      toast.error(t('forgotPassword.genericErrorToast'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <AuthLayout title="Quên mật khẩu" subtitle="Nhập email để nhận hướng dẫn đặt lại mật khẩu">
+    <AuthLayout title={t('forgotPassword.title')} subtitle={t('forgotPassword.subtitle')}>
       {sent ? (
         <div className="text-center py-4">
           <div
@@ -35,15 +37,15 @@ export default function ForgotPasswordPage() {
             <MailCheck size={20} className="text-emerald-400" />
           </div>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Nếu <span style={{ color: 'var(--text-primary)' }}>{email}</span> tồn tại trong hệ thống, một email hướng
-            dẫn đặt lại mật khẩu đã được gửi đến bạn.
+            {t('forgotPassword.sentMessagePrefix')} <span style={{ color: 'var(--text-primary)' }}>{email}</span>
+            {t('forgotPassword.sentMessageSuffix')}
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-[12px] font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-              Email
+              {t('forgotPassword.emailLabel')}
             </label>
             <div className="relative">
               <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
@@ -52,7 +54,7 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ban@example.com"
+                placeholder={t('forgotPassword.emailPlaceholder')}
                 className="field-input pl-10"
               />
             </div>
@@ -68,14 +70,14 @@ export default function ForgotPasswordPage() {
             }}
           >
             {isSubmitting && <Loader2 size={15} className="animate-spin" />}
-            Gửi hướng dẫn
+            {t('forgotPassword.sendInstructionsButton')}
           </button>
         </form>
       )}
 
       <p className="text-center text-[13px] mt-6" style={{ color: 'var(--text-secondary)' }}>
         <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium">
-          Quay lại đăng nhập
+          {t('forgotPassword.backToLoginLink')}
         </Link>
       </p>
     </AuthLayout>

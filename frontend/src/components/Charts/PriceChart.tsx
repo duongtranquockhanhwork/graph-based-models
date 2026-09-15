@@ -22,15 +22,16 @@ import {
 } from 'lucide-react'
 import type { Candle } from '../../types'
 import { fmtNumber } from '../../utils/stockColors'
+import { useLanguage } from '../../context/LanguageContext'
 
 export type ChartType = 'candle' | 'ohlc' | 'line' | 'area' | 'bar'
 
-export const CHART_TYPES: { key: ChartType; label: string; icon: typeof CandlestickChart }[] = [
-  { key: 'candle', label: 'Nến', icon: CandlestickChart },
-  { key: 'ohlc', label: 'Thanh OHLC', icon: BarChart3 },
-  { key: 'line', label: 'Đường', icon: LineIcon },
-  { key: 'area', label: 'Vùng', icon: AreaChart },
-  { key: 'bar', label: 'Cột', icon: BarChart3 },
+export const CHART_TYPES: { key: ChartType; icon: typeof CandlestickChart }[] = [
+  { key: 'candle', icon: CandlestickChart },
+  { key: 'ohlc', icon: BarChart3 },
+  { key: 'line', icon: LineIcon },
+  { key: 'area', icon: AreaChart },
+  { key: 'bar', icon: BarChart3 },
 ]
 
 const UP = '#10b981'
@@ -172,15 +173,16 @@ function OhlcShape({ x = 0, y = 0, width = 0, height = 0, payload }: ShapeProps)
 }
 
 function ChartTooltip({ active, payload }: { active?: boolean; payload?: { payload: ChartCandle }[] }) {
+  const { t } = useLanguage()
   if (!active || !payload?.length) return null
   const c = payload[0].payload
   const up = c.close >= c.open
-  const rows: [string, string][] = [
-    ['Mở', fmtNumber(c.open)],
-    ['Cao', fmtNumber(c.high)],
-    ['Thấp', fmtNumber(c.low)],
-    ['Đóng', fmtNumber(c.close)],
-    ['Khối lượng', fmtNumber(c.volume)],
+  const rows: [string, string, string][] = [
+    ['open', t('priceChart.tooltip.open'), fmtNumber(c.open)],
+    ['high', t('priceChart.tooltip.high'), fmtNumber(c.high)],
+    ['low', t('priceChart.tooltip.low'), fmtNumber(c.low)],
+    ['close', t('priceChart.tooltip.close'), fmtNumber(c.close)],
+    ['volume', t('priceChart.tooltip.volume'), fmtNumber(c.volume)],
   ]
   return (
     <div
@@ -195,12 +197,12 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { paylo
         {c.time}
       </p>
       <div className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5">
-        {rows.map(([k, v]) => (
-          <div key={k} className="contents">
-            <span style={{ color: 'var(--text-faint)' }}>{k}</span>
+        {rows.map(([key, label, v]) => (
+          <div key={key} className="contents">
+            <span style={{ color: 'var(--text-faint)' }}>{label}</span>
             <span
               className="text-right tabular-nums font-medium"
-              style={{ color: k === 'Khối lượng' ? 'var(--text-secondary)' : up ? UP : DOWN }}
+              style={{ color: key === 'volume' ? 'var(--text-secondary)' : up ? UP : DOWN }}
             >
               {v}
             </span>
@@ -271,6 +273,7 @@ function OverviewStrip({
   end: number
   onChange: (start: number, end: number) => void
 }) {
+  const { t } = useLanguage()
   const ref = useRef<HTMLDivElement | null>(null)
   const drag = useRef<{ mode: 'move' | 'left' | 'right'; originX: number; s: number; e: number } | null>(null)
 
@@ -354,7 +357,7 @@ function OverviewStrip({
         }}
         onPointerDown={onPointerDown('move')}
         role="slider"
-        aria-label="Khoảng thời gian đang xem"
+        aria-label={t('priceChart.overviewStripAriaLabel')}
         aria-valuemin={0}
         aria-valuemax={total - 1}
         aria-valuenow={start}
@@ -390,6 +393,7 @@ export default function PriceChart({
   defaultType = 'candle',
   showToolbar = true,
 }: PriceChartProps) {
+  const { t } = useLanguage()
   const [type, setType] = useState<ChartType>(defaultType)
   const [showVolume, setShowVolume] = useState(true)
   const [mas, setMas] = useState<number[]>([20])
@@ -547,7 +551,7 @@ export default function PriceChart({
   if (!candles.length) {
     return (
       <p className="text-[12px] py-16 text-center" style={{ color: 'var(--text-faint)' }}>
-        Chưa có dữ liệu lịch sử giá
+        {t('priceChart.noData')}
       </p>
     )
   }
@@ -561,10 +565,10 @@ export default function PriceChart({
     <div>
       {showToolbar && (
         <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          {CHART_TYPES.map(({ key, label, icon: Icon }) => (
+          {CHART_TYPES.map(({ key, icon: Icon }) => (
             <ToggleButton key={key} active={type === key} onClick={() => setType(key)}>
               <Icon size={12} />
-              {label}
+              {t(`priceChart.types.${key}`)}
             </ToggleButton>
           ))}
 
@@ -575,7 +579,7 @@ export default function PriceChart({
               key={p}
               active={mas.includes(p)}
               onClick={() => toggleMa(p)}
-              title={`Đường giá trung bình ${p} phiên gần nhất`}
+              title={t('priceChart.maTooltip', { period: p })}
             >
               <span
                 className="w-2 h-0.5 rounded"
@@ -586,15 +590,15 @@ export default function PriceChart({
           ))}
 
           <ToggleButton active={showVolume} onClick={() => setShowVolume((v) => !v)}>
-            Khối lượng
+            {t('priceChart.volume')}
           </ToggleButton>
 
           <span className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
 
           <button
             onClick={() => zoomAt(1 / 1.4, 0.5)}
-            title="Phóng to"
-            aria-label="Phóng to biểu đồ"
+            title={t('priceChart.zoomIn')}
+            aria-label={t('priceChart.zoomInAriaLabel')}
             className="p-1.5 rounded-lg"
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
           >
@@ -602,8 +606,8 @@ export default function PriceChart({
           </button>
           <button
             onClick={() => zoomAt(1.4, 0.5)}
-            title="Thu nhỏ"
-            aria-label="Thu nhỏ biểu đồ"
+            title={t('priceChart.zoomOut')}
+            aria-label={t('priceChart.zoomOutAriaLabel')}
             className="p-1.5 rounded-lg"
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
           >
@@ -612,8 +616,8 @@ export default function PriceChart({
           <button
             onClick={() => setRange([0, full.length - 1])}
             disabled={!zoomedIn}
-            title="Xem lại toàn bộ"
-            aria-label="Xem lại toàn bộ khoảng thời gian"
+            title={t('priceChart.resetView')}
+            aria-label={t('priceChart.resetViewAriaLabel')}
             className="p-1.5 rounded-lg disabled:opacity-40"
             style={{ color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
           >
@@ -621,7 +625,7 @@ export default function PriceChart({
           </button>
 
           <span className="text-[11px] ml-1 tabular-nums" style={{ color: 'var(--text-faint)' }}>
-            {visible.length}/{full.length} phiên
+            {t('priceChart.sessionsVisible', { visible: visible.length, total: full.length })}
           </span>
         </div>
       )}
@@ -767,8 +771,7 @@ export default function PriceChart({
       )}
 
       <p className="text-[10px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
-        Lăn chuột để phóng to · kéo ngang để xem đoạn khác · nhấp đúp để xem lại toàn bộ · kéo khung
-        sáng bên dưới để chọn khoảng
+        {t('priceChart.hint')}
       </p>
     </div>
   )

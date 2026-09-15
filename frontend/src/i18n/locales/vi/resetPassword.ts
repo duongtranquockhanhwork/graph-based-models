@@ -1,0 +1,17 @@
+export default {
+  title: 'Đặt lại mật khẩu',
+  subtitle: 'Nhập mật khẩu mới cho tài khoản của bạn',
+  invalidLinkSubtitle: 'Link không hợp lệ',
+  invalidLinkMessagePrefix: 'Link đặt lại mật khẩu bị thiếu hoặc không hợp lệ. Vui lòng yêu cầu lại từ trang',
+  forgotPasswordPageLink: 'Quên mật khẩu',
+  newPasswordLabel: 'Mật khẩu mới',
+  passwordHintPlaceholder: 'Chữ hoa, chữ thường, số, ký tự đặc biệt',
+  hidePasswordAria: 'Ẩn mật khẩu',
+  showPasswordAria: 'Hiện mật khẩu',
+  confirmPasswordLabel: 'Xác nhận mật khẩu',
+  confirmPasswordPlaceholder: 'Nhập lại mật khẩu mới',
+  submitButton: 'Đặt lại mật khẩu',
+  passwordMismatchToast: 'Mật khẩu xác nhận không khớp',
+  resetSuccessToast: 'Đặt lại mật khẩu thành công, vui lòng đăng nhập lại',
+  resetErrorToast: 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn',
+}

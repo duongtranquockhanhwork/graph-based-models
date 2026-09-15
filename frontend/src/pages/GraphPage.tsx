@@ -5,6 +5,7 @@ import { Boxes, Filter, Info, Maximize2, Newspaper, RefreshCw, Rotate3d, Type } 
 import { analyticsApi, graphApi } from '../services/api'
 import type { GraphData, GraphNode } from '../types'
 import { SymbolChip } from '../components/common/Chips'
+import { useLanguage } from '../context/LanguageContext'
 
 // Cả hai thư viện đồ thị đều nặng (bản 3D kéo theo Three.js). Nạp động để các
 // trang khác không phải tải chúng.
@@ -22,34 +23,9 @@ const NODE_COLORS: Record<string, string> = {
   sentiment: '#F97316',
 }
 
-const NODE_TYPE_LABELS: Record<string, string> = {
-  news: 'Tin tức',
-  stock: 'Cổ phiếu',
-  company: 'Công ty',
-  industry: 'Ngành nghề',
-  event: 'Sự kiện',
-  sentiment: 'Cảm xúc',
-}
-
-const RELATION_LABELS: Record<string, string> = {
-  mentions: 'nhắc đến',
-  represents: 'đại diện cho',
-  belongs_to: 'thuộc ngành',
-  contains_event: 'chứa sự kiện',
-  affects: 'ảnh hưởng tới',
-  has_sentiment: 'mang cảm xúc',
-  same_industry: 'cùng ngành',
-}
-
 /** Mức hiển thị nhãn. Đồ thị lớn mà bật hết nhãn thì thành một đám chữ chồng
  *  nhau; tắt hết thì thành một đám chấm vô danh. Ba mức để người dùng chọn. */
 type LabelMode = 'key' | 'all' | 'none'
-
-const LABEL_MODES: { key: LabelMode; label: string; hint: string }[] = [
-  { key: 'key', label: 'Tên chính', hint: 'Chỉ hiện tên mã, ngành, sự việc, tin tốt/xấu' },
-  { key: 'all', label: 'Tất cả', hint: 'Hiện cả tiêu đề bài và tên công ty' },
-  { key: 'none', label: 'Ẩn', hint: 'Chỉ chấm màu, rê chuột để xem tên' },
-]
 
 /** Loại nút luôn có nhãn ở chế độ "Nút chính": chúng là các thực thể người dùng
  *  tra cứu. Tin tức và công ty bị ẩn vì nhãn dài và số lượng lớn. */
@@ -72,8 +48,8 @@ type SpriteTextCtor = new (text: string) => {
   material: { depthWrite: boolean }
 }
 
-function Legend({ counts }: { counts: Record<string, number> }) {
-  const entries = Object.entries(NODE_TYPE_LABELS).filter(([key]) => counts[key])
+function Legend({ counts, labels }: { counts: Record<string, number>; labels: Record<string, string> }) {
+  const entries = Object.entries(labels).filter(([key]) => counts[key])
   return (
     <div className="flex flex-wrap gap-x-4 gap-y-1.5">
       {entries.map(([key, label]) => (
@@ -92,6 +68,38 @@ function Legend({ counts }: { counts: Record<string, number> }) {
 }
 
 export default function GraphPage() {
+  const { t } = useLanguage()
+  const NODE_TYPE_LABELS: Record<string, string> = useMemo(
+    () => ({
+      news: t('graph.nodeTypes.news'),
+      stock: t('graph.nodeTypes.stock'),
+      company: t('graph.nodeTypes.company'),
+      industry: t('graph.nodeTypes.industry'),
+      event: t('graph.nodeTypes.event'),
+      sentiment: t('graph.nodeTypes.sentiment'),
+    }),
+    [t],
+  )
+  const RELATION_LABELS: Record<string, string> = useMemo(
+    () => ({
+      mentions: t('graph.relations.mentions'),
+      represents: t('graph.relations.represents'),
+      belongs_to: t('graph.relations.belongs_to'),
+      contains_event: t('graph.relations.contains_event'),
+      affects: t('graph.relations.affects'),
+      has_sentiment: t('graph.relations.has_sentiment'),
+      same_industry: t('graph.relations.same_industry'),
+    }),
+    [t],
+  )
+  const LABEL_MODES: { key: LabelMode; label: string; hint: string }[] = useMemo(
+    () => [
+      { key: 'key', label: t('graph.labelModes.keyLabel'), hint: t('graph.labelModes.keyHint') },
+      { key: 'all', label: t('graph.labelModes.allLabel'), hint: t('graph.labelModes.allHint') },
+      { key: 'none', label: t('graph.labelModes.noneLabel'), hint: t('graph.labelModes.noneHint') },
+    ],
+    [t],
+  )
   const [params, setParams] = useSearchParams()
   const [data, setData] = useState<GraphData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -147,7 +155,7 @@ export default function GraphPage() {
         limit: 300,
       })
       .then((r) => setData(r.data))
-      .catch(() => toast.error('Không tải được dữ liệu đồ thị'))
+      .catch(() => toast.error(t('graph.loadError')))
       .finally(() => setLoading(false))
   }, [stockFilter, industryFilter])
 
@@ -300,11 +308,10 @@ export default function GraphPage() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-            Knowledge Graph
+            {t('graph.title')}
           </h2>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Sơ đồ cho thấy tin nào nói về mã nào, mã nào cùng ngành với nhau — vẽ từ chính các
-            bài bạn đã nhập
+            {t('graph.subtitle')}
           </p>
         </div>
 
@@ -313,7 +320,7 @@ export default function GraphPage() {
             className="flex rounded-xl overflow-hidden"
             style={{ border: '1px solid var(--border-subtle)' }}
             role="group"
-            aria-label="Chế độ hiển thị đồ thị"
+            aria-label={t('graph.viewModeGroup')}
           >
             {(['2d', '3d'] as const).map((m) => (
               <button
@@ -334,17 +341,17 @@ export default function GraphPage() {
 
           <button
             onClick={() => graphRef.current?.zoomToFit?.(600, 60)}
-            aria-label="Căn vừa khung nhìn"
+            aria-label={t('graph.zoomToFit')}
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px]"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
             <Maximize2 size={13} />
-            Căn vừa
+            {t('graph.zoomToFitButton')}
           </button>
 
           <button
             onClick={load}
-            aria-label="Tải lại đồ thị"
+            aria-label={t('graph.reload')}
             className="p-2 rounded-xl"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
           >
@@ -362,13 +369,13 @@ export default function GraphPage() {
           <Filter size={14} style={{ color: 'var(--text-faint)' }} />
           <input
             className="field-input flex-1"
-            placeholder="Lọc quanh một mã, vd: FPT"
+            placeholder={t('graph.filterInput.placeholder')}
             defaultValue={stockFilter}
             onBlur={(e) => setFilter('stock', e.target.value.trim().toUpperCase())}
             onKeyDown={(e) => {
               if (e.key === 'Enter') setFilter('stock', (e.target as HTMLInputElement).value.trim().toUpperCase())
             }}
-            aria-label="Lọc đồ thị theo mã cổ phiếu"
+            aria-label={t('graph.filterInput.ariaLabel')}
           />
         </div>
 
@@ -376,9 +383,9 @@ export default function GraphPage() {
           className="field-input w-full sm:w-48"
           value={industryFilter}
           onChange={(e) => setFilter('industry', e.target.value)}
-          aria-label="Lọc đồ thị theo ngành"
+          aria-label={t('graph.industryFilter.ariaLabel')}
         >
-          <option value="">— Tất cả ngành —</option>
+          <option value="">{t('graph.industryFilter.allOption')}</option>
           {industries.map((i) => (
             <option key={i} value={i}>
               {i}
@@ -388,7 +395,7 @@ export default function GraphPage() {
 
         <div className="flex items-center gap-1.5">
           <Type size={13} style={{ color: 'var(--text-faint)' }} />
-          <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }} role="group" aria-label="Mức hiển thị nhãn">
+          <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-subtle)' }} role="group" aria-label={t('graph.labelModeGroup')}>
             {LABEL_MODES.map((m) => (
               <button
                 key={m.key}
@@ -414,7 +421,7 @@ export default function GraphPage() {
             className="px-3 py-2 rounded-xl text-[12px]"
             style={{ background: 'var(--bg-surface)', color: 'var(--text-secondary)' }}
           >
-            Xoá lọc
+            {t('graph.clearFilters')}
           </button>
         )}
       </div>
@@ -439,19 +446,19 @@ export default function GraphPage() {
             <div className="h-full flex flex-col items-center justify-center text-center px-6">
               <Boxes size={30} style={{ color: 'var(--text-faint)' }} />
               <p className="mt-3 text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                Sơ đồ chưa có gì
+                {t('graph.empty.title')}
               </p>
               <p className="mt-1 text-[12px] max-w-sm" style={{ color: 'var(--text-muted)' }}>
                 {stockFilter || industryFilter
-                  ? 'Không có gì khớp bộ lọc hiện tại. Thử xoá lọc để xem toàn bộ.'
-                  : 'Sơ đồ được vẽ từ các bài đã phân tích. Thêm vài bài ở trang Nhập dữ liệu rồi quay lại.'}
+                  ? t('graph.empty.filtered')
+                  : t('graph.empty.none')}
               </p>
               <Link
                 to="/import"
                 className="mt-4 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
                 style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
               >
-                Nhập dữ liệu
+                {t('graph.empty.importData')}
               </Link>
             </div>
           ) : (
@@ -544,19 +551,19 @@ export default function GraphPage() {
         <div className="space-y-3">
           <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <h3 className="text-[13px] font-semibold mb-2.5" style={{ color: 'var(--text-primary)' }}>
-              Sơ đồ gồm những gì
+              {t('graph.legendCard.title')}
             </h3>
-            <Legend counts={typeCounts} />
+            <Legend counts={typeCounts} labels={NODE_TYPE_LABELS} />
             {data?.metadata && (
               <p className="text-[11px] mt-3 pt-2.5" style={{ color: 'var(--text-faint)', borderTop: '1px solid var(--border-subtle)' }}>
-                Hiển thị {data.nodes.length} / {data.metadata.total_nodes} nút · {data.edges.length} cạnh
+                {t('graph.legendCard.summary', { shown: data.nodes.length, total: data.metadata.total_nodes, edges: data.edges.length })}
               </p>
             )}
           </div>
 
           <div className="rounded-2xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}>
             <h3 className="text-[13px] font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              {selected ? 'Đang chọn' : 'Chi tiết'}
+              {selected ? t('graph.detailCard.selectedTitle') : t('graph.detailCard.defaultTitle')}
             </h3>
             {selected ? (
               <div className="space-y-2">
@@ -584,7 +591,7 @@ export default function GraphPage() {
                     )}
                     {selected.properties?.industry && (
                       <p className="text-[11px]" style={{ color: 'var(--text-faint)' }}>
-                        Ngành: {String(selected.properties.industry)}
+                        {t('graph.detailCard.industryLabel', { industry: String(selected.properties.industry) })}
                       </p>
                     )}
                     <div className="flex flex-wrap gap-1.5 pt-1">
@@ -594,7 +601,7 @@ export default function GraphPage() {
                         className="text-[11px] px-2 py-0.5 rounded"
                         style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }}
                       >
-                        Chỉ xem quanh mã này
+                        {t('graph.detailCard.filterHere')}
                       </button>
                     </div>
                   </>
@@ -606,7 +613,7 @@ export default function GraphPage() {
                     className="inline-flex items-center gap-1.5 text-[11px] hover:underline"
                     style={{ color: '#2563eb' }}
                   >
-                    <Newspaper size={11} /> Xem trong dòng tin
+                    <Newspaper size={11} /> {t('graph.detailCard.viewInFeed')}
                   </Link>
                 )}
 
@@ -616,13 +623,13 @@ export default function GraphPage() {
                     className="w-full mt-1 px-3 py-2 rounded-xl text-[12px] font-medium text-white"
                     style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)' }}
                   >
-                    Chỉ xem ngành {selected.label}
+                    {t('graph.detailCard.filterIndustry', { industry: selected.label })}
                   </button>
                 )}
               </div>
             ) : (
               <p className="text-[12px]" style={{ color: 'var(--text-muted)' }}>
-                Rê chuột để làm nổi phần liên quan, bấm vào một chấm để xem thông tin.
+                {t('graph.detailCard.hint')}
               </p>
             )}
           </div>
@@ -632,18 +639,18 @@ export default function GraphPage() {
               <Info size={13} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-faint)' }} />
               <div>
                 <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-                  Cách đọc sơ đồ
+                  {t('graph.helpCard.title')}
                 </h3>
                 <ul className="text-[11px] space-y-1" style={{ color: 'var(--text-muted)' }}>
-                  <li>Màu chấm = loại thông tin (xem chú giải phía trên).</li>
-                  <li>Chấm càng to = càng liên quan tới nhiều thứ.</li>
-                  <li>Rê chuột lên một chấm để làm mờ những gì không liên quan.</li>
-                  <li>Quan hệ: {Object.values(RELATION_LABELS).slice(0, 4).join(', ')}…</li>
+                  <li>{t('graph.helpCard.line1')}</li>
+                  <li>{t('graph.helpCard.line2')}</li>
+                  <li>{t('graph.helpCard.line3')}</li>
+                  <li>{t('graph.helpCard.relationsLine', { relations: Object.values(RELATION_LABELS).slice(0, 4).join(', ') })}</li>
                 </ul>
                 <p className="text-[11px] mt-2" style={{ color: 'var(--text-faint)' }}>
-                  Sơ đồ này cho thấy các mối liên quan đã thấy trong dữ liệu. Nó <strong>không</strong>
-                  tham gia vào việc dự đoán giá — thử nghiệm cho thấy thêm nó vào không giúp đoán
-                  chính xác hơn. Nó ở đây để <strong>giải thích và tìm hiểu</strong>.
+                  {t('graph.helpCard.disclaimerPrefix')} <strong>{t('graph.helpCard.disclaimerNot')}</strong>{' '}
+                  {t('graph.helpCard.disclaimerMiddle')} <strong>{t('graph.helpCard.disclaimerPurpose')}</strong>
+                  {t('graph.helpCard.disclaimerEnd')}
                 </p>
               </div>
             </div>

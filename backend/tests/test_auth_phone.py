@@ -303,6 +303,37 @@ class TestEmailOtp:
         assert "đã có tài khoản" in second.json()["detail"]
 
 
+class TestEmailExists:
+    def test_unknown_email_reports_not_exists(self, client):
+        r = client.get("/api/auth/email-exists", params={"email": "no-such-account@gmail.com"})
+        assert r.status_code == 200, r.text
+        assert r.json() == {"exists": False}
+
+    def test_registered_email_reports_exists(self, client):
+        from app.core.email_otp import issue_code
+
+        code = issue_code("otp-exists-check@example.com")
+        create = client.post(
+            "/api/auth/email-otp/verify",
+            json={
+                "email": "otp-exists-check@example.com",
+                "code": code,
+                "full_name": "H",
+                "date_of_birth": "1988-08-08",
+                "password": STRONG_PASSWORD,
+            },
+        )
+        assert create.status_code == 200
+
+        r = client.get("/api/auth/email-exists", params={"email": "otp-exists-check@example.com"})
+        assert r.status_code == 200, r.text
+        assert r.json() == {"exists": True}
+
+    def test_malformed_email_rejected(self, client):
+        r = client.get("/api/auth/email-exists", params={"email": "not-an-email"})
+        assert r.status_code == 422
+
+
 class TestLinkEmail:
     def test_requires_authentication(self, client):
         r = client.post("/api/auth/link-email", json={"email": "x@example.com", "code": "123456"})

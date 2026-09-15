@@ -6,12 +6,15 @@ const AVATAR_SIZE = 200
 const AVATAR_JPEG_QUALITY = 0.85
 const MAX_SOURCE_FILE_BYTES = 10 * 1024 * 1024
 
-export async function fileToAvatarDataUrl(file: File): Promise<string> {
+export async function fileToAvatarDataUrl(
+  file: File,
+  t: (key: string, params?: Record<string, string | number>) => string
+): Promise<string> {
   if (!file.type.startsWith('image/')) {
-    throw new Error('Vui lòng chọn một file ảnh')
+    throw new Error(t('profileEdit.notAnImage'))
   }
   if (file.size > MAX_SOURCE_FILE_BYTES) {
-    throw new Error('Ảnh quá lớn (tối đa 10MB)')
+    throw new Error(t('profileEdit.imageTooLarge'))
   }
 
   const bitmap = await createImageBitmap(file)
@@ -23,7 +26,7 @@ export async function fileToAvatarDataUrl(file: File): Promise<string> {
   canvas.width = AVATAR_SIZE
   canvas.height = AVATAR_SIZE
   const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('Trình duyệt không hỗ trợ xử lý ảnh')
+  if (!ctx) throw new Error(t('profileEdit.canvasUnsupported'))
   ctx.drawImage(bitmap, sx, sy, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE)
 
   return canvas.toDataURL('image/jpeg', AVATAR_JPEG_QUALITY)

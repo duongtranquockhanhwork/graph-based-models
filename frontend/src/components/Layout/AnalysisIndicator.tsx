@@ -1,5 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import { useAnalysisJobs } from '../../context/AnalysisJobsContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 /** Chỉ báo "đang phân tích" trên thanh trên cùng.
  *
@@ -9,6 +10,7 @@ import { useAnalysisJobs } from '../../context/AnalysisJobsContext'
  * biến mất — thông báo kèm đường dẫn kết quả do AnalysisJobsContext đưa ra.
  */
 export default function AnalysisIndicator() {
+  const { t } = useLanguage()
   const { jobs } = useAnalysisJobs()
   const active = jobs.filter((j) => !j.done)
   if (active.length === 0) return null
@@ -26,11 +28,11 @@ export default function AnalysisIndicator() {
       }}
       role="status"
       aria-live="polite"
-      title={`Đang phân tích ${analyzed}/${total} bài báo`}
+      title={t('analysisIndicator.title', { analyzed, total })}
     >
       <Loader2 size={11} className="animate-spin" style={{ color: '#2563eb' }} />
       <span className="text-[11px] font-medium whitespace-nowrap" style={{ color: '#2563eb' }}>
-        <span className="hidden sm:inline">Đang phân tích </span>
+        <span className="hidden sm:inline">{t('analysisIndicator.label')}</span>
         {analyzed}/{total}
       </span>
       <div

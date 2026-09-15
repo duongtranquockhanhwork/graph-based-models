@@ -23,6 +23,7 @@ interface AuthContextValue {
   updateProfile: (fullName: string, dateOfBirth?: string, avatarUrl?: string) => Promise<User>
   completeProfile: (fullName: string, dateOfBirth: string) => Promise<User>
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
+  updateLanguage: (language: 'en' | 'vi') => Promise<User>
   refreshUser: () => Promise<User | null>
 }
 
@@ -99,6 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authApi.changePassword(currentPassword, newPassword)
   }, [])
 
+  const updateLanguage = useCallback(async (language: 'en' | 'vi') => {
+    const res = await authApi.updateLanguage(language)
+    setUser(res.data)
+    return res.data
+  }, [])
+
   const refreshUser = useCallback(async () => {
     try {
       const res = await authApi.me()
@@ -124,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile,
         completeProfile,
         changePassword,
+        updateLanguage,
         refreshUser,
       }}
     >

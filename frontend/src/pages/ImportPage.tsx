@@ -7,10 +7,12 @@ import {
   AlertCircle, Loader2, Globe
 } from 'lucide-react'
 import { newsApi } from '../services/api'
+import { useLanguage } from '../context/LanguageContext'
 
 type Tab = 'csv' | 'url' | 'manual'
 
 export default function ImportPage() {
+  const { t } = useLanguage()
   const { track } = useAnalysisJobs()
   const [activeTab, setActiveTab] = useState<Tab>('csv')
 
@@ -35,11 +37,11 @@ export default function ImportPage() {
       const res = await newsApi.uploadCsv(files[0])
       const ids: number[] = res.data.ids
       setUploadResult(ids.length)
-      toast.success(`Đã nhập ${ids.length} bài báo. Đang phân tích…`)
+      toast.success(t('import.toasts.csvSuccess', { count: ids.length }))
       // Phân tích chạy nền; theo dõi để báo và trỏ tới kết quả khi xong.
-      track(ids, `${ids.length} bài từ CSV`)
+      track(ids, t('import.toasts.csvJobLabel', { count: ids.length }))
     } catch {
-      toast.error('Lỗi khi upload file CSV')
+      toast.error(t('import.toasts.csvError'))
     } finally {
       setUploading(false)
     }
@@ -59,13 +61,13 @@ export default function ImportPage() {
     try {
       const res = await newsApi.importUrl(urlInput.trim())
       setUrlPreview({ title: res.data.title, source: res.data.source })
-      toast.success('Đã nhập bài báo. Đang phân tích…')
+      toast.success(t('import.toasts.urlSuccess'))
       track([res.data.id], res.data.title)
       setUrlInput('')
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-        'Không thể import URL này'
+        t('import.toasts.urlErrorDefault')
       toast.error(msg)
     } finally {
       setUrlLoading(false)
@@ -78,11 +80,11 @@ export default function ImportPage() {
     setSubmitting(true)
     try {
       const res = await newsApi.create(form)
-      toast.success('Đã thêm bài báo. Đang phân tích…')
+      toast.success(t('import.toasts.manualSuccess'))
       track([res.data.id], form.title)
       setForm({ title: '', content: '', source: '', published_date: '' })
     } catch {
-      toast.error('Lỗi khi thêm bài báo')
+      toast.error(t('import.toasts.manualError'))
     } finally {
       setSubmitting(false)
     }
@@ -91,16 +93,16 @@ export default function ImportPage() {
   const handleAnalyzeAll = async () => {
     try {
       await newsApi.analyzeAll()
-      toast.success('Đã xếp hàng phân tích tất cả bài báo')
+      toast.success(t('import.toasts.analyzeAllSuccess'))
     } catch {
-      toast.error('Lỗi khi phân tích')
+      toast.error(t('import.toasts.analyzeAllError'))
     }
   }
 
   const TABS: { key: Tab; icon: React.ElementType; label: string; desc: string }[] = [
-    { key: 'csv', icon: FileText, label: 'Upload CSV', desc: 'Import nhiều bài cùng lúc' },
-    { key: 'url', icon: Link2, label: 'Từ URL', desc: 'Scrape từ website tin tức' },
-    { key: 'manual', icon: Plus, label: 'Thủ công', desc: 'Nhập nội dung trực tiếp' },
+    { key: 'csv', icon: FileText, label: t('import.tabs.csvLabel'), desc: t('import.tabs.csvDesc') },
+    { key: 'url', icon: Link2, label: t('import.tabs.urlLabel'), desc: t('import.tabs.urlDesc') },
+    { key: 'manual', icon: Plus, label: t('import.tabs.manualLabel'), desc: t('import.tabs.manualDesc') },
   ]
 
   return (
@@ -108,9 +110,9 @@ export default function ImportPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Nhập dữ liệu tin tức</h2>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('import.header.title')}</h2>
           <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Thêm dữ liệu để hệ thống phân tích và xây dựng Knowledge Graph
+            {t('import.header.subtitle')}
           </p>
         </div>
         <button
@@ -129,7 +131,7 @@ export default function ImportPage() {
           }}
         >
           <RefreshCw size={14} />
-          Phân tích tất cả
+          {t('import.header.analyzeAll')}
         </button>
       </div>
 
@@ -190,12 +192,12 @@ export default function ImportPage() {
             {uploading ? (
               <div className="flex flex-col items-center gap-3">
                 <Loader2 size={36} className="text-blue-400 animate-spin" />
-                <p className="text-blue-400 text-sm">Đang xử lý file...</p>
+                <p className="text-blue-400 text-sm">{t('import.csv.processing')}</p>
               </div>
             ) : isDragActive ? (
               <div className="flex flex-col items-center gap-3">
                 <Upload size={36} style={{ color: '#3b82f6' }} />
-                <p className="text-blue-400 text-sm font-medium">Thả file vào đây</p>
+                <p className="text-blue-400 text-sm font-medium">{t('import.csv.dropHere')}</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
@@ -206,16 +208,16 @@ export default function ImportPage() {
                   <Upload size={24} style={{ color: '#3b82f6' }} />
                 </div>
                 <div>
-                  <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>Kéo thả file CSV vào đây</p>
+                  <p className="text-[14px] font-medium" style={{ color: 'var(--text-primary)' }}>{t('import.csv.dragHere')}</p>
                   <p className="text-[12px] mt-1" style={{ color: 'var(--text-muted)' }}>
-                    hoặc click để chọn file từ máy tính
+                    {t('import.csv.orClick')}
                   </p>
                 </div>
                 <div
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px]"
                   style={{ background: 'rgba(37,99,235,0.08)', color: '#60a5fa', border: '1px solid rgba(37,99,235,0.15)' }}
                 >
-                  Cột bắt buộc: <strong>title</strong> · Tuỳ chọn: content, source, published_date, url
+                  {t('import.csv.requiredLabel')} <strong>title</strong> · {t('import.csv.optionalLabel')} content, source, published_date, url
                 </div>
               </div>
             )}
@@ -228,7 +230,7 @@ export default function ImportPage() {
             >
               <CheckCircle2 size={16} className="text-green-400 flex-shrink-0" />
               <p className="text-green-400 text-[13px]">
-                Đã import thành công <strong>{uploadResult}</strong> bài báo
+                {t('import.csv.successPrefix')} <strong>{uploadResult}</strong> {t('import.csv.successSuffix')}
               </p>
             </div>
           )}
@@ -240,7 +242,7 @@ export default function ImportPage() {
               style={{ color: '#60a5fa' }}
             >
               <FileText size={13} />
-              Tải file CSV mẫu
+              {t('import.csv.downloadSample')}
             </a>
           </div>
         </div>
@@ -260,9 +262,9 @@ export default function ImportPage() {
               <Globe size={18} style={{ color: '#0ea5e9' }} />
             </div>
             <div>
-              <h3 className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>Import từ URL tin tức</h3>
+              <h3 className="font-semibold text-[14px]" style={{ color: 'var(--text-primary)' }}>{t('import.url.title')}</h3>
               <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                Nhập link bài báo từ các website chứng khoán VN (cafef.vn, vnexpress.net, vietstock.vn...)
+                {t('import.url.subtitle')}
               </p>
             </div>
           </div>
@@ -270,14 +272,14 @@ export default function ImportPage() {
           <form onSubmit={handleUrlImport} className="space-y-4">
             <div>
               <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                URL bài báo
+                {t('import.url.label')}
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Link2 size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-faint)' }} />
                   <input
                     className="field-input pl-9"
-                    placeholder="https://cafef.vn/..."
+                    placeholder={t('import.url.placeholder')}
                     value={urlInput}
                     onChange={e => setUrlInput(e.target.value)}
                     type="url"
@@ -291,9 +293,9 @@ export default function ImportPage() {
                   style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)', color: 'white' }}
                 >
                   {urlLoading ? (
-                    <><Loader2 size={14} className="animate-spin" /> Đang lấy...</>
+                    <><Loader2 size={14} className="animate-spin" /> {t('import.url.fetching')}</>
                   ) : (
-                    <><Globe size={14} /> Import</>
+                    <><Globe size={14} /> {t('import.url.submit')}</>
                   )}
                 </button>
               </div>
@@ -308,10 +310,10 @@ export default function ImportPage() {
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 size={16} className="text-green-400 flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <p className="text-green-400 text-[12px] font-medium mb-1">Import thành công!</p>
+                  <p className="text-green-400 text-[12px] font-medium mb-1">{t('import.url.successTitle')}</p>
                   <p className="text-[13px] font-medium line-clamp-2" style={{ color: 'var(--text-primary)' }}>{urlPreview.title}</p>
                   <p className="text-[11px] mt-1" style={{ color: 'var(--text-faint)' }}>
-                    Nguồn: {urlPreview.source} · Đang phân tích NLP...
+                    {t('import.url.sourcePrefix', { source: urlPreview.source })}
                   </p>
                 </div>
               </div>
@@ -326,7 +328,7 @@ export default function ImportPage() {
               <AlertCircle size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <p className="text-[12px] font-medium" style={{ color: '#60a5fa' }}>
-                  Website hỗ trợ tốt:
+                  {t('import.url.supportedTitle')}
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {['cafef.vn', 'vnexpress.net', 'vietstock.vn', 'tinnhanhchungkhoan.vn', 'ndh.vn', 'baomoi.com'].map(site => (
@@ -354,11 +356,11 @@ export default function ImportPage() {
           <form onSubmit={handleManualSubmit} className="space-y-4">
             <div>
               <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                Tiêu đề bài báo <span style={{ color: '#ef4444' }}>*</span>
+                {t('import.manual.titleLabel')} <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 className="field-input"
-                placeholder="VD: FPT báo lãi quý II tăng 25% so với cùng kỳ..."
+                placeholder={t('import.manual.titlePlaceholder')}
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 required
@@ -367,12 +369,12 @@ export default function ImportPage() {
 
             <div>
               <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                Nội dung
+                {t('import.manual.contentLabel')}
               </label>
               <textarea
                 className="field-input resize-none"
                 rows={5}
-                placeholder="Nội dung chi tiết bài báo..."
+                placeholder={t('import.manual.contentPlaceholder')}
                 value={form.content}
                 onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
               />
@@ -381,18 +383,18 @@ export default function ImportPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                  Nguồn
+                  {t('import.manual.sourceLabel')}
                 </label>
                 <input
                   className="field-input"
-                  placeholder="cafef.vn"
+                  placeholder={t('import.manual.sourcePlaceholder')}
                   value={form.source}
                   onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
                 />
               </div>
               <div>
                 <label className="block text-[12px] font-medium mb-1.5" style={{ color: 'var(--text-muted)' }}>
-                  Ngày đăng
+                  {t('import.manual.dateLabel')}
                 </label>
                 <input
                   type="date"
@@ -411,9 +413,9 @@ export default function ImportPage() {
                 style={{ background: 'linear-gradient(135deg, #1d4ed8, #0ea5e9)', color: 'white' }}
               >
                 {submitting ? (
-                  <><Loader2 size={14} className="animate-spin" /> Đang lưu...</>
+                  <><Loader2 size={14} className="animate-spin" /> {t('import.manual.saving')}</>
                 ) : (
-                  <><Plus size={14} /> Thêm bài báo</>
+                  <><Plus size={14} /> {t('import.manual.submit')}</>
                 )}
               </button>
             </div>

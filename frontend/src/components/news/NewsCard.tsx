@@ -15,29 +15,20 @@ import { EventChip, SentimentBadge, SymbolChip, TrendBadge } from '../common/Chi
 import RecommendationPanel from './RecommendationPanel'
 import EntryLadderPanel from './EntryLadderPanel'
 import { contentPreviewParagraphs } from '../../utils/articleContent'
+import { useLanguage } from '../../context/LanguageContext'
 
-/** Nhãn cho suy đoán dự phòng. Giá trị gốc là INCREASING/DECREASING/UNCHANGED —
- *  chuỗi kỹ thuật không nên lọt ra giao diện. */
-const FALLBACK_TREND_LABELS: Record<string, string> = {
-  INCREASING: 'giá tăng',
-  DECREASING: 'giá giảm',
-  UNCHANGED: 'giá ít đổi',
-}
-
-
-const KG_KIND_LABELS: Record<string, string> = {
-  DIRECT_MENTION: 'Được nhắc thẳng trong bài',
-  COMENTION_HISTORY: 'Hay xuất hiện cùng nhau trong tin trước đây',
-  INDIRECT_EXPOSURE: 'Cùng ngành nên có thể bị ảnh hưởng theo',
-}
-
-function KgPath({ path }: { path: KgExplanation }) {
+function KgPath({ path, t }: { path: KgExplanation; t: (key: string, params?: Record<string, string | number>) => string }) {
+  const kgKindLabels: Record<string, string> = {
+    DIRECT_MENTION: t('newsCard.kgKind.DIRECT_MENTION'),
+    COMENTION_HISTORY: t('newsCard.kgKind.COMENTION_HISTORY'),
+    INDIRECT_EXPOSURE: t('newsCard.kgKind.INDIRECT_EXPOSURE'),
+  }
   return (
     <div className="flex items-start gap-2">
       <Network size={11} className="mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
       <div className="min-w-0">
         <p className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
-          {KG_KIND_LABELS[path.kind] || path.kind}
+          {kgKindLabels[path.kind] || path.kind}
         </p>
         {path.detail && (
           <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
@@ -72,11 +63,17 @@ export interface NewsCardProps {
  * vào mã cổ phiếu.
  */
 export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded = false }: NewsCardProps) {
+  const { t } = useLanguage()
   const [expanded, setExpanded] = useState(defaultExpanded)
   const explanation = news.prediction_explanation
   const symbols = (news.stocks_mentioned || []).filter((s) => s !== hideSymbol)
   const kgPaths = explanation?.kg_explanation || []
   const isHeuristic = explanation?.engine === 'heuristic'
+  const fallbackTrendLabels: Record<string, string> = {
+    INCREASING: t('newsCard.fallbackTrend.INCREASING'),
+    DECREASING: t('newsCard.fallbackTrend.DECREASING'),
+    UNCHANGED: t('newsCard.fallbackTrend.UNCHANGED'),
+  }
 
   return (
     <div
@@ -110,7 +107,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                 </span>
               )}
               {!news.is_analyzed && (
-                <span className="badge-amber px-2 py-0.5 rounded-full">Đang phân tích…</span>
+                <span className="badge-amber px-2 py-0.5 rounded-full">{t('newsCard.analyzing')}</span>
               )}
               {/* Luôn hiện, không cần mở rộng thẻ trước — đây là thứ người
                   dùng cần tìm ngay, không phải thứ chờ họ tự bấm ra mới thấy. */}
@@ -123,7 +120,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   style={{ color: '#2563eb' }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <ExternalLink size={11} /> Đọc bài gốc
+                  <ExternalLink size={11} /> {t('newsCard.readOriginal')}
                 </a>
               )}
             </div>
@@ -158,7 +155,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   e.stopPropagation()
                   onDelete()
                 }}
-                aria-label={`Xoá bài báo: ${news.title}`}
+                aria-label={t('newsCard.deleteArticle', { title: news.title })}
                 className="p-1.5 rounded-lg transition-colors"
                 style={{ color: 'var(--text-faint)' }}
               >
@@ -180,7 +177,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
               return (
                 <div className="pt-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-faint)' }}>
-                    Trích đoạn gốc
+                    {t('newsCard.originalExcerpt')}
                   </p>
                   <div className="space-y-2">
                     {preview.paragraphs.map((para, i) => (
@@ -191,7 +188,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   </div>
                   {preview.truncated && (
                     <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
-                      Chỉ là một đoạn trích, chưa phải toàn văn — bấm "Đọc bài gốc" bên dưới để xem đầy đủ.
+                      {t('newsCard.excerptTruncated')}
                     </p>
                   )}
                 </div>
@@ -208,10 +205,10 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                 <>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                     <p className="text-[12px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      Hệ thống nhận định
+                      {t('newsCard.systemVerdictAbout')}
                       {explanation.primary_symbol && (
                         <>
-                          {' '}về <SymbolChip symbol={explanation.primary_symbol} size="sm" />
+                          {' '}{t('newsCard.systemVerdictOn')} <SymbolChip symbol={explanation.primary_symbol} size="sm" />
                         </>
                       )}
                     </p>
@@ -219,7 +216,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                       <div className="flex gap-2 text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
                         {Object.entries(explanation.probabilities).map(([k, v]) => (
                           <span key={k}>
-                            {k === 'POSITIVE' ? 'Tăng' : k === 'NEGATIVE' ? 'Giảm' : 'Ít đổi'}{' '}
+                            {k === 'POSITIVE' ? t('newsCard.probPositive') : k === 'NEGATIVE' ? t('newsCard.probNegative') : t('newsCard.probNeutral')}{' '}
                             {(v * 100).toFixed(0)}%
                           </span>
                         ))}
@@ -250,7 +247,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   {kgPaths.length > 0 && (
                     <div className="space-y-1.5 pt-2" style={{ borderTop: '1px dashed var(--border-subtle)' }}>
                       {kgPaths.map((p, i) => (
-                        <KgPath key={i} path={p} />
+                        <KgPath key={i} path={p} t={t} />
                       ))}
                     </div>
                   )}
@@ -258,7 +255,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   {explanation.article_type_caveat && (
                     <details className="mt-2">
                       <summary className="text-[11px] cursor-pointer" style={{ color: 'var(--text-faint)' }}>
-                        Nhận định này đáng tin đến đâu với loại bài này?
+                        {t('newsCard.caveatSummary')}
                       </summary>
                       <p className="text-[11px] mt-1" style={{ color: 'var(--text-muted)' }}>
                         {explanation.article_type_caveat}
@@ -271,7 +268,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                   <Info size={12} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--text-faint)' }} />
                   <div>
                     <p className="text-[12px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                      Không dự đoán được bài này
+                      {t('newsCard.notPredicted')}
                     </p>
                     {/* status UNAVAILABLE luôn cùng một câu chung ("mô hình chưa
                         cấu hình trên máy chủ") cho mọi bài — không đổi theo bài
@@ -279,14 +276,14 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                         REFUSED/ERROR, vốn khác nhau theo từng bài và có ích hơn. */}
                     {explanation.status !== 'UNAVAILABLE' && (
                       <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                        {explanation.message || explanation.reason || 'Chưa rõ nguyên nhân.'}
+                        {explanation.message || explanation.reason || t('newsCard.unknownReason')}
                       </p>
                     )}
                     {explanation.fallback_trend && (
                       <p className="text-[11px] mt-1.5" style={{ color: 'var(--text-faint)' }}>
-                        Nếu chỉ nhìn vào từ ngữ trong bài thì thiên về{' '}
-                        <strong>{FALLBACK_TREND_LABELS[explanation.fallback_trend] || explanation.fallback_trend}</strong>
-                        {' '}— đây chỉ là suy đoán từ câu chữ, chưa đối chiếu với diễn biến giá.
+                        {t('newsCard.fallbackTrendPrefix')}{' '}
+                        <strong>{fallbackTrendLabels[explanation.fallback_trend] || explanation.fallback_trend}</strong>
+                        {' '}{t('newsCard.fallbackTrendSuffix')}
                       </p>
                     )}
                   </div>
@@ -295,8 +292,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
 
               {isHeuristic && (
                 <p className="text-[11px] mt-2" style={{ color: '#b45309' }}>
-                  Nhận định này chỉ dựa trên từ ngữ trong bài, chưa được đối chiếu với diễn biến
-                  giá thực tế — hãy đọc như một gợi ý, không phải kết luận.
+                  {t('newsCard.heuristicNotice')}
                 </p>
               )}
             </div>
@@ -310,7 +306,7 @@ export default function NewsCard({ news, onDelete, hideSymbol, defaultExpanded =
                 style={{ color: '#2563eb' }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <Network size={11} /> Xem mã này liên quan tới gì
+                <Network size={11} /> {t('newsCard.viewRelated')}
               </Link>
             )}
           </div>

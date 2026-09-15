@@ -5,32 +5,9 @@ import { Info, Plus, Power, Save, Trash2 } from 'lucide-react'
 import adminApi from '../../services/adminApi'
 import type { EventKeyword, SystemSetting } from '../../types'
 import { SkeletonBlock } from '../../components/Admin/AdminWidgets'
+import { useLanguage } from '../../context/LanguageContext'
 
 type Tab = 'thresholds' | 'keywords'
-
-/** Giải thích tác dụng thật của từng ngưỡng.
- *
- * Bản trước chỉ hiện tên khoá kỹ thuật (`manual_review_confidence_threshold`)
- * và một câu mô tả, nên admin không biết đổi nó thì cái gì thay đổi ở đâu.
- */
-const SETTING_HELP: Record<string, { title: string; effect: string; link?: { to: string; label: string } }> = {
-  sentiment_positive_threshold: {
-    title: 'Khi nào coi là tin tốt',
-    effect:
-      'Bài phải có đủ tỉ lệ từ ngữ mang nghĩa tích cực thì mới được xếp là tin tốt. Đặt cao hơn thì ít bài được coi là tin tốt hơn.',
-  },
-  sentiment_negative_threshold: {
-    title: 'Khi nào coi là tin xấu',
-    effect:
-      'Dưới tỉ lệ này thì bài được xếp là tin xấu. Đặt thấp hơn thì ít bài bị coi là tin xấu. Khoảng ở giữa là tin trung tính.',
-  },
-  manual_review_confidence_threshold: {
-    title: 'Khi nào cần người xem lại',
-    effect:
-      'Bài mà hệ thống kém chắc chắn hơn mức này sẽ được xếp vào hàng chờ để người đọc lại. Đặt quá cao thì mọi bài đều vào hàng chờ và việc lọc mất tác dụng — hệ thống hiếm khi chắc chắn hơn 0,45.',
-    link: { to: '/admin/labeling', label: 'Xem hàng chờ' },
-  },
-}
 
 /** Cấu hình phân tích — gộp hai trang cũ.
  *
@@ -40,6 +17,29 @@ const SETTING_HELP: Record<string, { title: string; effect: string; link?: { to:
  * kiểm định — nhưng không trang nào nói ra điều đó.
  */
 export default function AdminTuningPage() {
+  const { t } = useLanguage()
+
+  /** Giải thích tác dụng thật của từng ngưỡng.
+   *
+   * Bản trước chỉ hiện tên khoá kỹ thuật (`manual_review_confidence_threshold`)
+   * và một câu mô tả, nên admin không biết đổi nó thì cái gì thay đổi ở đâu.
+   */
+  const SETTING_HELP: Record<string, { title: string; effect: string; link?: { to: string; label: string } }> = {
+    sentiment_positive_threshold: {
+      title: t('adminTuning.settingHelp.sentimentPositive.title'),
+      effect: t('adminTuning.settingHelp.sentimentPositive.effect'),
+    },
+    sentiment_negative_threshold: {
+      title: t('adminTuning.settingHelp.sentimentNegative.title'),
+      effect: t('adminTuning.settingHelp.sentimentNegative.effect'),
+    },
+    manual_review_confidence_threshold: {
+      title: t('adminTuning.settingHelp.manualReview.title'),
+      effect: t('adminTuning.settingHelp.manualReview.effect'),
+      link: { to: '/admin/labeling', label: t('adminTuning.settingHelp.manualReview.linkLabel') },
+    },
+  }
+
   const [tab, setTab] = useState<Tab>('thresholds')
 
   const [settings, setSettings] = useState<SystemSetting[]>([])
@@ -81,9 +81,9 @@ export default function AdminTuningPage() {
     setSavingKey(key)
     try {
       await adminApi.settings.update(key, drafts[key])
-      toast.success('Đã lưu — áp dụng từ bài tiếp theo')
+      toast.success(t('adminTuning.toastSaved'))
     } catch {
-      toast.error('Lỗi khi lưu cấu hình')
+      toast.error(t('adminTuning.toastSaveError'))
     } finally {
       setSavingKey(null)
     }
@@ -98,11 +98,11 @@ export default function AdminTuningPage() {
         label_vi: form.label_vi.trim() || form.event_type.trim(),
         keyword: form.keyword.trim(),
       })
-      toast.success('Đã thêm từ khoá')
+      toast.success(t('adminTuning.toastKeywordAdded'))
       setForm({ event_type: '', label_vi: '', keyword: '' })
       loadKeywords()
     } catch {
-      toast.error('Lỗi khi thêm từ khoá')
+      toast.error(t('adminTuning.toastKeywordAddError'))
     }
   }
 
@@ -111,7 +111,7 @@ export default function AdminTuningPage() {
       await adminApi.keywords.update(kw.id, { is_active: !kw.is_active })
       loadKeywords()
     } catch {
-      toast.error('Không đổi được trạng thái từ khoá')
+      toast.error(t('adminTuning.toastToggleError'))
     }
   }
 
@@ -121,10 +121,10 @@ export default function AdminTuningPage() {
     setPendingDelete(null)
     try {
       await adminApi.keywords.delete(id)
-      toast.success('Đã xoá từ khoá')
+      toast.success(t('adminTuning.toastKeywordDeleted'))
       loadKeywords()
     } catch {
-      toast.error('Lỗi khi xoá từ khoá')
+      toast.error(t('adminTuning.toastKeywordDeleteError'))
     }
   }
 
@@ -139,10 +139,10 @@ export default function AdminTuningPage() {
     <div className="p-4 sm:p-6 space-y-4 fade-in">
       <div>
         <h2 className="text-lg sm:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Cấu hình phân tích
+          {t('adminTuning.pageTitle')}
         </h2>
         <p className="text-[12px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          Chỉnh cách hệ thống đọc hiểu bài báo — áp dụng ngay từ bài phân tích tiếp theo
+          {t('adminTuning.pageSubtitle')}
         </p>
       </div>
 
@@ -152,11 +152,10 @@ export default function AdminTuningPage() {
       >
         <Info size={14} className="mt-0.5 flex-shrink-0" style={{ color: '#2563eb' }} />
         <p className="text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-          Các mục ở đây <strong>không</strong> làm thay đổi phần dự đoán giá — phần đó đã được
-          xây và kiểm chứng sẵn, không chỉnh được từ đây. Chúng chỉ ảnh hưởng cách hệ thống
-          nhận ra tin tốt/xấu, loại sự việc, và bài nào cần người xem lại. Kết quả thấy ở{' '}
+          {t('adminTuning.infoPrefix')} <strong>{t('adminTuning.infoStrong')}</strong>{' '}
+          {t('adminTuning.infoMiddle')}{' '}
           <Link to="/admin/quality" className="hover:underline" style={{ color: '#2563eb' }}>
-            Chất lượng dữ liệu
+            {t('adminTuning.qualityLink')}
           </Link>
           .
         </p>
@@ -164,22 +163,22 @@ export default function AdminTuningPage() {
 
       <div className="flex gap-1" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         {([
-          { key: 'thresholds', label: 'Mức nhạy khi đọc bài', count: settings.length },
-          { key: 'keywords', label: 'Từ ngữ nhận diện sự việc', count: keywords.length || undefined },
-        ] as const).map((t) => (
+          { key: 'thresholds', label: t('adminTuning.tabThresholds'), count: settings.length },
+          { key: 'keywords', label: t('adminTuning.tabKeywords'), count: keywords.length || undefined },
+        ] as const).map((tabItem) => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className="px-3.5 py-2.5 text-[13px] transition-colors"
             style={{
-              color: tab === t.key ? '#2563eb' : 'var(--text-muted)',
-              fontWeight: tab === t.key ? 600 : 400,
-              borderBottom: tab === t.key ? '2px solid #2563eb' : '2px solid transparent',
+              color: tab === tabItem.key ? '#2563eb' : 'var(--text-muted)',
+              fontWeight: tab === tabItem.key ? 600 : 400,
+              borderBottom: tab === tabItem.key ? '2px solid #2563eb' : '2px solid transparent',
               marginBottom: '-1px',
             }}
           >
-            {t.label}
-            {t.count != null && <span className="ml-1.5 text-[11px] tabular-nums opacity-70">{t.count}</span>}
+            {tabItem.label}
+            {tabItem.count != null && <span className="ml-1.5 text-[11px] tabular-nums opacity-70">{tabItem.count}</span>}
           </button>
         ))}
       </div>
@@ -231,7 +230,7 @@ export default function AdminTuningPage() {
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white disabled:opacity-40"
                         style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
                       >
-                        <Save size={13} /> Lưu
+                        <Save size={13} /> {t('adminTuning.saveBtn')}
                       </button>
                     </div>
                   </div>
@@ -249,43 +248,43 @@ export default function AdminTuningPage() {
           >
             <div className="flex-1 min-w-[160px]">
               <label className="block text-[11px] mb-1" style={{ color: 'var(--text-muted)' }} htmlFor="kw-type">
-                Loại sự việc
+                {t('adminTuning.formEventTypeLabel')}
               </label>
               <input
                 id="kw-type"
                 className="field-input"
                 list="event-type-options"
-                placeholder="vd: profit_growth"
+                placeholder={t('adminTuning.formEventTypePlaceholder')}
                 value={form.event_type}
                 onChange={(e) => setForm((f) => ({ ...f, event_type: e.target.value }))}
                 required
               />
               <datalist id="event-type-options">
-                {eventTypes.map((t) => (
-                  <option key={t} value={t} />
+                {eventTypes.map((et) => (
+                  <option key={et} value={et} />
                 ))}
               </datalist>
             </div>
             <div className="flex-1 min-w-[160px]">
               <label className="block text-[11px] mb-1" style={{ color: 'var(--text-muted)' }} htmlFor="kw-label">
-                Tên hiển thị
+                {t('adminTuning.formLabelLabel')}
               </label>
               <input
                 id="kw-label"
                 className="field-input"
-                placeholder="vd: Lợi nhuận tăng"
+                placeholder={t('adminTuning.formLabelPlaceholder')}
                 value={form.label_vi}
                 onChange={(e) => setForm((f) => ({ ...f, label_vi: e.target.value }))}
               />
             </div>
             <div className="flex-1 min-w-[160px]">
               <label className="block text-[11px] mb-1" style={{ color: 'var(--text-muted)' }} htmlFor="kw-word">
-                Cụm từ trong bài
+                {t('adminTuning.formKeywordLabel')}
               </label>
               <input
                 id="kw-word"
                 className="field-input"
-                placeholder="vd: lãi kỷ lục"
+                placeholder={t('adminTuning.formKeywordPlaceholder')}
                 value={form.keyword}
                 onChange={(e) => setForm((f) => ({ ...f, keyword: e.target.value }))}
                 required
@@ -296,7 +295,7 @@ export default function AdminTuningPage() {
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-medium text-white"
               style={{ background: 'linear-gradient(135deg, #047857, #10b981)' }}
             >
-              <Plus size={13} /> Thêm
+              <Plus size={13} /> {t('adminTuning.addBtn')}
             </button>
           </form>
 
@@ -318,7 +317,7 @@ export default function AdminTuningPage() {
                       {g.type}
                     </span>
                     <span className="text-[11px] ml-auto tabular-nums" style={{ color: 'var(--text-faint)' }}>
-                      {g.items.filter((k) => k.is_active).length}/{g.items.length} đang bật
+                      {t('adminTuning.activeCount', { active: g.items.filter((k) => k.is_active).length, total: g.items.length })}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -336,15 +335,15 @@ export default function AdminTuningPage() {
                         {kw.keyword}
                         <button
                           onClick={() => toggleActive(kw)}
-                          aria-label={kw.is_active ? `Tắt từ khoá ${kw.keyword}` : `Bật từ khoá ${kw.keyword}`}
-                          title={kw.is_active ? 'Tắt' : 'Bật'}
+                          aria-label={kw.is_active ? t('adminTuning.toggleAriaOff', { keyword: kw.keyword }) : t('adminTuning.toggleAriaOn', { keyword: kw.keyword })}
+                          title={kw.is_active ? t('adminTuning.toggleOffTitle') : t('adminTuning.toggleOnTitle')}
                         >
                           <Power size={10} />
                         </button>
                         <button
                           onClick={() => setPendingDelete(kw)}
-                          aria-label={`Xoá từ khoá ${kw.keyword}`}
-                          title="Xoá"
+                          aria-label={t('adminTuning.deleteAria', { keyword: kw.keyword })}
+                          title={t('adminTuning.deleteTitle')}
                           style={{ color: '#ef4444' }}
                         >
                           <Trash2 size={10} />
@@ -373,11 +372,10 @@ export default function AdminTuningPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Xoá từ khoá “{pendingDelete.keyword}”?
+              {t('adminTuning.deleteModalTitle', { keyword: pendingDelete.keyword })}
             </h3>
             <p className="text-[12px] mt-1.5" style={{ color: 'var(--text-muted)' }}>
-              Các bài đọc sau này sẽ không còn dựa vào cụm từ này nữa. Bài đã đọc trước đó giữ
-              nguyên kết quả cũ.
+              {t('adminTuning.deleteModalDesc')}
             </p>
             <div className="flex justify-end gap-2 mt-4">
               <button
@@ -385,14 +383,14 @@ export default function AdminTuningPage() {
                 className="px-4 py-2 rounded-xl text-[13px]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}
               >
-                Huỷ
+                {t('adminTuning.cancelBtn')}
               </button>
               <button
                 onClick={confirmDelete}
                 className="px-4 py-2 rounded-xl text-[13px] font-medium text-white"
                 style={{ background: '#dc2626' }}
               >
-                Xoá
+                {t('adminTuning.confirmDeleteBtn')}
               </button>
             </div>
           </div>
