@@ -76,6 +76,13 @@ Nếu `FINNEXUS_ROOT` để trống, hệ thống vẫn chạy: nó dùng bộ l
 **nói rõ điều đó** trên giao diện, thay vì trình bày kết quả của bộ luật như
 dự đoán của một mô hình.
 
+> **Muốn chạy với mô hình V56 thật mà không có repo nghiên cứu?** Dùng kho demo
+> [FinNexusKG_Demo](https://github.com/weamon17/FinNexusKG_Demo) (riêng tư, cần
+> được mời). Kho đó chứa đúng mã nguồn web này cộng thư mục `model/` đóng gói sẵn
+> dataset V89, mô hình V56 và đồ thị tri thức V55: clone về là backend tự nạp mô
+> hình, không cần đặt `FINNEXUS_ROOT`. Kho để riêng tư vì dữ liệu kèm theo có
+> tiêu đề và nội dung bài báo thuộc bản quyền.
+
 ---
 
 ## Cấu trúc thư mục
@@ -182,7 +189,9 @@ trong tài liệu này mà không có nguồn.
 ### Yêu cầu
 
 - Docker + Docker Compose, hoặc Python 3.11+ và Node 20+
-- Repo nghiên cứu [FinNexus KG](../FinNexus%20KG) nếu muốn dùng mô hình dự đoán
+- Repo nghiên cứu [FinNexus KG](../FinNexus%20KG) nếu muốn dùng mô hình dự đoán,
+  hoặc dùng thẳng kho demo [FinNexusKG_Demo](https://github.com/weamon17/FinNexusKG_Demo)
+  đã kèm sẵn mô hình (xem ghi chú ở mục [Kiến trúc](#kiến-trúc))
 
 ### Docker (khuyến nghị)
 
@@ -263,8 +272,16 @@ Sau khi có tài khoản, đăng nhập lại bằng `POST /api/auth/login` (ema
 mật khẩu) — không còn tuỳ chọn "đăng nhập bằng OTP" trên giao diện, chỉ còn
 đường khôi phục mật khẩu cổ điển qua `/forgot-password` (link, không phải OTP).
 
+**Demo không cần SMTP:** đăng nhập bằng các tài khoản thử ở mục trên. SMTP chỉ
+cần khi đăng ký tài khoản mới hoặc gửi link quên mật khẩu.
+
 **Thiết lập gửi OTP qua email (SMTP)** — để trống `SMTP_HOST` thì mã OTP chỉ
-được ghi ra log backend, không gửi thật:
+được ghi ra log backend, không gửi thật. Chạy bằng Docker thì điền `SMTP_*`
+trong `.env` ở thư mục gốc. Chạy backend trực tiếp thì đặt `SMTP_*` bằng biến
+môi trường như `JWT_SECRET_KEY`, hoặc tạo `backend/.env` **chỉ gồm các dòng
+`SMTP_*`**. Đừng chép nguyên `.env.example` ở thư mục gốc vào `backend/.env`:
+file đó có các biến dành cho Docker (`POSTGRES_*`) mà backend không nhận, nên
+backend sẽ từ chối khởi động.
 
 - Dùng Gmail: bật xác minh 2 bước cho tài khoản Gmail rồi tạo "Mật khẩu ứng
   dụng" tại <https://myaccount.google.com/apppasswords> — dùng mật khẩu đó cho
