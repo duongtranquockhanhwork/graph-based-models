@@ -29,7 +29,7 @@ type ImportTab = 'manual' | 'csv' | 'url'
 /** Trích đoạn gốc + link đọc bài gốc — cùng tính năng đang có ở thẻ tin phía
  *  khách hàng (NewsCard), gắn thêm vào đây vì admin cũng nhập/duyệt tin ở
  *  trang này và cần thấy được đúng như vậy, không phải bảng dữ liệu thô.
- *  Không có mục tóm tắt AI: tốn API Claude thật mỗi lần tạo, không kiểm soát
+ *  Không có mục tóm tắt AI: tốn phí gọi API mô hình ngôn ngữ bên ngoài mỗi lần tạo, không kiểm soát
  *  được chi phí khi có nhiều người dùng. */
 function NewsDetailPanel({ news }: { news: NewsArticle }) {
   const { t } = useLanguage()
