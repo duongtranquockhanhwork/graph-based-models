@@ -1,6 +1,6 @@
 # FinNexus KG — Phân tích tin tức chứng khoán Việt Nam bằng Knowledge Graph
 
-Ứng dụng web đọc bài báo tài chính tiếng Việt, nhận diện mã cổ phiếu / công ty /
+Ứng dụng web đọc bài báo tài chính tiếng Việt (tiếng Anh), nhận diện mã cổ phiếu / công ty /
 ngành / sự kiện trong bài, dựng thành đồ thị tri thức, và chấm hướng phản ứng
 giá sau tin bằng mô hình đã kiểm chứng.
 
